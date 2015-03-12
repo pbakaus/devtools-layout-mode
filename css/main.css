@@ -1,0 +1,37 @@
+
+
+.box {
+	background: #664337;
+	width: 100px;
+	height: 100px;
+	color: #fff;
+}
+
+.margin {
+	margin: 10px;
+}
+
+.padding {
+	padding: 10px;
+}
+
+.center {
+	margin-right: auto;
+	margin-left: auto;
+}
+
+ul {
+
+}
+
+li {
+	padding: 5px;
+}
+
+#testbox {
+	line-height: 2em;
+}
+
+#sidebar h2 {
+	border-bottom: 1px solid black;
+}
