@@ -1,4 +1,4 @@
-# devtools-layout-mode
+# Layout Mode. Yeah baby.
 Layout Mode ftw! This is an experiment.
 
 ## The bookmarklet
