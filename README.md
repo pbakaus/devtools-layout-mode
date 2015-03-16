@@ -1,5 +1,5 @@
 # Layout Mode. Yeah baby.
-Layout Mode ftw! This is an experiment.
+Layout Mode ftw! This is an experiment. [Try it out in this demo page!](https://pbakaus.github.io/devtools-layout-mode/)
 
 ## The bookmarklet
 
