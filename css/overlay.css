@@ -339,3 +339,8 @@
 .guide-bottom {
 	bottom: 0;
 }
+
+
+body {
+	overflow-y: scroll; /* avoid herky jerky scrollbar behavior */
+}
