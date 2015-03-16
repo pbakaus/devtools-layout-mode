@@ -730,7 +730,7 @@
 	hoverGhost = createGhost();
 
 	// make all elements on page inspectable
-	$("body *:not(.overlay,.overlay *)").on('mouseover', function() {
+	$("body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)").on('mouseover', function() {
 
 		if(hoverElem === this || interacting || over)
 			return;
@@ -746,7 +746,7 @@
 	});
 
 	// make all elements on page inspectable
-	$("body *:not(.overlay,.overlay *)").on('click', function() {
+	$("body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)").on('click', function() {
 
 		if(inFocus === this && inInspect)
 			return;
