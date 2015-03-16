@@ -89,16 +89,16 @@
 		containerPaddingBottom = $('<div class="container-padding bottom"></div>').appendTo(overlay);
 		containerPaddingLeft = $('<div class="container-padding left"></div>').appendTo(overlay);
 		containerPaddingRight = $('<div class="container-padding right"></div>').appendTo(overlay);
-		$('<div class="handle bottom handle-size"></div>').appendTo(overlay);
-		handlePaddingBottom = $('<div class="handle bottom handle-padding"></div>').appendTo(overlay);
-		handleMarginBottom = $('<div class="handle bottom handle-margin"></div>').appendTo(overlay);
-		$('<div class="handle right handle-size"></div>').appendTo(overlay);
-		handlePaddingRight = $('<div class="handle right handle-padding"></div>').appendTo(overlay);
-		handleMarginRight = $('<div class="handle right handle-margin"></div>').appendTo(overlay);
-		handlePaddingTop = $('<div class="handle top handle-padding"></div>').appendTo(overlay);
-		handleMarginTop = $('<div class="handle top handle-margin"></div>').appendTo(overlay);
-		handlePaddingLeft = $('<div class="handle left handle-padding"></div>').appendTo(overlay);
-		handleMarginLeft = $('<div class="handle left handle-margin"></div>').appendTo(overlay);
+		$('<div class="handle bottom handle-size" title="Drag to change height"></div>').appendTo(overlay);
+		handlePaddingBottom = $('<div class="handle bottom handle-padding" title="Drag to change padding"></div>').appendTo(overlay);
+		handleMarginBottom = $('<div class="handle bottom handle-margin" title="Drag to change margin"></div>').appendTo(overlay);
+		$('<div class="handle right handle-size" title="Drag to change width"></div>').appendTo(overlay);
+		handlePaddingRight = $('<div class="handle right handle-padding" title="Drag to change padding"></div>').appendTo(overlay);
+		handleMarginRight = $('<div class="handle right handle-margin" title="Drag to change margin"></div>').appendTo(overlay);
+		handlePaddingTop = $('<div class="handle top handle-padding" title="Drag to change padding"></div>').appendTo(overlay);
+		handleMarginTop = $('<div class="handle top handle-margin" title="Drag to change margin"></div>').appendTo(overlay);
+		handlePaddingLeft = $('<div class="handle left handle-padding" title="Drag to change padding"></div>').appendTo(overlay);
+		handleMarginLeft = $('<div class="handle left handle-margin" title="Drag to change margin"></div>').appendTo(overlay);
 
 		overlay.appendTo('body');
 
