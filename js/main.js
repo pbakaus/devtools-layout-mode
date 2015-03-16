@@ -105,6 +105,8 @@
 		containerPaddingBottom = $('<div class="container-padding bottom"></div>').appendTo(overlay);
 		containerPaddingLeft = $('<div class="container-padding left"></div>').appendTo(overlay);
 		containerPaddingRight = $('<div class="container-padding right"></div>').appendTo(overlay);
+		
+
 		$('<div class="handle bottom handle-size" title="Drag to change height"></div>').appendTo(overlay);
 		handlePaddingBottom = $('<div class="handle bottom handle-padding" title="Drag to change padding-bottom"></div>').appendTo(overlay);
 		handleMarginBottom = $('<div class="handle bottom handle-margin" title="Drag to change margin-bottom"></div>').appendTo(overlay);
@@ -704,13 +706,13 @@
 		var hitsRightEdge = (offset.left + outerWidth + 40 > window.innerWidth);
 		captionWidth[(hitsRightEdge ? 'add' : 'remove') + 'Class']('edge');
 		captionWidth
-			.html(innerWidth + ' <span>px</span>')
+			.html('<span>width: </span>' + innerWidth + ' <span>px</span>')
 			.css({
 				right: hitsRightEdge ? 13 : -(captionWidth[0].offsetWidth+13)
 			});
 
 		captionHeight
-			.html(innerHeight + ' <span>px</span>')
+			.html('<span>height: </span>' + innerHeight + ' <span>px</span>')
 			.css({
 				bottom: 1
 			});
