@@ -3,8 +3,9 @@
 	var inFocus = null;
 	var inInspect = false;
 	var overlay = null;
+	var titleBox = null;
 	var focusOffset = null;
-	var over = false;
+	var over = false, overInner, overPadding, overMargin;
 	var interacting = false;
 	var handleOffset = 7;
 	var dropdown = null;
@@ -15,7 +16,8 @@
 	var hoverElem = null;
 
 	var focusOuterWidth, focusOuterHeight,
-		focusMarginLeft, focusMarginTop, focusMarginBottom, focusMarginRight;
+		focusMarginLeft, focusMarginTop, focusMarginBottom, focusMarginRight,
+		focusPaddingRight, focusPaddingBottom;
 
 	var containerPaddingLeft, containerPaddingRight, containerPaddingTop, containerPaddingBottom,
 		containerMarginLeft, containerMarginRight, containerMarginTop, containerMarginBottom;
@@ -31,7 +33,7 @@
 
 		console.log('entering rule mode..');
 		selectedRule = cssRule;
-		$('.title', overlay).addClass('rule');
+		titleBox.addClass('rule');
 		overlay.css('zIndex', 10002);
 
 		$(selectedRule.selectorText).not(inFocus).not('.overlay, .overlay *').each(function() {
@@ -48,8 +50,8 @@
 
 		console.log('exiting rule mode..');
 		
-		$('.title span.selected', overlay).html('inline style');
-		$('.title', overlay).removeClass('rule');
+		$('span.selected', titleBox).html('inline style');
+		$(titleBox).removeClass('rule');
 		overlay.css('zIndex', '');
 
 		for (var i = 0; i < ghosts.length; i++) {
@@ -88,13 +90,14 @@
 	var createOverlay = function() {
 
 		overlay = $('<div id="overlay" class="overlay"></div>');
+		titleBox = $('<div class="overlay-title"><div class="title-rule"><span class="selected">inline style</span> <span class="toggle">▾</span><ul class="dropdown"><li>inline style</li></ul></div><div class="title-proportions">100 x 100</div></div>').appendTo(document.body);
 
 		guideLeft = $('<div class="guide-left"></div>').appendTo(overlay);
 		guideRight = $('<div class="guide-right"></div>').appendTo(overlay);
 		guideBottom = $('<div class="guide-bottom"></div>').appendTo(overlay);
 		guideTop = $('<div class="guide-top"></div>').appendTo(overlay);
 		
-		containerMarginTop = $('<div class="container-margin top"><div class="title"><span class="selected">inline style</span> <span class="toggle">▾</span><ul class="dropdown"><li>inline style</li><li>.box {}</li><li>div {}</li></ul></div></div>').appendTo(overlay);
+		containerMarginTop = $('<div class="container-margin top"></div>').appendTo(overlay);
 		containerMarginBottom = $('<div class="container-margin bottom"></div>').appendTo(overlay);
 		containerMarginLeft = $('<div class="container-margin left"></div>').appendTo(overlay);
 		containerMarginRight = $('<div class="container-margin right"></div>').appendTo(overlay);
@@ -116,23 +119,21 @@
 		captionWidth = $('<div class="caption caption-width"></div>').appendTo(overlay);
 		captionHeight = $('<div class="caption caption-height"></div>').appendTo(overlay);
 
-
-
-		overlay.appendTo('body');
+		overlay.appendTo(document.body);
 
 	};
 
 	var initializeOverlay = function() {
 
-		$('.title span', overlay).click(function() {
-			$(".title .dropdown", overlay).toggle();
+		$('span', titleBox).click(function() {
+			$(".dropdown", titleBox).toggle();
 		});
 
-		dropdown = $('.title .dropdown', overlay);
+		dropdown = $('.dropdown', titleBox);
 		dropdown.on('click', 'li', function() {
 
-			$(".title .dropdown", overlay).hide();
-			$(".title .selected", overlay).html(this.innerHTML);
+			$(".dropdown", titleBox).hide();
+			$(".selected", titleBox).html(this.innerHTML);
 			
 			var cssRule = $(this).data('cssRule');
 			if(cssRule) {
@@ -149,6 +150,8 @@
 			if(!inFocus || !inInspect) {
 				return;
 			}
+
+			// general over/out
 
 			if(
 				e.pageX > focusOffset.left - focusMarginLeft - extraMargin
@@ -172,6 +175,31 @@
 				}
 
 			}
+
+			// over inner box
+
+			if(
+				e.pageX > focusOffset.left
+				&& e.pageY > focusOffset.top
+				&& e.pageX < (focusOffset.left + focusOuterWidth - focusPaddingRight)
+				&& e.pageY < (focusOffset.top + focusOuterHeight - focusPaddingBottom)
+			) {
+
+				if(!overInner) {
+					overlay.addClass('hover-inner');
+					overInner = true;
+				}
+
+			} else {
+
+				if(overInner && !interacting) {
+					overInner = false;
+					overlay.removeClass('hover-inner');		
+				}
+
+			}
+
+
 		});
 
 		$(document).on('keydown', function(e) {
@@ -477,12 +505,13 @@
 		}
 
 		overlay[0].style.display = 'none';
+		titleBox[0].style.display = 'none';
 		inFocus.attr('contentEditable', false);
+		inFocus[0].style.outline = '';
 
 		over = false;
 		inInspect = false;
-		
-
+		inFocus = null;
 
 	};
 
@@ -499,6 +528,8 @@
 		if(!ghost && inInspect) {
 			overlay.addClass('hover');
 			over = true;
+			overlay.addClass('hover-inner');
+			overInner = true;
 		}
 
 		var innerWidth = elem.width();
@@ -527,6 +558,8 @@
 			focusMarginTop = marginTop;
 			focusMarginRight = marginRight;
 			focusMarginBottom = marginBottom;
+			focusPaddingRight = paddingRight;
+			focusPaddingBottom = paddingBottom;
 		}
 
 		// place overlay
@@ -539,6 +572,18 @@
 				left: offset.left + paddingLeft
 			});
 
+		if(!ghost) {
+
+			// place title
+			titleBox[0].style.display = 'inline-block';
+			titleBox
+				.css({
+					top: offset.top - 35,
+					left: offset.left + ((outerWidth - titleBox[0].offsetWidth) / 2)
+				});
+
+			$('.title-proportions', titleBox).html(outerWidth + ' x ' + outerHeight);
+		}
 
 		// modify padding box
 
@@ -672,6 +717,7 @@
 
 		// content editable
 		elem.attr('contentEditable', true);
+		elem[0].style.outline = 'none';
 
 
 	};
