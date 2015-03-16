@@ -11,6 +11,9 @@
 	var selectedRule = null;
 	var ghosts = [];
 
+	var hoverGhost;
+	var hoverElem = null;
+
 	var focusOuterWidth, focusOuterHeight,
 		focusMarginLeft, focusMarginTop, focusMarginBottom, focusMarginRight;
 
@@ -157,13 +160,15 @@
 				if(!over) {
 					overlay.addClass('hover');
 					over = true;
+					hoverGhost[0].style.display = 'none';
 				}
 
 			} else {
 
 				if(over && !interacting) {
 					over = false;
-					overlay.removeClass('hover');				
+					overlay.removeClass('hover');
+					hoverGhost[0].style.display = 'block';			
 				}
 
 			}
@@ -465,6 +470,21 @@
 
 	};
 
+	var unsetOverlay = function() {
+
+		if(selectedRule) {
+			exitRuleMode();
+		}
+
+		overlay[0].style.display = 'none';
+		inFocus.attr('contentEditable', false);
+
+		over = false;
+		inInspect = false;
+		
+
+
+	};
 
 	var setOverlay = function(overlayElement, trackedElement, ghost) {
 
@@ -604,71 +624,76 @@
 			left: -paddingLeft
 		});
 
-		if(!ghost) {
-			handleMarginLeft.css({
-				marginLeft: -(paddingLeft + marginLeft)
-			});
-
-			handleMarginRight.css({
-				marginRight: -(paddingRight + marginRight)
-			});
-
-			handleMarginTop.css({
-				marginTop: -(paddingTop + marginTop)
-			});
-
-			handleMarginBottom.css({
-				marginBottom: -(paddingBottom + marginBottom)
-			});
-
-
-
-
-			// guides
-
-			guideLeft.css({ top: -offset.top -paddingTop, height: window.innerHeight });
-			guideRight.css({ top: -offset.top -paddingTop, height: window.innerHeight });
-			guideBottom.css({ left: -offset.left -paddingLeft, width: window.innerWidth });
-			guideTop.css({ left: -offset.left -paddingLeft, width: window.innerWidth });
-
-
-
-			// captions
-
-
-			var hitsRightEdge = (offset.left + outerWidth + 40 > window.innerWidth);
-			captionWidth[(hitsRightEdge ? 'add' : 'remove') + 'Class']('edge');
-			captionWidth
-				.html(innerWidth)
-				.css({
-					right: hitsRightEdge ? 13 : -(captionWidth[0].offsetWidth+13)
-				});
-
-			captionHeight
-				.html(innerHeight)
-				.css({
-					bottom: 1
-				});
-
+		// exit here
+		// if not the real deal!
+		if(ghost) {
+			return;
 		}
+
+		handleMarginLeft.css({
+			marginLeft: -(paddingLeft + marginLeft)
+		});
+
+		handleMarginRight.css({
+			marginRight: -(paddingRight + marginRight)
+		});
+
+		handleMarginTop.css({
+			marginTop: -(paddingTop + marginTop)
+		});
+
+		handleMarginBottom.css({
+			marginBottom: -(paddingBottom + marginBottom)
+		});
+
+
+		// guides
+
+		guideLeft.css({ top: -offset.top -paddingTop, height: window.innerHeight });
+		guideRight.css({ top: -offset.top -paddingTop, height: window.innerHeight });
+		guideBottom.css({ left: -offset.left -paddingLeft, width: window.innerWidth });
+		guideTop.css({ left: -offset.left -paddingLeft, width: window.innerWidth });
+
+		// captions
+
+		var hitsRightEdge = (offset.left + outerWidth + 40 > window.innerWidth);
+		captionWidth[(hitsRightEdge ? 'add' : 'remove') + 'Class']('edge');
+		captionWidth
+			.html(innerWidth + ' <span>px</span>')
+			.css({
+				right: hitsRightEdge ? 13 : -(captionWidth[0].offsetWidth+13)
+			});
+
+		captionHeight
+			.html(innerHeight + ' <span>px</span>')
+			.css({
+				bottom: 1
+			});
+
+		// content editable
+		elem.attr('contentEditable', true);
+
 
 	};
 
+	// create the overlay
 	createOverlay();
-
 	initializeOverlay();
+
+	// create the hover ghost
+	hoverGhost = createGhost();
 
 	// make all elements on page inspectable
 	$("body *:not(.overlay,.overlay *)").on('mouseover', function() {
 
-		if(inFocus === this || inInspect)
+		if(hoverElem === this || interacting || over)
 			return;
 
 		// focus the element
-		inFocus = $(this);
+		hoverElem = this;
 
 		// create overlay
-		setOverlay(overlay, inFocus);
+		setOverlay(hoverGhost, hoverElem, true);
 
 		return false;
 
@@ -697,12 +722,12 @@
 
 	$(document).on('keyup', function(e) {
 		if(e.keyCode === 27) {
-			inInspect = false;
+			unsetOverlay();
 		}
 	});
 
 
-	$(".box").click();
+	//$(".box").click();
 
 
 })();

@@ -195,6 +195,10 @@
 	transition: opacity 0.3s;
 }
 
+.caption span {
+	opacity: 0.5;
+}
+
 .overlay.hover .caption {
 	opacity: 1;
 }
@@ -263,8 +267,19 @@
 
 /* guides */
 
+.guide-left, .guide-right,
+.guide-bottom, .guide-top {
+	opacity: 0.3;
+	transition: opacity 0.3s;
+}
+
+.overlay.hover .guide-left, .overlay.hover .guide-right,
+.overlay.hover .guide-bottom, .overlay.hover .guide-top {
+	opacity: 1;
+}
+
 .guide-left, .guide-right {
-	border-left: 1px solid rgba(0,0,0,0.3);
+	border-left: 1px dashed #4A90E2;
 	width: 0;
 	height: 100%;
 	position: absolute;
@@ -280,7 +295,7 @@
 }
 
 .guide-bottom, .guide-top {
-	border-top: 1px solid rgba(0,0,0,0.3);
+	border-top: 1px dashed #4A90E2;
 	height: 0;
 	width: 100%;
 	position: absolute;
