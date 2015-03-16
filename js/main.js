@@ -20,6 +20,10 @@
 	var handlePaddingLeft, handlePaddingRight, handlePaddingTop, handlePaddingBottom,
 		handleMarginLeft, handleMarginRight, handleMarginTop, handleMarginBottom;
 
+	var captionWidth, captionHeight;
+
+	var guideLeft, guideRight, guideTop, guideBottom;
+
 	var enterRuleMode = function(cssRule) {
 
 		console.log('entering rule mode..');
@@ -81,6 +85,12 @@
 	var createOverlay = function() {
 
 		overlay = $('<div id="overlay" class="overlay"></div>');
+
+		guideLeft = $('<div class="guide-left"></div>').appendTo(overlay);
+		guideRight = $('<div class="guide-right"></div>').appendTo(overlay);
+		guideBottom = $('<div class="guide-bottom"></div>').appendTo(overlay);
+		guideTop = $('<div class="guide-top"></div>').appendTo(overlay);
+		
 		containerMarginTop = $('<div class="container-margin top"><div class="title"><span class="selected">inline style</span> <span class="toggle">▾</span><ul class="dropdown"><li>inline style</li><li>.box {}</li><li>div {}</li></ul></div></div>').appendTo(overlay);
 		containerMarginBottom = $('<div class="container-margin bottom"></div>').appendTo(overlay);
 		containerMarginLeft = $('<div class="container-margin left"></div>').appendTo(overlay);
@@ -99,6 +109,11 @@
 		handleMarginTop = $('<div class="handle top handle-margin" title="Drag to change margin"></div>').appendTo(overlay);
 		handlePaddingLeft = $('<div class="handle left handle-padding" title="Drag to change padding"></div>').appendTo(overlay);
 		handleMarginLeft = $('<div class="handle left handle-margin" title="Drag to change margin"></div>').appendTo(overlay);
+
+		captionWidth = $('<div class="caption caption-width"></div>').appendTo(overlay);
+		captionHeight = $('<div class="caption caption-height"></div>').appendTo(overlay);
+
+
 
 		overlay.appendTo('body');
 
@@ -604,7 +619,37 @@
 
 			handleMarginBottom.css({
 				marginBottom: -(paddingBottom + marginBottom)
-			});			
+			});
+
+
+
+
+			// guides
+
+			guideLeft.css({ top: -offset.top -paddingTop, height: window.innerHeight });
+			guideRight.css({ top: -offset.top -paddingTop, height: window.innerHeight });
+			guideBottom.css({ left: -offset.left -paddingLeft, width: window.innerWidth });
+			guideTop.css({ left: -offset.left -paddingLeft, width: window.innerWidth });
+
+
+
+			// captions
+
+
+			var hitsRightEdge = (offset.left + outerWidth + 40 > window.innerWidth);
+			captionWidth[(hitsRightEdge ? 'add' : 'remove') + 'Class']('edge');
+			captionWidth
+				.html(innerWidth)
+				.css({
+					right: hitsRightEdge ? 13 : -(captionWidth[0].offsetWidth+13)
+				});
+
+			captionHeight
+				.html(innerHeight)
+				.css({
+					bottom: 1
+				});
+
 		}
 
 	};
@@ -632,8 +677,6 @@
 	// make all elements on page inspectable
 	$("body *:not(.overlay,.overlay *)").on('click', function() {
 
-
-
 		if(inFocus === this && inInspect)
 			return;
 
@@ -652,8 +695,14 @@
 
 	});
 
+	$(document).on('keyup', function(e) {
+		if(e.keyCode === 27) {
+			inInspect = false;
+		}
+	});
 
-	//$(".box").click();
+
+	$(".box").click();
 
 
 })();

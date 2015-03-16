@@ -65,8 +65,8 @@
 
 .container-margin, .container-padding {
 	position: absolute;
-	opacity: 0.2;
-	transition: opacity 0.5s;
+	opacity: 0.3;
+	transition: opacity 0.3s;
 }
 
 .container-margin {
@@ -95,7 +95,7 @@
 	position: absolute;
 	box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.24);
 	opacity: 0.3;
-	transition: opacity 0.5s;
+	transition: opacity 0.3s;
 }
 
 .handle-size {
@@ -180,4 +180,117 @@
 
 .handle.left.handle-margin {
 	margin-top: 8px;
+}
+
+/* captions */
+
+.caption {
+	background: #fff;
+	-webkit-filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.24));
+	padding: 2px 5px;
+	border-radius: 2px;
+	position: absolute;
+	z-index: 10002;
+	opacity: 0.3;
+	transition: opacity 0.3s;
+}
+
+.overlay.hover .caption {
+	opacity: 1;
+}
+
+.caption-width {
+	top: 50%;
+	right: 0;
+	margin-top: -21px;
+	background: #4A90E2;
+	color: #fff;
+}
+
+.caption-width::before {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 0; 
+	height: 0; 
+	border-top: 6px solid transparent;
+	border-bottom: 6px solid transparent;
+	border-right: 6px solid #4A90E2;
+	top: 1px;
+	left: -6px;
+}
+
+.caption-width.edge::before {
+	border-top: 6px solid transparent;
+	border-bottom: 6px solid transparent;
+	border-left: 6px solid #4A90E2;
+	border-right: none;
+	right: -6px;
+	left: auto;
+}
+
+.caption-height {
+	left: 50%;
+	bottom: 0;
+	margin-left: -21px;
+	background: #4A90E2;
+	color: #fff;
+	transform: rotate(-90deg);
+	transform-origin: top left;
+}
+
+.caption-height::before {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 0; 
+	height: 0; 
+	border-top: 6px solid transparent;
+	border-bottom: 6px solid transparent;
+	border-right: 6px solid #4A90E2;
+	top: 1px;
+	left: -6px;
+}
+
+.caption-height.edge::before {
+	border-top: 6px solid transparent;
+	border-bottom: 6px solid transparent;
+	border-left: 6px solid #4A90E2;
+	border-right: none;
+	right: -6px;
+	left: auto;
+}
+
+/* guides */
+
+.guide-left, .guide-right {
+	border-left: 1px solid rgba(0,0,0,0.3);
+	width: 0;
+	height: 100%;
+	position: absolute;
+	top: 0;
+}
+
+.guide-left {
+	left: 0;
+}
+
+.guide-right {
+	right: 0;
+}
+
+.guide-bottom, .guide-top {
+	border-top: 1px solid rgba(0,0,0,0.3);
+	height: 0;
+	width: 100%;
+	position: absolute;
+	left: 0;
+}
+
+.guide-top {
+	top: 0;
+}
+
+.guide-bottom {
+	bottom: 0;
 }

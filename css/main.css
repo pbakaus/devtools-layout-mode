@@ -1,4 +1,7 @@
-
+html, body {
+	margin: 0;
+	padding: 0;
+}
 
 .box {
 	background: #664337;
@@ -33,5 +36,5 @@ li {
 }
 
 #sidebar h2 {
-	border-bottom: 1px solid black;
+
 }
