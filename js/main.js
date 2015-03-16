@@ -192,7 +192,7 @@
 
 			} else {
 
-				if(overInner && !interacting) {
+				if(overInner && interacting !== "size") {
 					overInner = false;
 					overlay.removeClass('hover-inner');		
 				}
@@ -220,7 +220,7 @@
 			axis: 'y',
 			cursor: 's-resize',
 			start: function() {
-				interacting = true;
+				interacting = "size";
 			},
 			drag: function(event, ui) {
 				ui.position.top = Math.max(0 - handleOffset, ui.position.top);
@@ -238,7 +238,7 @@
 			axis: 'x',
 			cursor: 'e-resize',
 			start: function() {
-				interacting = true;
+				interacting = "size";
 			},
 			drag: function(event, ui) {
 				ui.position.left = Math.max(0 - handleOffset, ui.position.left);
@@ -260,18 +260,18 @@
 			start: function() {
 				this.curInnerHeight = $(inFocus).height();
 				this.curPaddingBottom = parseInt(inFocus.css('padding-bottom'));
-				interacting = true;
+				interacting = "padding";
 			},
 			drag: function(event, ui) {
 				ui.position.top = Math.max(this.curInnerHeight - handleOffset, ui.position.top);
 				(selectedRule || inFocus[0]).style.paddingBottom = Math.max(0, this.curPaddingBottom + (ui.position.top - ui.originalPosition.top)) + 'px';
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			},
 			stop: function() {
 				this.removeAttribute('style');
 				interacting = false;
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			}
 		});
@@ -282,18 +282,18 @@
 			start: function() {
 				this.curInnerWidth = $(inFocus).width();
 				this.curPaddingRight = parseInt(inFocus.css('padding-right'));
-				interacting = true;
+				interacting = "padding";
 			},
 			drag: function(event, ui) {
 				ui.position.left = Math.max(this.curInnerWidth - handleOffset, ui.position.left);
 				(selectedRule || inFocus[0]).style.paddingRight = Math.max(0, this.curPaddingRight + (ui.position.left - ui.originalPosition.left)) + 'px';
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			},
 			stop: function() {
 				this.removeAttribute('style');
 				interacting = false;
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			}
 		});
@@ -304,18 +304,18 @@
 			start: function(event, ui) {
 				this.curOffset = ui.offset.top;
 				this.curPaddingTop = parseInt(inFocus.css('padding-top'));
-				interacting = true;
+				interacting = "padding";
 			},
 			drag: function(event, ui) {
 				ui.position.top = -handleOffset + 2;
 				(selectedRule || inFocus[0]).style.paddingTop = Math.max(0, this.curPaddingTop - (ui.offset.top - this.curOffset)) + 'px';
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			},
 			stop: function() {
 				this.removeAttribute('style');
 				interacting = false;
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			}
 		});
@@ -326,18 +326,18 @@
 			start: function(event, ui) {
 				this.curOffset = ui.offset.left;
 				this.curPaddingLeft = parseInt(inFocus.css('padding-left'));
-				interacting = true;
+				interacting = "padding";
 			},
 			drag: function(event, ui) {
 				ui.position.left = -handleOffset + 2;
 				(selectedRule || inFocus[0]).style.paddingLeft = Math.max(0, this.curPaddingLeft - (ui.offset.left - this.curOffset)) + 'px';
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			},
 			stop: function() {
 				this.removeAttribute('style');
 				interacting = false;
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			}
 		});
@@ -351,18 +351,18 @@
 				this.curInnerHeight = $(inFocus).height();
 				this.curMarginBottom = parseInt(inFocus.css('margin-bottom'));
 				this.curPaddingBottom = parseInt(inFocus.css('padding-bottom'));
-				interacting = true;
+				interacting = "margin";
 			},
 			drag: function(event, ui) {
 				ui.position.top = Math.max(this.curInnerHeight + this.curPaddingBottom - handleOffset, ui.position.top);
 				(selectedRule || inFocus[0]).style.marginBottom = Math.max(0, this.curMarginBottom + (ui.position.top - ui.originalPosition.top)) + 'px';
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			},
 			stop: function() {
 				this.removeAttribute('style');
 				interacting = false;
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			}
 		});
@@ -374,18 +374,18 @@
 				this.curInnerWidth = $(inFocus).width();
 				this.curMarginRight = parseInt(inFocus.css('margin-right'));
 				this.curPaddingRight = parseInt(inFocus.css('padding-right'));
-				interacting = true;
+				interacting = "margin";
 			},
 			drag: function(event, ui) {
 				ui.position.left = Math.max(this.curInnerWidth + this.curPaddingRight - handleOffset, ui.position.left);
 				(selectedRule || inFocus[0]).style.marginRight = Math.max(0, this.curMarginRight + (ui.position.left - ui.originalPosition.left)) + 'px';
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			},
 			stop: function() {
 				this.removeAttribute('style');
 				interacting = false;
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			}
 		});
@@ -396,18 +396,18 @@
 			start: function(event, ui) {
 				this.curOffset = ui.offset.left;
 				this.curMarginLeft = parseInt(inFocus.css('margin-left'));
-				interacting = true;
+				interacting = "margin";
 			},
 			drag: function(event, ui) {
 				ui.position.left = -handleOffset + 2;
 				(selectedRule || inFocus[0]).style.marginLeft = Math.max(0, this.curMarginLeft - (ui.offset.left - this.curOffset)) + 'px';
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			},
 			stop: function() {
 				this.removeAttribute('style');
 				interacting = false;
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			}
 		});
@@ -418,18 +418,18 @@
 			start: function(event, ui) {
 				this.curOffset = ui.offset.top;
 				this.curMarginTop = parseInt(inFocus.css('margin-top'));
-				interacting = true;
+				interacting = "margin";
 			},
 			drag: function(event, ui) {
 				ui.position.top = -handleOffset + 2;
 				(selectedRule || inFocus[0]).style.marginTop = Math.max(0, this.curMarginTop - (ui.offset.top - this.curOffset)) + 'px';
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			},
 			stop: function() {
 				this.removeAttribute('style');
 				interacting = false;
-				setOverlay(overlay, inFocus);
+				setOverlay(overlay, inFocus, false, true);
 				updateGhosts();
 			}
 		});
@@ -515,7 +515,7 @@
 
 	};
 
-	var setOverlay = function(overlayElement, trackedElement, ghost) {
+	var setOverlay = function(overlayElement, trackedElement, ghost, duringInteraction) {
 
 		var elem = $(trackedElement);
 		var offset = elem.offset();
@@ -525,7 +525,7 @@
 		}
 
 		// add hover class initially
-		if(!ghost && inInspect) {
+		if(!ghost && inInspect && !(interacting || duringInteraction)) {
 			overlay.addClass('hover');
 			over = true;
 			overlay.addClass('hover-inner');
@@ -750,6 +750,9 @@
 
 		if(inFocus === this && inInspect)
 			return;
+
+		//hide hover ghost
+		hoverGhost[0].style.display = 'none';
 
 		// focus the element
 		inFocus = $(this);
