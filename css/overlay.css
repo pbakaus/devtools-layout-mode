@@ -96,6 +96,7 @@
 	position: absolute;
 	opacity: 0.3;
 	transition: opacity 0.3s;
+	pointer-events: none;
 }
 
 .container-margin {
