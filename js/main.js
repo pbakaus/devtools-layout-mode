@@ -483,17 +483,13 @@
 
 			var hitsRightEdge = (offset.left + outerWidth + 80 > window.innerWidth);
 			this.captionWidth[0].classList[hitsRightEdge ? 'add' : 'remove']('edge');
+			this.captionWidth[0].innerHTML = '<span>width: </span>' + innerWidth + ' <span>px</span>';
 			this.captionWidth
-				.html('<span>width: </span>' + innerWidth + ' <span>px</span>')
 				.css({
 					right: hitsRightEdge ? 13 : -(this.captionWidth[0].offsetWidth+13)
 				});
 
-			this.captionHeight
-				.html('<span>height: </span>' + innerHeight + ' <span>px</span>')
-				.css({
-					bottom: 1
-				});
+			this.captionHeight[0].innerHTML = '<span>height: </span>' + innerHeight + ' <span>px</span>';
 
 			// content editable
 			elem[0].setAttribute('contentEditable', true);

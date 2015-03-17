@@ -227,9 +227,10 @@
 	border-radius: 2px;
 	position: absolute;
 	z-index: 10002;
-	opacity: 0;
+	opacity: 1;
 	pointer-events: none;
 	transition: opacity 0.3s;
+	white-space: nowrap;
 }
 
 .caption span {
@@ -272,7 +273,7 @@
 
 .caption-height {
 	left: 50%;
-	bottom: 0;
+	bottom: 1px;
 	margin-left: -21px;
 	background: #4A90E2;
 	color: #fff;
