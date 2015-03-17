@@ -3,27 +3,14 @@
 
 	var Overlay = function() {
 
-		// the actual overlay div
-		this.overlayElement = null;
-
-		// the currently selected element
-		this.currentElement = null;
-
-		// when defined, we're in rule mode
-		this.selectedRule = null;
-
-		// ghosts are elements created to visualize hovering, or when we edit based on rule
-		this.ghosts = [];
-
-		// the hover ghost
-		this.hoverGhost = new Ghost();
-
-		// on whether we're currenly hovering a certain part of the overlay
-		this.over = false;
+		this.overlayElement = null; // the actual overlay div
+		this.currentElement = null; // the currently selected element
+		this.selectedRule = null; // when defined, we're in rule mode
+		this.ghosts = []; // ghosts are elements created to visualize hovering, or when we edit based on rule
+		this.hoverGhost = new Ghost(); // the hover ghost
+		this.over = false; // on whether we're currenly hovering a certain part of the overlay
 		this.overInner = false;
-
-		// whether we're currently interacting with the element
-		this.interacting = false;
+		this.interacting = false; // whether we're currently interacting with the element
 
 		// initialize
 		this.create();
@@ -41,23 +28,22 @@
 
 		createOverlay: function() {
 
-			this.overlayElement = $('<div id="overlay" class="overlay"></div>');
+			this.overlayElement = $('<div id="overlay" class="overlay"></div>')[0];
 
 			this.guideLeft = $('<div class="guide-left"></div>').appendTo(this.overlayElement)[0];
 			this.guideRight = $('<div class="guide-right"></div>').appendTo(this.overlayElement)[0];
 			this.guideBottom = $('<div class="guide-bottom"></div>').appendTo(this.overlayElement)[0];
 			this.guideTop = $('<div class="guide-top"></div>').appendTo(this.overlayElement)[0];
 			
-			$('<div class="container-margin top"></div>').appendTo(this.overlayElement);
-			$('<div class="container-margin bottom"></div>').appendTo(this.overlayElement);
-			$('<div class="container-margin left"></div>').appendTo(this.overlayElement);
-			$('<div class="container-margin right"></div>').appendTo(this.overlayElement);
-			$('<div class="container-padding top"></div>').appendTo(this.overlayElement);
-			$('<div class="container-padding bottom"></div>').appendTo(this.overlayElement);
-			$('<div class="container-padding left"></div>').appendTo(this.overlayElement);
-			$('<div class="container-padding right"></div>').appendTo(this.overlayElement);
+			this.containerMarginTop = $('<div class="container-margin top"></div>').appendTo(this.overlayElement)[0];
+			this.containerMarginBottom = $('<div class="container-margin bottom"></div>').appendTo(this.overlayElement)[0];
+			this.containerMarginLeft = $('<div class="container-margin left"></div>').appendTo(this.overlayElement)[0];
+			this.containerMarginRight = $('<div class="container-margin right"></div>').appendTo(this.overlayElement)[0];
+			this.containerPaddingTop = $('<div class="container-padding top"></div>').appendTo(this.overlayElement)[0];
+			this.containerPaddingBottom = $('<div class="container-padding bottom"></div>').appendTo(this.overlayElement)[0];
+			this.containerPaddingLeft = $('<div class="container-padding left"></div>').appendTo(this.overlayElement)[0];
+			this.containerPaddingRight = $('<div class="container-padding right"></div>').appendTo(this.overlayElement)[0];
 			
-
 			this.handleSizeBottom = $('<div class="handle bottom handle-size" title="Drag to change height"></div>').appendTo(this.overlayElement);
 			this.handlePaddingBottom = $('<div class="handle bottom handle-padding" title="Drag to change padding-bottom"></div>').appendTo(this.overlayElement);
 			this.handleMarginBottom = $('<div class="handle bottom handle-margin" title="Drag to change margin-bottom"></div>').appendTo(this.overlayElement);
@@ -72,16 +58,17 @@
 			this.captionWidth = $('<div class="caption caption-width"></div>').appendTo(this.overlayElement);
 			this.captionHeight = $('<div class="caption caption-height"></div>').appendTo(this.overlayElement);
 
-			this.overlayElement.appendTo(document.body);
+			document.body.appendChild(this.overlayElement);
 
 		},
 
 		createTitle: function() {
 
 			this.titleBox = $('<div class="overlay-title"><div class="title-rule"><span class="selected">inline style</span> <span class="toggle">▾</span><ul class="dropdown"><li>inline style</li></ul></div><div class="title-proportions">100 x 100</div></div>')
-				.appendTo(document.body);
+				.appendTo(document.body)[0];
 
-			this.titleDropdown = $('.dropdown', Overlay.titleBox);
+			this.titleProportions = $('.title-proportions', this.titleBox)[0];
+			this.titleDropdown = $('.dropdown', this.titleBox);
 
 		},
 
@@ -96,9 +83,10 @@
 			this.initRuleShortcut();
 			this.initHandles();
 
+			var that = this;
 			$(document).on('keyup', function(e) {
 				if(e.keyCode === 27) {
-					Overlay.unset();
+					that.unset();
 				}
 			});
 
@@ -108,6 +96,7 @@
 
 			// initialize title box behaviour
 
+			var that = this;
 			var titleBox = this.titleBox;
 			var titleDropdown = this.titleDropdown;
 
@@ -123,9 +112,9 @@
 				
 				var cssRule = $(this).data('cssRule');
 				if(cssRule) {
-					Overlay.enterRuleMode(cssRule);
+					that.enterRuleMode(cssRule);
 				} else {
-					Overlay.exitRuleMode();
+					that.exitRuleMode();
 				}
 
 			});
@@ -139,9 +128,9 @@
 			$('body').on('mousemove', function(e) {
 
 				var extraMargin = 10;
-				var offset = Overlay.currentOffset;
+				var offset = that.currentOffset;
 
-				if(!Overlay.currentElement) {
+				if(!that.currentElement) {
 					return;
 				}
 
@@ -155,44 +144,47 @@
 				) {
 
 					if(!that.over) {
-						Overlay.overlayElement.addClass('hover');
 						that.over = true;
-						Overlay.hoverGhost.overlayElement.style.display = 'none';
+						that.overlayElement.classList.add('hover');
+						that.hoverGhost.overlayElement.style.display = 'none';
 					}
 
 				} else {
 
 					if(that.over && !that.interacting) {
 						that.over = false;
-						Overlay.overlayElement.removeClass('hover');
-						Overlay.hoverGhost.overlayElement.style.display = 'block';			
+						that.overlayElement.classList.remove('hover');
+						that.hoverGhost.overlayElement.style.display = 'block';			
 					}
 
 				}
 
 				// over inner box
 
-				if(
-					e.pageX > offset.left
-					&& e.pageY > offset.top
-					&& e.pageX < (offset.left + that.outerWidth - that.paddingRight)
-					&& e.pageY < (offset.top + that.outerHeight - that.paddingBottom)
-				) {
+				if(!that.interacting) {
 
-					if(!that.overInner) {
-						Overlay.overlayElement.addClass('hover-inner');
-						that.overInner = true;
-					}
+					if(
+						e.pageX > offset.left
+						&& e.pageY > offset.top
+						&& e.pageX < (offset.left + that.outerWidth - that.paddingRight)
+						&& e.pageY < (offset.top + that.outerHeight - that.paddingBottom)
+					) {
 
-				} else {
+						if(!that.overInner) {
+							that.overlayElement.classList.add('hover-inner');
+							that.overInner = true;
+						}
 
-					if(that.overInner && that.interacting !== "size") {
-						that.overInner = false;
-						Overlay.overlayElement.removeClass('hover-inner');		
+					} else {
+
+						if(that.overInner) {
+							that.overInner = false;
+							that.overlayElement.classList.remove('hover-inner');		
+						}
+
 					}
 
 				}
-
 
 			});
 
@@ -417,156 +409,80 @@
 				this.set(newElem);
 			}
 
-			var overlayElement = $(this.overlayElement);
+			var overlayElement = this.overlayElement;
 			var elem = $(this.currentElement);
 			var offset = elem.offset();
 
-			var innerWidth = elem.width();
-			var innerHeight = elem.height();
+			var computedStyle = getComputedStyle(this.currentElement);
+
+			var innerWidth = parseInt(computedStyle.width);
+			var innerHeight = parseInt(computedStyle.height);
 
 			// we need to store outer height, bottom/right padding and margins for hover detection
-			var outerWidth = this.outerWidth = elem[0].offsetWidth;
-			var outerHeight = this.outerHeight = elem[0].offsetHeight;
+			var paddingLeft = this.paddingLeft = parseInt(computedStyle.paddingLeft);
+			var paddingTop = this.paddingTop = parseInt(computedStyle.paddingTop);
+			var paddingRight = this.paddingRight = parseInt(computedStyle.paddingRight);
+			var paddingBottom = this.paddingBottom = parseInt(computedStyle.paddingBottom);
 
-			var paddingLeft = this.paddingLeft = parseInt(elem.css('padding-left'));
-			var paddingTop = this.paddingTop = parseInt(elem.css('padding-top'));
-			var paddingRight = this.paddingRight = parseInt(elem.css('padding-right'));
-			var paddingBottom = this.paddingBottom = parseInt(elem.css('padding-bottom'));
+			var marginLeft = this.marginLeft = parseInt(computedStyle.marginLeft);
+			var marginTop = this.marginTop = parseInt(computedStyle.marginTop);
+			var marginRight = this.marginRight = parseInt(computedStyle.marginRight);
+			var marginBottom = this.marginBottom = parseInt(computedStyle.marginBottom);
 
-			var marginLeft = this.marginLeft = parseInt(elem.css('margin-left'));
-			var marginTop = this.marginTop = parseInt(elem.css('margin-top'));
-			var marginRight = this.marginRight = parseInt(elem.css('margin-right'));
-			var marginBottom = this.marginBottom = parseInt(elem.css('margin-bottom'));
+			var outerWidth = this.outerWidth = innerWidth + paddingLeft + paddingRight;
+			var outerHeight = this.outerHeight = innerHeight + paddingTop + paddingBottom;
 
-			// place overlay
-			overlayElement
-				.css({
-					display: 'block',
-					width: innerWidth,
-					height: innerHeight,
-					top: offset.top + paddingTop,
-					left: offset.left + paddingLeft
-				});
 
-			// place title
-			this.titleBox[0].style.display = 'inline-block';
-			this.titleBox.css({ top: offset.top - 35, left: offset.left + ((outerWidth - this.titleBox[0].offsetWidth) / 2) });
-			$('.title-proportions', this.titleBox).html(outerWidth + ' x ' + outerHeight);
+			// place and resize overlay
+			overlayElement.style.width = innerWidth + 'px';
+			overlayElement.style.height = innerHeight + 'px';
+			overlayElement.style.transform = 'translate(' + (offset.left + paddingLeft) + 'px, ' + (offset.top + paddingTop) + 'px)';
+
+			// place title box
+			this.titleBox.style.display = 'inline-block';
+			this.titleBox.style.transform = 'translate(' + (offset.left + ((outerWidth - this.titleBox.offsetWidth) / 2)) + 'px, ' + (offset.top - 35) + 'px)';
+			this.titleProportions.innerHTML = outerWidth + ' x ' + outerHeight;
 
 			// modify padding box
+			this.containerPaddingLeft.style.transform = 'translate(' + (-paddingLeft) + 'px, ' + (-paddingTop) + 'px) scale(' + paddingLeft + ', ' + outerHeight + ')';
+			this.containerPaddingRight.style.transform = 'translate(' + (innerWidth) + 'px, ' + (-paddingTop) + 'px) scale(' + paddingRight + ', ' + outerHeight + ')';
+			this.containerPaddingTop.style.transform = 'translate(' + (0) + 'px, ' + (-paddingTop) + 'px) scale(' + innerWidth + ', ' + paddingTop + ')';
+			this.containerPaddingBottom.style.transform = 'translate(' + (0) + 'px, ' + (innerHeight) + 'px) scale(' + innerWidth + ', ' + paddingBottom + ')';
 
-			// left
-			$(".container-padding.left", overlayElement).css({
-				width: paddingLeft,
-				height: outerHeight,
-				top: -paddingTop,
-				left: -paddingLeft
-			});
 
-			// right
-			$(".container-padding.right", overlayElement).css({
-				width: paddingRight,
-				height: outerHeight,
-				top: -paddingTop,
-				right: -paddingRight
-			});
-
-			// top
-			$(".container-padding.top", overlayElement).css({
-				width: innerWidth,
-				height: paddingTop,
-				top: -paddingTop
-			});
-
-			// bottom
-			$(".container-padding.bottom", overlayElement).css({
-				width: innerWidth,
-				height: paddingBottom,
-				bottom: -paddingBottom
-			});
-
-			this.handlePaddingLeft.css({
-				marginLeft: -paddingLeft
-			});
-
-			this.handlePaddingRight.css({
-				marginRight: -paddingRight
-			});
-
-			this.handlePaddingTop.css({
-				marginTop: -paddingTop
-			});
-
-			this.handlePaddingBottom.css({
-				marginBottom: -paddingBottom
-			});
+			this.handlePaddingLeft[0].style.transform = 'translate(' + -paddingLeft + 'px, 0px)';
+			this.handlePaddingRight[0].style.marginRight = -paddingRight + 'px'; // TODO: find out why converting these to transforms messes with dragging
+			this.handlePaddingTop[0].style.transform = 'translate(0px, ' + -paddingTop + 'px)';
+			this.handlePaddingBottom[0].style.marginBottom =  -paddingBottom + 'px';  // TODO: find out why converting these to transforms messes with dragging
 
 			// modify margin box
+			this.containerMarginLeft.style.transform = 'translate(' + (-(paddingLeft + marginLeft)) + 'px, ' + (-(paddingTop + marginTop)) + 'px) scale(' + marginLeft + ', ' + (outerHeight + marginTop + marginBottom) + ')';
+			this.containerMarginRight.style.transform = 'translate(' + (innerWidth + paddingRight) + 'px, ' + (-(paddingTop + marginTop)) + 'px) scale(' + marginRight + ', ' + (outerHeight + marginTop + marginBottom) + ')';
+			this.containerMarginTop.style.transform = 'translate(' + (-paddingLeft) + 'px, ' + (-(paddingTop + marginTop)) + 'px) scale(' + outerWidth + ', ' + marginTop + ')';
+			this.containerMarginBottom.style.transform = 'translate(' + (-paddingLeft) + 'px, ' + (innerHeight + paddingBottom) + 'px) scale(' + outerWidth + ', ' + marginBottom + ')';
 
-			// left
-			$(".container-margin.left", overlayElement).css({
-				width: marginLeft,
-				height: outerHeight + marginTop + marginBottom,
-				top: -(paddingTop + marginTop),
-				left: -(paddingLeft + marginLeft)
-			});
 
-			// right
-			$(".container-margin.right", overlayElement).css({
-				width: marginRight,
-				height: outerHeight + marginTop + marginBottom,
-				top: -(paddingTop + marginTop),
-				right: -(paddingRight + marginRight)
-			});
 
-			// top
-			$(".container-margin.top", overlayElement).css({
-				width: outerWidth,
-				height: marginTop,
-				top: -(paddingTop + marginTop),
-				left: -paddingLeft
-			});
-
-			// bottom
-			$(".container-margin.bottom", overlayElement).css({
-				width: outerWidth,
-				height: marginBottom,
-				bottom: -(paddingBottom + marginBottom),
-				left: -paddingLeft
-			});
-
-			this.handleMarginLeft.css({
-				marginLeft: -(paddingLeft + marginLeft)
-			});
-
-			this.handleMarginRight.css({
-				marginRight: -(paddingRight + marginRight)
-			});
-
-			this.handleMarginTop.css({
-				marginTop: -(paddingTop + marginTop)
-			});
-
-			this.handleMarginBottom.css({
-				marginBottom: -(paddingBottom + marginBottom)
-			});
+			this.handleMarginLeft[0].style.marginLeft = -(paddingLeft + marginLeft) + 'px';
+			this.handleMarginRight[0].style.marginRight = -(paddingRight + marginRight) + 'px';
+			this.handleMarginTop[0].style.marginTop = -(paddingTop + marginTop) + 'px';
+			this.handleMarginBottom[0].style.marginBottom = -(paddingBottom + marginBottom) + 'px';
 
 
 			// guides
-
-			this.guideLeft.style.top = (-offset.top -paddingTop) + 'px';
+			this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
 			this.guideLeft.style.height = window.innerHeight + 'px';
-			this.guideRight.style.top = (-offset.top -paddingTop) + 'px';
+			this.guideRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
 			this.guideRight.style.height = window.innerHeight + 'px';
-			this.guideBottom.style.left = (-offset.left -paddingLeft) + 'px';
+			this.guideBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
 			this.guideBottom.style.width = window.innerWidth + 'px';
-			this.guideTop.style.left = (-offset.left -paddingLeft) + 'px';
+			this.guideTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
 			this.guideTop.style.width = window.innerWidth + 'px';
 
 			// captions
 
-			var hitsRightEdge = (offset.left + outerWidth + 40 > window.innerWidth);
-			this.captionWidth[(hitsRightEdge ? 'add' : 'remove') + 'Class']('edge');
+			var hitsRightEdge = (offset.left + outerWidth + 80 > window.innerWidth);
+			this.captionWidth[0].classList[hitsRightEdge ? 'add' : 'remove']('edge');
 			this.captionWidth
 				.html('<span>width: </span>' + innerWidth + ' <span>px</span>')
 				.css({
@@ -593,7 +509,8 @@
 			this.currentElement = newElem;
 
 			// initial hover
-			this.overlayElement.addClass('hover hover-inner');
+			this.overlayElement.classList.add('hover', 'hover-inner');
+			this.overlayElement.style.display = 'block';
 			this.over = true;
 			this.overInner = true;
 
@@ -608,10 +525,10 @@
 				this.exitRuleMode();
 			}
 
-			this.overlayElement[0].style.display = 'none';
-			this.titleBox[0].style.display = 'none';
-			this.currentElement.attr('contentEditable', false);
-			this.currentElement[0].style.outline = '';
+			this.overlayElement.style.display = 'none';
+			this.titleBox.style.display = 'none';
+			this.currentElement.removeAttribute('contentEditable');
+			this.currentElement.style.outline = '';
 
 			this.over = false;
 			this.currentElement = null;
@@ -629,13 +546,13 @@
 			var ghosts = this.ghosts;
 
 			this.selectedRule = cssRule;
-			this.titleBox.addClass('rule');
-			this.overlayElement.css('zIndex', 10002);
+			this.titleBox.classList.add('rule');
+			this.overlayElement.style.zIndex = 10002;
 
 			$(this.selectedRule.selectorText).not(this.currentElement).not('.overlay, .overlay *').each(function() {
 
 				var ghost = new Ghost(this);
-				setOverlay(ghost.overlayElement, this, true);
+				ghost.sync();
 				ghosts.push(ghost);
 
 			});
@@ -647,8 +564,8 @@
 			console.log('exiting rule mode..');
 			
 			$('span.selected', this.titleBox).html('inline style');
-			$(this.titleBox).removeClass('rule');
-			Overlay.overlayElement.css('zIndex', '');
+			this.titleBox.classList.remove('rule');
+			this.overlayElement.style.zIndex = '';
 
 			for (var i = 0; i < this.ghosts.length; i++) {
 				this.ghosts[i].destroy();
@@ -681,7 +598,7 @@
 		updateGhosts: function() {
 			if(!this.ghosts) return;
 			for (var i = 0; i < this.ghosts.length; i++) {
-				setOverlay(this.ghosts[i].overlayElement, this.ghosts[i].currentElement, true);
+				this.ghosts[i].sync();
 			}		
 		}
 

@@ -34,36 +34,33 @@ $.extend(Ghost.prototype, {
 			this.currentElement = newElem;
 		}
 
-		var overlayElement = $(this.overlayElement);
+		var overlayElement = this.overlayElement;
 		var elem = $(this.currentElement);
 		var offset = elem.offset();
 
-		var innerWidth = elem.width();
-		var innerHeight = elem.height();
+		var computedStyle = getComputedStyle(this.currentElement);
 
-		var outerWidth = elem[0].offsetWidth;
-		var outerHeight = elem[0].offsetHeight;
+		var innerWidth = parseInt(computedStyle.width);
+		var innerHeight = parseInt(computedStyle.height);
 
-		var paddingLeft = parseInt(elem.css('padding-left'));
-		var paddingTop = parseInt(elem.css('padding-top'));
-		var paddingRight = parseInt(elem.css('padding-right'));
-		var paddingBottom = parseInt(elem.css('padding-bottom'));
+		var paddingLeft = parseInt(computedStyle.paddingLeft);
+		var paddingTop = parseInt(computedStyle.paddingTop);
+		var paddingRight = parseInt(computedStyle.paddingRight);
+		var paddingBottom = parseInt(computedStyle.paddingBottom);
 
-		var marginLeft = parseInt(elem.css('margin-left'));
-		var marginTop = parseInt(elem.css('margin-top'));
-		var marginRight = parseInt(elem.css('margin-right'));
-		var marginBottom = parseInt(elem.css('margin-bottom'));
+		var marginLeft = parseInt(computedStyle.marginLeft);
+		var marginTop = parseInt(computedStyle.marginTop);
+		var marginRight = parseInt(computedStyle.marginRight);
+		var marginBottom = parseInt(computedStyle.marginBottom);
 
-		// place overlay
-		overlayElement
-			.css({
-				display: 'block',
-				width: innerWidth,
-				height: innerHeight,
-				top: offset.top + paddingTop,
-				left: offset.left + paddingLeft
-			});
+		var outerWidth = innerWidth + paddingLeft + paddingRight;
+		var outerHeight = innerHeight + paddingTop + paddingBottom;
 
+		// place and resize overlay
+		overlayElement.style.display = 'block';
+		overlayElement.style.width = innerWidth + 'px';
+		overlayElement.style.height = innerHeight + 'px';
+		overlayElement.style.transform = 'translate(' + (offset.left + paddingLeft) + 'px, ' + (offset.top + paddingTop) + 'px)';
 
 		// modify padding box
 
