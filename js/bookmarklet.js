@@ -21,7 +21,7 @@
 		script.onload = function() {
 
 			var script = document.createElement('script');
-			script.src = "//paulbakaus.com/labs/layoutmode/js/styleparser.js";
+			script.src = "//paulbakaus.com/labs/layoutmode/js/StyleParser.js";
 			script.type = "text/javascript";
 			script.onload = function() {
 
