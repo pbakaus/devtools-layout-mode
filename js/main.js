@@ -461,8 +461,6 @@
 			this.containerMarginTop.style.transform = 'translate(' + (-paddingLeft) + 'px, ' + (-(paddingTop + marginTop)) + 'px) scale(' + outerWidth + ', ' + marginTop + ')';
 			this.containerMarginBottom.style.transform = 'translate(' + (-paddingLeft) + 'px, ' + (innerHeight + paddingBottom) + 'px) scale(' + outerWidth + ', ' + marginBottom + ')';
 
-
-
 			this.handleMarginLeft[0].style.marginLeft = -(paddingLeft + marginLeft) + 'px';
 			this.handleMarginRight[0].style.marginRight = -(paddingRight + marginRight) + 'px';
 			this.handleMarginTop[0].style.marginTop = -(paddingTop + marginTop) + 'px';
@@ -484,7 +482,7 @@
 			var hitsRightEdge = (offset.left + outerWidth + 80 > window.innerWidth);
 			this.captionWidth[0].classList[hitsRightEdge ? 'add' : 'remove']('edge');
 			this.captionWidth[0].innerHTML = '<span>width: </span>' + innerWidth + ' <span>px</span>';
-			this.captionWidth[0].style.right = hitsRightEdge ? 13 : -(this.captionWidth[0].offsetWidth + 13);
+			this.captionWidth[0].style.right = (hitsRightEdge ? 13 : -(this.captionWidth[0].offsetWidth + 13)) + 'px';
 
 			this.captionHeight[0].innerHTML = '<span>height: </span>' + innerHeight + ' <span>px</span>';
 
