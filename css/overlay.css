@@ -227,7 +227,7 @@
 	border-radius: 2px;
 	position: absolute;
 	z-index: 10002;
-	opacity: 1;
+	opacity: 0;
 	pointer-events: none;
 	transition: opacity 0.3s;
 	white-space: nowrap;
