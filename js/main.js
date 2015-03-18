@@ -120,6 +120,7 @@
 			this.initTitleBox();
 			this.initHover();
 			this.initRuleShortcut();
+			this.initDimensionShortcut();
 			this.initHandles();
 
 			var that = this;
@@ -186,6 +187,8 @@
 						that.over = true;
 						that.overlayElement.classList.add('hover');
 						that.hoverGhost.overlayElement.style.display = 'none';
+						if(that.vLineX) that.vLineX.style.display = 'none';
+						if(that.vLineY) that.vLineY.style.display = 'none';
 					}
 
 				} else {
@@ -299,6 +302,31 @@
 
 			$(document).on('keyup', function(e) {
 				if(e.which === 16) titleDropdown.find('li:eq(0)').click();
+			});
+
+		},
+
+		initDimensionShortcut: function() {
+
+			var that = this;
+
+			$(document).on('keydown', function(e) {
+				if(e.which === 91) {
+					that.commandPressed = true;
+					that.hoverGhost.overlayElement.style.visibility = 'hidden';
+					if(that.hoverElement !== that.currentElement) {
+						that.visualizeRelationTo(that.hoverElement);
+					}
+				}
+			});
+
+			$(document).on('keyup', function(e) {
+				if(e.which === 91) {
+					that.commandPressed = false;
+					that.hoverGhost.overlayElement.style.visibility = '';
+					if(that.vLineX) that.vLineX.style.display = 'none';
+					if(that.vLineY) that.vLineY.style.display = 'none';
+				}
 			});
 
 		},
@@ -723,6 +751,153 @@
 			for (var i = 0; i < this.ghosts.length; i++) {
 				this.ghosts[i].sync();
 			}		
+		},
+
+		visualizeRelationTo: function(relatedElement) {
+
+			var currentElement = this.currentElement;
+
+			if(!this.vLineX) {
+				this.vLineX = document.createElement('div');
+				this.vLineX.className = 'vline-x';
+				document.body.appendChild(this.vLineX);
+
+				this.vLineXCaption = document.createElement('div');
+				this.vLineXCaption.className = 'caption';
+				this.vLineX.appendChild(this.vLineXCaption);
+
+				this.vLineXCrossBar = document.createElement('div');
+				this.vLineXCrossBar.className = 'crossbar';
+				this.vLineX.appendChild(this.vLineXCrossBar);
+			}
+
+			if(!this.vLineY) {
+				this.vLineY = document.createElement('div');
+				this.vLineY.className = 'vline-y';
+				document.body.appendChild(this.vLineY);
+
+				this.vLineYCaption = document.createElement('div');
+				this.vLineYCaption.className = 'caption';
+				this.vLineY.appendChild(this.vLineYCaption);
+
+				this.vLineYCrossBar = document.createElement('div');
+				this.vLineYCrossBar.className = 'crossbar';
+				this.vLineY.appendChild(this.vLineYCrossBar);
+			}
+
+
+			var reRightEdge = relatedElement.offsetLeft + relatedElement.offsetWidth;
+			var ceRightEdge = currentElement.offsetLeft + currentElement.offsetWidth;
+			var reLeftEdge = relatedElement.offsetLeft;
+			var ceLeftEdge = currentElement.offsetLeft;
+
+			var reBottomEdge = relatedElement.offsetTop + relatedElement.offsetHeight;
+			var ceBottomEdge = currentElement.offsetTop + currentElement.offsetHeight;
+			var reTopEdge = relatedElement.offsetTop;
+			var ceTopEdge = currentElement.offsetTop;
+			
+			// horizontal connection
+			if(reRightEdge < ceLeftEdge) {
+				this.vLineX.style.display = 'block';
+				this.vLineX.style.top = currentElement.offsetTop + (currentElement.offsetHeight / 2) + 'px';
+				this.vLineX.style.left = reRightEdge + 'px';
+				this.vLineX.style.width = ceLeftEdge - reRightEdge + 'px';
+				this.vLineXCaption.innerHTML = ceLeftEdge - reRightEdge + ' <span>px</span>';
+
+				if(reBottomEdge < ceTopEdge) {
+					this.vLineXCrossBar.style.display = 'block';
+					this.vLineXCrossBar.style.left = '0px';
+					this.vLineXCrossBar.style.bottom = '0px';
+					this.vLineXCrossBar.style.top = 'auto';
+					this.vLineXCrossBar.style.height = (currentElement.offsetHeight / 2) + (ceTopEdge - reBottomEdge) + 'px';
+				} else if(ceBottomEdge < reTopEdge) {
+					this.vLineXCrossBar.style.display = 'block';
+					this.vLineXCrossBar.style.left = '0px';
+					this.vLineXCrossBar.style.top = '0px';
+					this.vLineXCrossBar.style.bottom = 'auto';
+					this.vLineXCrossBar.style.height = (currentElement.offsetHeight / 2) + (reTopEdge - ceBottomEdge) + 'px';
+				} else {
+					this.vLineXCrossBar.style.display = 'none';
+				}
+
+			} else if(ceRightEdge < reLeftEdge) {
+				this.vLineX.style.display = 'block';
+				this.vLineX.style.top = currentElement.offsetTop + (currentElement.offsetHeight / 2) + 'px';
+				this.vLineX.style.left = ceRightEdge + 'px';
+				this.vLineX.style.width = reLeftEdge - ceRightEdge + 'px';
+				this.vLineXCaption.innerHTML = reLeftEdge - ceRightEdge + ' <span>px</span>';
+
+				if(reBottomEdge < ceTopEdge) {
+					this.vLineXCrossBar.style.display = 'block';
+					this.vLineXCrossBar.style.left = '100%';
+					this.vLineXCrossBar.style.bottom = '0px';
+					this.vLineXCrossBar.style.top = 'auto';
+					this.vLineXCrossBar.style.height = (currentElement.offsetHeight / 2) + (ceTopEdge - reBottomEdge) + 'px';
+				} else if(ceBottomEdge < reTopEdge) {
+					this.vLineXCrossBar.style.display = 'block';
+					this.vLineXCrossBar.style.left = '100%';
+					this.vLineXCrossBar.style.top = '0px';
+					this.vLineXCrossBar.style.bottom = 'auto';
+					this.vLineXCrossBar.style.height = (currentElement.offsetHeight / 2) + (reTopEdge - ceBottomEdge) + 'px';
+				} else {
+					this.vLineXCrossBar.style.display = 'none';
+				}
+
+			} else {
+				this.vLineX.style.display = 'none';
+			}
+
+			// vertical connection
+			if(reBottomEdge < ceTopEdge) {
+				this.vLineY.style.display = 'block';
+				this.vLineY.style.left = currentElement.offsetLeft + (currentElement.offsetWidth / 2) + 'px';
+				this.vLineY.style.top = reBottomEdge + 'px';
+				this.vLineY.style.height = ceTopEdge - reBottomEdge + 'px';
+				this.vLineYCaption.innerHTML = ceTopEdge - reBottomEdge + ' <span>px</span>';
+
+				if(reRightEdge < ceLeftEdge) {
+					this.vLineYCrossBar.style.display = 'block';
+					this.vLineYCrossBar.style.top = '0px';
+					this.vLineYCrossBar.style.right = '0px';
+					this.vLineYCrossBar.style.left = 'auto';
+					this.vLineYCrossBar.style.width = (currentElement.offsetWidth / 2) + (ceLeftEdge - reRightEdge) + 'px';
+				} else if(ceRightEdge < reLeftEdge) {
+					this.vLineYCrossBar.style.display = 'block';
+					this.vLineYCrossBar.style.top = '0px';
+					this.vLineYCrossBar.style.left = '0px';
+					this.vLineYCrossBar.style.right = 'auto';
+					this.vLineYCrossBar.style.width = (currentElement.offsetWidth / 2) + (reLeftEdge - ceRightEdge) + 'px';
+				} else {
+					this.vLineYCrossBar.style.display = 'none';
+				}
+
+			} else if(ceBottomEdge < reTopEdge) {
+				this.vLineY.style.display = 'block';
+				this.vLineY.style.left = currentElement.offsetLeft + (currentElement.offsetWidth / 2) + 'px';
+				this.vLineY.style.top = ceBottomEdge + 'px';
+				this.vLineY.style.height = reTopEdge - ceBottomEdge + 'px';
+				this.vLineYCaption.innerHTML = reTopEdge - ceBottomEdge + ' <span>px</span>';
+
+				if(reRightEdge < ceLeftEdge) {
+					this.vLineYCrossBar.style.display = 'block';
+					this.vLineYCrossBar.style.top = '100%';
+					this.vLineYCrossBar.style.right = '0px';
+					this.vLineYCrossBar.style.left = 'auto';
+					this.vLineYCrossBar.style.width = (currentElement.offsetWidth / 2) + (ceLeftEdge - reRightEdge) + 'px';
+				} else if(ceRightEdge < reLeftEdge) {
+					this.vLineYCrossBar.style.display = 'block';
+					this.vLineYCrossBar.style.top = '100%';
+					this.vLineYCrossBar.style.left = '0px';
+					this.vLineYCrossBar.style.right = 'auto';
+					this.vLineYCrossBar.style.width = (currentElement.offsetWidth / 2) + (reLeftEdge - ceRightEdge) + 'px';
+				} else {
+					this.vLineYCrossBar.style.display = 'none';
+				}
+
+			} else {
+				this.vLineY.style.display = 'none';
+			}
+
 		}
 
 	});
@@ -737,6 +912,15 @@
 	// make all elements on page inspectable
 	$("body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)").on('mouseover', function() {
 
+		Overlay.hoverElement = this;
+
+		// if we're holding shift and hover another element, show guides
+		if(Overlay.commandPressed && Overlay.currentElement && this !== Overlay.currentElement) {
+			Overlay.visualizeRelationTo(this);
+			return false;
+		}
+
+		// in normal mode, don't activate the hover ghost when interacting or over the current el
 		if(Overlay.hoverGhost.currentElement === this || Overlay.interacting || Overlay.over)
 			return;
 
@@ -750,7 +934,11 @@
 	$("body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)").on('click', function() {
 
 		if(Overlay.currentElement === this)
-			return;
+			return false;
+
+		if(Overlay.currentElement) {
+			Overlay.unset();
+		}
 
 		//hide hover ghost
 		Overlay.hoverGhost.overlayElement.style.display = 'none';

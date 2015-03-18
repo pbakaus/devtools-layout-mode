@@ -1,3 +1,12 @@
+.overlay,
+.overlay-title,
+.vline-x,
+.vline-y {
+	font-family: Roboto, Arial;
+	line-height: 1em;
+	font-size: 10px;
+}
+
 .overlay {
 	position: absolute;
 	top: 0;
@@ -6,17 +15,11 @@
 	height: 100px;
 	pointer-events: none;
 	display: none;
-	font-family: Roboto, Arial;
-	line-height: 1em;
-	font-size: 10px;
 	z-index: 10000;
 	will-change: transform;
 }
 
 .overlay-title {
-	font-family: Roboto, Arial;
-	line-height: 1em;
-	font-size: 10px;
 	background: rgba(0,0,0,0.7);
 	color: #eee;
 	padding: 4px 6px;
@@ -219,7 +222,7 @@
 
 /* captions */
 
-.caption {
+.overlay .caption {
 	background: #fff;
 	-webkit-filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.34));
 	padding: 2px 5px;
@@ -232,7 +235,7 @@
 	white-space: nowrap;
 }
 
-.caption span {
+.overlay .caption span {
 	opacity: 0.5;
 }
 
@@ -246,18 +249,18 @@
 	opacity: 1;
 }
 
-.caption-padding {
+.overlay .caption-padding {
 	color: #fff;
 	background: #5BB500;
 }
 
-.caption-padding.left {
+.overlay .caption-padding.left {
 	top: 50%;
 	right: 100%;
 	margin-top: -7px;
 }
 
-.caption-padding.left::before {
+.overlay .caption-padding.left::before {
 	content: '';
 	display: block;
 	position: absolute;
@@ -272,7 +275,7 @@
 	left: auto;
 }
 
-.caption-padding.left.edge::before {
+.overlay .caption-padding.left.edge::before {
 	border-top: 6px solid transparent;
 	border-bottom: 6px solid transparent;
 	border-right: 6px solid #5BB500;
@@ -282,13 +285,13 @@
 	right: auto;
 }
 
-.caption-padding.right {
+.overlay .caption-padding.right {
 	top: 50%;
 	left: 100%;
 	margin-top: -7px;
 }
 
-.caption-padding.right::before {
+.overlay .caption-padding.right::before {
 	content: '';
 	display: block;
 	position: absolute;
@@ -303,7 +306,7 @@
 	right: auto;
 }
 
-.caption-padding.right.edge::before {
+.overlay .caption-padding.right.edge::before {
 	border-top: 6px solid transparent;
 	border-bottom: 6px solid transparent;
 	border-left: 6px solid #5BB500;
@@ -313,12 +316,12 @@
 	left: auto;
 }
 
-.caption-padding.bottom {
+.overlay .caption-padding.bottom {
 	left: 50%;
 	margin-left: 15px;
 }
 
-.caption-padding.bottom::before {
+.overlay .caption-padding.bottom::before {
 	content: '';
 	display: block;
 	position: absolute;
@@ -331,12 +334,12 @@
 	left: -6px;
 }
 
-.caption-padding.top {
+.overlay .caption-padding.top {
 	left: 50%;
 	margin-left: 15px;
 }
 
-.caption-padding.top::before {
+.overlay .caption-padding.top::before {
 	content: '';
 	display: block;
 	position: absolute;
@@ -354,18 +357,18 @@
 	opacity: 1;
 }
 
-.caption-margin {
+.overlay .caption-margin {
 	color: #fff;
 	background: #F6A723;
 }
 
-.caption-margin.left {
+.overlay .caption-margin.left {
 	top: 50%;
 	right: 100%;
 	margin-top: 7px;
 }
 
-.caption-margin.left::before {
+.overlay .caption-margin.left::before {
 	content: '';
 	display: block;
 	position: absolute;
@@ -380,7 +383,7 @@
 	left: auto;
 }
 
-.caption-margin.left.edge::before {
+.overlay .caption-margin.left.edge::before {
 	border-top: 6px solid transparent;
 	border-bottom: 6px solid transparent;
 	border-right: 6px solid #F6A723;
@@ -390,13 +393,13 @@
 	right: auto;
 }
 
-.caption-margin.right {
+.overlay .caption-margin.right {
 	top: 50%;
 	left: 100%;
 	margin-top: 7px;
 }
 
-.caption-margin.right::before {
+.overlay .caption-margin.right::before {
 	content: '';
 	display: block;
 	position: absolute;
@@ -411,7 +414,7 @@
 	right: auto;
 }
 
-.caption-margin.right.edge::before {
+.overlay .caption-margin.right.edge::before {
 	border-top: 6px solid transparent;
 	border-bottom: 6px solid transparent;
 	border-left: 6px solid #F6A723;
@@ -421,12 +424,12 @@
 	left: auto;
 }
 
-.caption-margin.bottom {
+.overlay .caption-margin.bottom {
 	left: 50%;
 	margin-left: 29px;
 }
 
-.caption-margin.bottom::before {
+.overlay .caption-margin.bottom::before {
 	content: '';
 	display: block;
 	position: absolute;
@@ -439,12 +442,12 @@
 	left: -6px;
 }
 
-.caption-margin.top {
+.overlay .caption-margin.top {
 	left: 50%;
 	margin-left: 29px;
 }
 
-.caption-margin.top::before {
+.overlay .caption-margin.top::before {
 	content: '';
 	display: block;
 	position: absolute;
@@ -457,7 +460,7 @@
 	left: -6px;
 }
 
-.caption-width {
+.overlay .caption-width {
 	top: 50%;
 	right: 0;
 	margin-top: -21px;
@@ -465,7 +468,7 @@
 	color: #fff;
 }
 
-.caption-width::before {
+.overlay .caption-width::before {
 	content: '';
 	display: block;
 	position: absolute;
@@ -478,7 +481,7 @@
 	left: -6px;
 }
 
-.caption-width.edge::before {
+.overlay .caption-width.edge::before {
 	border-top: 6px solid transparent;
 	border-bottom: 6px solid transparent;
 	border-left: 6px solid #4A90E2;
@@ -487,7 +490,7 @@
 	left: auto;
 }
 
-.caption-height {
+.overlay .caption-height {
 	left: 50%;
 	bottom: -6px;
 	margin-left: 1px;
@@ -495,7 +498,7 @@
 	color: #fff;
 }
 
-.caption-height::before {
+.overlay .caption-height::before {
 	content: '';
 	display: block;
 	position: absolute;
@@ -508,7 +511,7 @@
 	left: -6px;
 }
 
-.caption-height.edge::before {
+.overlay .caption-height.edge::before {
 	border-top: 6px solid transparent;
 	border-bottom: 6px solid transparent;
 	border-left: 6px solid #4A90E2;
@@ -562,6 +565,119 @@
 	bottom: 0;
 }
 
+.vline-x,
+.vline-y {
+	pointer-events: none;
+	z-index: 10000;
+	-webkit-filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.34));
+	position: absolute;
+}
+
+.vline-x div.caption,
+.vline-y div.caption {
+	display: inline-block;
+	color: #fff;
+	background: #d800fe;
+	padding: 2px 5px;
+	border-radius: 2px;
+	white-space: nowrap;
+	position: relative;
+}
+
+.vline-x {
+	border-top: 1px solid #d800fe;
+	height: 0;
+	top: 0;
+	left: 0;
+	text-align: center;
+}
+
+.vline-x::before {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 0; 
+	height: 0; 
+	border-top: 6px solid transparent;
+	border-bottom: 6px solid transparent;
+	border-right: 6px solid #d800fe;
+	top: -6px;
+	left: 0px;
+}
+
+.vline-x::after {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 0; 
+	height: 0; 
+	border-top: 6px solid transparent;
+	border-bottom: 6px solid transparent;
+	border-left: 6px solid #d800fe;
+	top: -6px;
+	right: 0px;
+}
+
+.vline-x div.caption {
+	top: -22px;
+}
+
+.vline-x div.crossbar {
+	width: 0;
+	border-left: 1px dashed #d800fe;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.vline-y {
+	border-left: 1px solid #d800fe;
+	width: 0;
+	top: 0;
+	left: 0;
+}
+
+.vline-y::before {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 0; 
+	height: 0; 
+	border-bottom: 6px solid #d800fe;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	left: -6px;
+	top: 0px;
+}
+
+.vline-y::after {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 0; 
+	height: 0; 
+	border-top: 6px solid #d800fe;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	right: -6px;
+	bottom: 0px;
+}
+
+.vline-y div.caption {
+	left: 6px;
+	top: 50%;
+	position: absolute;
+	display: block;
+	margin-top: -7px;
+}
+
+.vline-y div.crossbar {
+	height: 0;
+	border-top: 1px dashed #d800fe;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
 
 body {
 	overflow-y: scroll; /* avoid herky jerky scrollbar behavior */
