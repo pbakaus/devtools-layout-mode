@@ -10,6 +10,7 @@
 		this.hoverGhost = new Ghost(); // the hover ghost
 		this.over = false; // on whether we're currenly hovering a certain part of the overlay
 		this.overInner = false;
+		this.overPadding = false;
 		this.interacting = false; // whether we're currently interacting with the element
 
 		// initialize
@@ -55,8 +56,46 @@
 			this.handlePaddingLeft = $('<div class="handle left handle-padding" title="Drag to change padding-left"></div>').appendTo(this.overlayElement);
 			this.handleMarginLeft = $('<div class="handle left handle-margin" title="Drag to change margin-left"></div>').appendTo(this.overlayElement);
 
-			this.captionWidth = $('<div class="caption caption-width"></div>').appendTo(this.overlayElement);
-			this.captionHeight = $('<div class="caption caption-height"></div>').appendTo(this.overlayElement);
+			var that = this;
+			this.handleSizeBottom
+				.add(this.handleSizeRight)
+				.hover(function() {
+					that.overSizeHandle = true;
+				}, function() {
+					that.overSizeHandle = false;
+				});
+			this.handlePaddingBottom
+				.add(this.handlePaddingTop)
+				.add(this.handlePaddingLeft)
+				.add(this.handlePaddingRight)
+				.hover(function() {
+					that.overPaddingHandle = true;
+				}, function() {
+					that.overPaddingHandle = false;
+				});
+			this.handleMarginBottom
+				.add(this.handleMarginTop)
+				.add(this.handleMarginLeft)
+				.add(this.handleMarginRight)
+				.hover(function() {
+					that.overMarginHandle = true;
+				}, function() {
+					that.overMarginHandle = false;
+				});
+
+			this.captionWidth = $('<div class="caption caption-width"></div>').appendTo(this.overlayElement)[0];
+			this.captionHeight = $('<div class="caption caption-height"></div>').appendTo(this.overlayElement)[0];
+
+			this.captionPaddingLeft = $('<div class="caption caption-padding left"></div>').appendTo(this.overlayElement)[0];
+			this.captionPaddingRight = $('<div class="caption caption-padding right"></div>').appendTo(this.overlayElement)[0];
+			this.captionPaddingTop = $('<div class="caption caption-padding top"></div>').appendTo(this.overlayElement)[0];
+			this.captionPaddingBottom = $('<div class="caption caption-padding bottom"></div>').appendTo(this.overlayElement)[0];
+
+			this.captionMarginLeft = $('<div class="caption caption-margin left"></div>').appendTo(this.overlayElement)[0];
+			this.captionMarginRight = $('<div class="caption caption-margin right"></div>').appendTo(this.overlayElement)[0];
+			this.captionMarginTop = $('<div class="caption caption-margin top"></div>').appendTo(this.overlayElement)[0];
+			this.captionMarginBottom = $('<div class="caption caption-margin bottom"></div>').appendTo(this.overlayElement)[0];
+
 
 			document.body.appendChild(this.overlayElement);
 
@@ -164,10 +203,11 @@
 				if(!that.interacting) {
 
 					if(
-						e.pageX > offset.left
-						&& e.pageY > offset.top
+						(e.pageX > offset.left + that.paddingLeft
+						&& e.pageY > offset.top + that.paddingTop
 						&& e.pageX < (offset.left + that.outerWidth - that.paddingRight)
-						&& e.pageY < (offset.top + that.outerHeight - that.paddingBottom)
+						&& e.pageY < (offset.top + that.outerHeight - that.paddingBottom))
+						|| that.overSizeHandle
 					) {
 
 						if(!that.overInner) {
@@ -180,6 +220,65 @@
 						if(that.overInner) {
 							that.overInner = false;
 							that.overlayElement.classList.remove('hover-inner');		
+						}
+
+					}
+
+				}
+
+				// over padding box
+
+				if(!that.interacting) {
+
+					if(
+						(e.pageX > offset.left
+						&& e.pageY > offset.top
+						&& e.pageX < (offset.left + that.outerWidth)
+						&& e.pageY < (offset.top + that.outerHeight)
+						&& !that.overInner)
+						|| that.overPaddingHandle
+					) {
+
+						if(!that.overPadding) {
+							that.overlayElement.classList.add('hover-padding');
+							that.overPadding = true;
+						}
+
+					} else {
+
+						if(that.overPadding) {
+							that.overPadding = false;
+							that.overlayElement.classList.remove('hover-padding');		
+						}
+
+					}
+
+				}
+
+				// over margin box
+
+				if(!that.interacting) {
+
+					if(
+						(e.pageX > offset.left - that.marginLeft
+						&& e.pageY > offset.top - that.marginTop
+						&& e.pageX < (offset.left + that.outerWidth + that.marginRight)
+						&& e.pageY < (offset.top + that.outerHeight + that.marginBottom)
+						&& !that.overInner
+						&& !that.overPadding)
+						|| that.overMarginHandle
+					) {
+
+						if(!that.overMargin) {
+							that.overlayElement.classList.add('hover-margin');
+							that.overMargin = true;
+						}
+
+					} else {
+
+						if(that.overMargin) {
+							that.overMargin = false;
+							that.overlayElement.classList.remove('hover-margin');		
 						}
 
 					}
@@ -478,13 +577,46 @@
 			this.guideTop.style.width = window.innerWidth + 'px';
 
 			// captions
+			var hitsRightEdge, hitsLeftEdge;
 
 			var hitsRightEdge = (offset.left + outerWidth + 80 > window.innerWidth);
-			this.captionWidth[0].classList[hitsRightEdge ? 'add' : 'remove']('edge');
-			this.captionWidth[0].innerHTML = '<span>width: </span>' + innerWidth + ' <span>px</span>';
-			this.captionWidth[0].style.right = (hitsRightEdge ? 13 : -(this.captionWidth[0].offsetWidth + 13)) + 'px';
+			this.captionWidth.classList[hitsRightEdge ? 'add' : 'remove']('edge');
+			this.captionWidth.innerHTML = '<span>width: </span>' + innerWidth + ' <span>px</span>';
+			this.captionWidth.style.right = (hitsRightEdge ? 16 : -(this.captionWidth.offsetWidth + 13)) + 'px';
 
-			this.captionHeight[0].innerHTML = '<span>height: </span>' + innerHeight + ' <span>px</span>';
+			this.captionHeight.innerHTML = '<span>height: </span>' + innerHeight + ' <span>px</span>';
+
+			this.captionPaddingLeft.innerHTML = '<span>padding: </span>' + paddingLeft + ' <span>px</span>';
+			this.captionPaddingRight.innerHTML = '<span>padding: </span>' + paddingRight + ' <span>px</span>';
+			this.captionPaddingTop.innerHTML = '<span>padding: </span>' + paddingTop + ' <span>px</span>';
+			this.captionPaddingBottom.innerHTML = '<span>padding: </span>' + paddingBottom + ' <span>px</span>';
+
+			this.captionMarginLeft.innerHTML = '<span>margin: </span>' + marginLeft + ' <span>px</span>';
+			this.captionMarginRight.innerHTML = '<span>margin: </span>' + marginRight + ' <span>px</span>';
+			this.captionMarginTop.innerHTML = '<span>margin: </span>' + marginTop + ' <span>px</span>';
+			this.captionMarginBottom.innerHTML = '<span>margin: </span>' + marginBottom + ' <span>px</span>';
+
+			hitsLeftEdge = (offset.left - 80 < 0);
+			this.captionPaddingLeft.classList[hitsLeftEdge ? 'add' : 'remove']('edge');
+			this.captionPaddingLeft.style.marginRight = (hitsLeftEdge ? paddingLeft - this.captionPaddingLeft.offsetWidth-16 : paddingLeft + 14) + 'px';
+
+			hitsRightEdge = (offset.left + outerWidth + 80 > window.innerWidth);
+			this.captionPaddingRight.classList[hitsRightEdge ? 'add' : 'remove']('edge');
+			this.captionPaddingRight.style.marginLeft = (hitsRightEdge ? paddingRight - this.captionPaddingRight.offsetWidth-16 : paddingRight + 14) + 'px';
+
+			this.captionPaddingBottom.style.bottom = -(paddingBottom  + 7) + 'px';
+			this.captionPaddingTop.style.top = -(paddingTop  + 7) + 'px';
+
+			hitsLeftEdge = (offset.left - marginLeft - 80 < 0);
+			this.captionMarginLeft.classList[hitsLeftEdge ? 'add' : 'remove']('edge');
+			this.captionMarginLeft.style.marginRight = paddingLeft + marginLeft + (hitsLeftEdge ? -this.captionMarginLeft.offsetWidth-17 : 14) + 'px';
+
+			hitsRightEdge = (offset.left + outerWidth + marginRight + 80 > window.innerWidth);
+			this.captionMarginRight.classList[hitsRightEdge ? 'add' : 'remove']('edge');
+			this.captionMarginRight.style.marginLeft = paddingRight + marginRight + (hitsRightEdge ? -this.captionMarginRight.offsetWidth-17 : 14) + 'px';
+
+			this.captionMarginBottom.style.bottom = -marginBottom -paddingBottom -7 + 'px';
+			this.captionMarginTop.style.top = -marginTop -paddingTop -7 + 'px';
 
 			// content editable
 			elem[0].setAttribute('contentEditable', true);
@@ -522,6 +654,7 @@
 			this.currentElement.style.outline = '';
 
 			this.over = false;
+			this.overInner = false;
 			this.currentElement = null;
 
 		},
@@ -631,7 +764,7 @@
 	});
 
 
-	$(".box").click();
+	$(".boxes li:eq(0)").click();
 
 
 })();

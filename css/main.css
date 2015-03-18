@@ -38,3 +38,11 @@ li {
 #sidebar h2 {
 
 }
+
+.boxes li {
+	display: inline-block;
+	margin: 20px;
+	padding: 20px;
+	background: #000;
+	color: #fff;
+}
