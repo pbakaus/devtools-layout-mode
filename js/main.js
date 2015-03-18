@@ -632,10 +632,9 @@
 			this.currentElement = newElem;
 
 			// initial hover
-			this.overlayElement.classList.add('hover', 'hover-inner');
+			this.overlayElement.classList.add('hover');
 			this.overlayElement.style.display = 'block';
 			this.over = true;
-			this.overInner = true;
 
 			// fill dropdown with correct CSS rules
 			this.fillRules(this.currentElement);
