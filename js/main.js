@@ -56,33 +56,6 @@
 			this.handlePaddingLeft = $('<div class="handle left handle-padding" title="Drag to change padding-left"></div>').appendTo(this.overlayElement);
 			this.handleMarginLeft = $('<div class="handle left handle-margin" title="Drag to change margin-left"></div>').appendTo(this.overlayElement);
 
-			var that = this;
-			this.handleSizeBottom
-				.add(this.handleSizeRight)
-				.hover(function() {
-					that.overSizeHandle = true;
-				}, function() {
-					that.overSizeHandle = false;
-				});
-			this.handlePaddingBottom
-				.add(this.handlePaddingTop)
-				.add(this.handlePaddingLeft)
-				.add(this.handlePaddingRight)
-				.hover(function() {
-					that.overPaddingHandle = true;
-				}, function() {
-					that.overPaddingHandle = false;
-				});
-			this.handleMarginBottom
-				.add(this.handleMarginTop)
-				.add(this.handleMarginLeft)
-				.add(this.handleMarginRight)
-				.hover(function() {
-					that.overMarginHandle = true;
-				}, function() {
-					that.overMarginHandle = false;
-				});
-
 			this.captionWidth = $('<div class="caption caption-width"></div>').appendTo(this.overlayElement)[0];
 			this.captionHeight = $('<div class="caption caption-height"></div>').appendTo(this.overlayElement)[0];
 
@@ -96,6 +69,106 @@
 			this.captionMarginTop = $('<div class="caption caption-margin top"></div>').appendTo(this.overlayElement)[0];
 			this.captionMarginBottom = $('<div class="caption caption-margin bottom"></div>').appendTo(this.overlayElement)[0];
 
+			var that = this;
+			this.handleSizeBottom
+				.add(this.handleSizeRight)
+				.hover(function() {
+					that.overSizeHandle = true;
+
+					if(!that.interacting) {
+						if(this === that.handleSizeRight[0]) { that.captionWidth.classList.add('over'); that.refreshCaptions(); }
+						if(this === that.handleSizeBottom[0]) that.captionHeight.classList.add('over');
+					}
+
+				}, function() {
+					that.overSizeHandle = false;
+
+					var self = this;
+					var removeSpan = function() {
+						if(self === that.handleSizeRight[0]) { that.captionWidth.classList.remove('over'); that.refreshCaptions(); }
+						if(self === that.handleSizeBottom[0]) that.captionHeight.classList.remove('over');	
+					};
+
+					if(!that.interacting) {
+						removeSpan();
+					} else if(!that.__catchMouseUp) {
+						that.__catchMouseUp = $(document).one('mouseup', function() {
+							if(!that.overSizeHandle) removeSpan();
+							that.__catchMouseUp = null;
+						});
+					}
+
+				});
+			this.handlePaddingBottom
+				.add(this.handlePaddingTop)
+				.add(this.handlePaddingLeft)
+				.add(this.handlePaddingRight)
+				.hover(function() {
+					that.overPaddingHandle = true;
+
+					if(!that.interacting) {
+						if(this === that.handlePaddingRight[0]) { that.captionPaddingRight.classList.add('over'); }
+						if(this === that.handlePaddingBottom[0]) { that.captionPaddingBottom.classList.add('over'); }
+						if(this === that.handlePaddingLeft[0]) { that.captionPaddingLeft.classList.add('over'); }
+						if(this === that.handlePaddingTop[0]) { that.captionPaddingTop.classList.add('over'); }
+					}
+
+				}, function() {
+					that.overPaddingHandle = false;
+
+					var self = this;
+					var removeSpan = function() {
+						if(self === that.handlePaddingRight[0]) { that.captionPaddingRight.classList.remove('over'); }
+						if(self === that.handlePaddingBottom[0]) { that.captionPaddingBottom.classList.remove('over'); }
+						if(self === that.handlePaddingLeft[0]) { that.captionPaddingLeft.classList.remove('over'); }
+						if(self === that.handlePaddingTop[0]) { that.captionPaddingTop.classList.remove('over'); }
+					};
+
+					if(!that.interacting) {
+						removeSpan();
+					} else if(!that.__catchMouseUp) {
+						that.__catchMouseUp = $(document).one('mouseup', function() {
+							if(!that.overPaddingHandle) removeSpan();
+							that.__catchMouseUp = null;
+						});
+					}
+
+				});
+			this.handleMarginBottom
+				.add(this.handleMarginTop)
+				.add(this.handleMarginLeft)
+				.add(this.handleMarginRight)
+				.hover(function() {
+					that.overMarginHandle = true;
+
+					if(!that.interacting) {
+						if(this === that.handleMarginRight[0]) { that.captionMarginRight.classList.add('over'); that.refreshCaptions(); }
+						if(this === that.handleMarginBottom[0]) { that.captionMarginBottom.classList.add('over'); }
+						if(this === that.handleMarginLeft[0]) { that.captionMarginLeft.classList.add('over'); that.refreshCaptions(); }
+						if(this === that.handleMarginTop[0]) { that.captionMarginTop.classList.add('over'); }
+					}
+
+				}, function() {
+					that.overMarginHandle = false;
+
+					var self = this;
+					var removeSpan = function() {
+						if(self === that.handleMarginRight[0]) { that.captionMarginRight.classList.remove('over'); that.refreshCaptions(); }
+						if(self === that.handleMarginBottom[0]) { that.captionMarginBottom.classList.remove('over'); }
+						if(self === that.handleMarginLeft[0]) { that.captionMarginLeft.classList.remove('over'); that.refreshCaptions(); }
+						if(self === that.handleMarginTop[0]) { that.captionMarginTop.classList.remove('over'); }
+					};
+
+					if(!that.interacting) {
+						removeSpan();
+					} else if(!that.__catchMouseUp) {
+						that.__catchMouseUp = $(document).one('mouseup', function() {
+							if(!that.overMarginHandle) removeSpan();
+							that.__catchMouseUp = null;
+						});
+					}
+
+				});
 
 			document.body.appendChild(this.overlayElement);
 
@@ -361,7 +434,10 @@
 					if(that.__lastMouseMoveEvent)
 						that.processCommandOverLogic(that.__lastMouseMoveEvent);
 
-					if(that.hoverElement !== that.currentElement) {
+					if(that.hoverElement !== that.currentElement
+						&& !$.contains(that.hoverElement, that.currentElement)
+						&& !$.contains(that.currentElement, that.hoverElement)
+					) {
 						that.visualizeRelationTo(that.hoverElement);
 					}
 				}
@@ -603,8 +679,8 @@
 
 			var computedStyle = getComputedStyle(this.currentElement);
 
-			var innerWidth = parseInt(computedStyle.width);
-			var innerHeight = parseInt(computedStyle.height);
+			var innerWidth = this.innerWidth = parseInt(computedStyle.width);
+			var innerHeight = this.innerHeight = parseInt(computedStyle.height);
 
 			// we need to store outer height, bottom/right padding and margins for hover detection
 			var paddingLeft = this.paddingLeft = parseInt(computedStyle.paddingLeft);
@@ -671,47 +747,7 @@
 			this.guideTop.style.width = window.innerWidth + 'px';
 			this.guideTop.style.top = -paddingTop-1 + 'px';
 
-			// captions
-			var hitsRightEdge, hitsLeftEdge;
-
-			var hitsRightEdge = (offset.left + outerWidth + 80 > window.innerWidth);
-			this.captionWidth.classList[hitsRightEdge ? 'add' : 'remove']('edge');
-			this.captionWidth.innerHTML = '<span>width: </span>' + innerWidth + ' <span>px</span>';
-			this.captionWidth.style.right = (hitsRightEdge ? 16 : -(this.captionWidth.offsetWidth + 13)) + 'px';
-
-			this.captionHeight.innerHTML = '<span>height: </span>' + innerHeight + ' <span>px</span>';
-
-			this.captionPaddingLeft.innerHTML = '<span>padding: </span>' + paddingLeft + ' <span>px</span>';
-			this.captionPaddingRight.innerHTML = '<span>padding: </span>' + paddingRight + ' <span>px</span>';
-			this.captionPaddingTop.innerHTML = '<span>padding: </span>' + paddingTop + ' <span>px</span>';
-			this.captionPaddingBottom.innerHTML = '<span>padding: </span>' + paddingBottom + ' <span>px</span>';
-
-			this.captionMarginLeft.innerHTML = '<span>margin: </span>' + marginLeft + ' <span>px</span>';
-			this.captionMarginRight.innerHTML = '<span>margin: </span>' + marginRight + ' <span>px</span>';
-			this.captionMarginTop.innerHTML = '<span>margin: </span>' + marginTop + ' <span>px</span>';
-			this.captionMarginBottom.innerHTML = '<span>margin: </span>' + marginBottom + ' <span>px</span>';
-
-			hitsLeftEdge = (offset.left - 80 < 0);
-			this.captionPaddingLeft.classList[hitsLeftEdge ? 'add' : 'remove']('edge');
-			this.captionPaddingLeft.style.marginRight = (hitsLeftEdge ? paddingLeft - this.captionPaddingLeft.offsetWidth-16 : paddingLeft + 14) + 'px';
-
-			hitsRightEdge = (offset.left + outerWidth + 80 > window.innerWidth);
-			this.captionPaddingRight.classList[hitsRightEdge ? 'add' : 'remove']('edge');
-			this.captionPaddingRight.style.marginLeft = (hitsRightEdge ? paddingRight - this.captionPaddingRight.offsetWidth-16 : paddingRight + 14) + 'px';
-
-			this.captionPaddingBottom.style.bottom = -(paddingBottom  + 7) + 'px';
-			this.captionPaddingTop.style.top = -(paddingTop  + 7) + 'px';
-
-			hitsLeftEdge = (offset.left - marginLeft - 80 < 0);
-			this.captionMarginLeft.classList[hitsLeftEdge ? 'add' : 'remove']('edge');
-			this.captionMarginLeft.style.marginRight = paddingLeft + marginLeft + (hitsLeftEdge ? -this.captionMarginLeft.offsetWidth-17 : 14) + 'px';
-
-			hitsRightEdge = (offset.left + outerWidth + marginRight + 80 > window.innerWidth);
-			this.captionMarginRight.classList[hitsRightEdge ? 'add' : 'remove']('edge');
-			this.captionMarginRight.style.marginLeft = paddingRight + marginRight + (hitsRightEdge ? -this.captionMarginRight.offsetWidth-17 : 14) + 'px';
-
-			this.captionMarginBottom.style.bottom = -marginBottom -paddingBottom -7 + 'px';
-			this.captionMarginTop.style.top = -marginTop -paddingTop -7 + 'px';
+			this.refreshCaptions(offset);
 
 			// content editable
 			elem[0].setAttribute('contentEditable', true);
@@ -719,6 +755,54 @@
 
 			this.currentOffset = offset;
 
+
+		},
+
+		refreshCaptions: function() {
+
+			var offset = { left: this.currentElement.offsetLeft, top: this.currentElement.offsetTop };
+
+			// captions
+			var hitsRightEdge, hitsLeftEdge;
+
+			var hitsRightEdge = (offset.left + this.outerWidth + 80 > window.innerWidth);
+			this.captionWidth.classList[hitsRightEdge ? 'add' : 'remove']('edge');
+			this.captionWidth.innerHTML = '<span>width: </span>' + this.innerWidth + ' <span>px</span>';
+			this.captionWidth.style.right = (hitsRightEdge ? 16 : -(this.captionWidth.offsetWidth + 13)) + 'px';
+
+			this.captionHeight.innerHTML = '<span>height: </span>' + this.innerHeight + ' <span>px</span>';
+
+			this.captionPaddingLeft.innerHTML = '<span>padding-left: </span>' + this.paddingLeft + ' <span>px</span>';
+			this.captionPaddingRight.innerHTML = '<span>padding-right: </span>' + this.paddingRight + ' <span>px</span>';
+			this.captionPaddingTop.innerHTML = '<span>padding-top: </span>' + this.paddingTop + ' <span>px</span>';
+			this.captionPaddingBottom.innerHTML = '<span>padding-bottom: </span>' + this.paddingBottom + ' <span>px</span>';
+
+			this.captionMarginLeft.innerHTML = '<span>margin-left: </span>' + this.marginLeft + ' <span>px</span>';
+			this.captionMarginRight.innerHTML = '<span>margin-right: </span>' + this.marginRight + ' <span>px</span>';
+			this.captionMarginTop.innerHTML = '<span>margin-top: </span>' + this.marginTop + ' <span>px</span>';
+			this.captionMarginBottom.innerHTML = '<span>margin-bottom: </span>' + this.marginBottom + ' <span>px</span>';
+
+			hitsLeftEdge = (offset.left - 80 < 0);
+			this.captionPaddingLeft.classList[hitsLeftEdge ? 'add' : 'remove']('edge');
+			this.captionPaddingLeft.style.marginRight = (hitsLeftEdge ? this.paddingLeft - this.captionPaddingLeft.offsetWidth-16 : this.paddingLeft + 14) + 'px';
+
+			hitsRightEdge = (offset.left + this.outerWidth + 80 > window.innerWidth);
+			this.captionPaddingRight.classList[hitsRightEdge ? 'add' : 'remove']('edge');
+			this.captionPaddingRight.style.marginLeft = (hitsRightEdge ? this.paddingRight - this.captionPaddingRight.offsetWidth-16 : this.paddingRight + 14) + 'px';
+
+			this.captionPaddingBottom.style.bottom = -(this.paddingBottom  + 7) + 'px';
+			this.captionPaddingTop.style.top = -(this.paddingTop  + 7) + 'px';
+
+			hitsLeftEdge = (offset.left - this.marginLeft - 80 < 0);
+			this.captionMarginLeft.classList[hitsLeftEdge ? 'add' : 'remove']('edge');
+			this.captionMarginLeft.style.marginRight = this.paddingLeft + this.marginLeft + (hitsLeftEdge ? -this.captionMarginLeft.offsetWidth-17 : 14) + 'px';
+
+			hitsRightEdge = (offset.left + this.outerWidth + this.marginRight + 80 > window.innerWidth);
+			this.captionMarginRight.classList[hitsRightEdge ? 'add' : 'remove']('edge');
+			this.captionMarginRight.style.marginLeft = this.paddingRight + this.marginRight + (hitsRightEdge ? -this.captionMarginRight.offsetWidth-17 : 14) + 'px';
+
+			this.captionMarginBottom.style.bottom = -this.marginBottom -this.paddingBottom -7 + 'px';
+			this.captionMarginTop.style.top = -this.marginTop -this.paddingTop -7 + 'px';
 
 		},
 
@@ -1055,6 +1139,8 @@
 		return false;
 
 	});
+
+	//$('ul').sortable();
 
 
 	$(".box").click();

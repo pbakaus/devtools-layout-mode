@@ -244,6 +244,14 @@
 	opacity: 0.5;
 }
 
+.overlay .caption span:nth-child(1) {
+	display: none;
+}
+
+.overlay .caption.over span:nth-child(1) {
+	display: inline;
+}
+
 .overlay.hover-inner .caption-width,
 .overlay.hover-inner .caption-height
  {
