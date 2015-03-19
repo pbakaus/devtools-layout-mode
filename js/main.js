@@ -628,7 +628,7 @@
 
 			// place title box
 			this.titleBox.style.opacity = 1;
-			this.titleBox.style.transform = 'translate(' + (offset.left + ((outerWidth - this.titleBox.offsetWidth) / 2)) + 'px, ' + (offset.top - 35) + 'px)';
+			this.titleBox.style.transform = 'translate(' + (offset.left + ((outerWidth - this.titleBox.offsetWidth) / 2)) + 'px, ' + (offset.top - marginTop - 30) + 'px)';
 			this.titleProportions.innerHTML = outerWidth + ' x ' + outerHeight;
 
 			// modify padding box
