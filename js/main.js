@@ -685,10 +685,7 @@
 			var elem = $(this.currentElement);
 			var offset = elem.offset();
 
-			var computedStyle = getComputedStyle(this.currentElement);
-
-			var innerWidth = this.innerWidth = parseInt(computedStyle.width);
-			var innerHeight = this.innerHeight = parseInt(computedStyle.height);
+			var computedStyle = this.computedStyle = getComputedStyle(this.currentElement);
 
 			// we need to store outer height, bottom/right padding and margins for hover detection
 			var paddingLeft = this.paddingLeft = parseInt(computedStyle.paddingLeft);
@@ -700,6 +697,9 @@
 			var marginTop = this.marginTop = parseInt(computedStyle.marginTop);
 			var marginRight = this.marginRight = parseInt(computedStyle.marginRight);
 			var marginBottom = this.marginBottom = parseInt(computedStyle.marginBottom);
+
+			var innerWidth = this.innerWidth = parseInt(computedStyle.width) || (this.currentElement.offsetWidth - paddingLeft - paddingRight);
+			var innerHeight = this.innerHeight = parseInt(computedStyle.height) || (this.currentElement.offsetHeight - paddingTop - paddingBottom);
 
 			var outerWidth = this.outerWidth = innerWidth + paddingLeft + paddingRight;
 			var outerHeight = this.outerHeight = innerHeight + paddingTop + paddingBottom;
@@ -775,20 +775,20 @@
 
 			var hitsRightEdge = (offset.left + this.outerWidth + 80 > window.innerWidth);
 			this.captionWidth.classList[hitsRightEdge ? 'add' : 'remove']('edge');
-			this.captionWidth.innerHTML = '<span>width: </span>' + this.innerWidth + ' <span>px</span>';
+			this.captionWidth.innerHTML = '<span>width: </span>' + this.getCaptionProperty('width');
 			this.captionWidth.style.right = (hitsRightEdge ? 16 : -(this.captionWidth.offsetWidth + 13)) + 'px';
 
-			this.captionHeight.innerHTML = '<span>height: </span>' + this.innerHeight + ' <span>px</span>';
+			this.captionHeight.innerHTML = '<span>height: </span>' + this.getCaptionProperty('height');
 
-			this.captionPaddingLeft.innerHTML = '<span>padding-left: </span>' + this.paddingLeft + ' <span>px</span>';
-			this.captionPaddingRight.innerHTML = '<span>padding-right: </span>' + this.paddingRight + ' <span>px</span>';
-			this.captionPaddingTop.innerHTML = '<span>padding-top: </span>' + this.paddingTop + ' <span>px</span>';
-			this.captionPaddingBottom.innerHTML = '<span>padding-bottom: </span>' + this.paddingBottom + ' <span>px</span>';
+			this.captionPaddingLeft.innerHTML = '<span>padding-left: </span>' + this.getCaptionProperty('paddingLeft');
+			this.captionPaddingRight.innerHTML = '<span>padding-right: </span>' + this.getCaptionProperty('paddingRight');
+			this.captionPaddingTop.innerHTML = '<span>padding-top: </span>' + this.getCaptionProperty('paddingTop');
+			this.captionPaddingBottom.innerHTML = '<span>padding-bottom: </span>' + this.getCaptionProperty('paddingBottom');
 
-			this.captionMarginLeft.innerHTML = '<span>margin-left: </span>' + this.marginLeft + ' <span>px</span>';
-			this.captionMarginRight.innerHTML = '<span>margin-right: </span>' + this.marginRight + ' <span>px</span>';
-			this.captionMarginTop.innerHTML = '<span>margin-top: </span>' + this.marginTop + ' <span>px</span>';
-			this.captionMarginBottom.innerHTML = '<span>margin-bottom: </span>' + this.marginBottom + ' <span>px</span>';
+			this.captionMarginLeft.innerHTML = '<span>margin-left: </span>' + this.getCaptionProperty('marginLeft');
+			this.captionMarginRight.innerHTML = '<span>margin-right: </span>' + this.getCaptionProperty('marginRight');
+			this.captionMarginTop.innerHTML = '<span>margin-top: </span>' + this.getCaptionProperty('marginTop');
+			this.captionMarginBottom.innerHTML = '<span>margin-bottom: </span>' + this.getCaptionProperty('marginBottom');
 
 			hitsLeftEdge = (offset.left - 80 < 0);
 			this.captionPaddingLeft.classList[hitsLeftEdge ? 'add' : 'remove']('edge');
@@ -811,6 +811,29 @@
 
 			this.captionMarginBottom.style.bottom = -this.marginBottom -this.paddingBottom -7 + 'px';
 			this.captionMarginTop.style.top = -this.marginTop -this.paddingTop -7 + 'px';
+
+		},
+
+		getCaptionProperty: function(cssProperty) {
+
+			for (var i = 0; i < this.matchedRules.length; i++) {
+				if(this.matchedRules[i].style[cssProperty]) {
+					return this.matchedRules[i].style[cssProperty].replace(/(em|px)/, ' <span>$1</span>');
+				}
+			}
+
+			var retVal = '';
+
+			if(cssProperty.indexOf('margin') > -1 || cssProperty.indexOf('padding') > -1) {
+				retVal = this[cssProperty];
+			} else if(cssProperty === 'height') {
+				retVal = this.innerHeight;
+			} else if(cssProperty === 'width') {
+				retVal = this.innerWidth;
+			}
+
+			// implicit value
+			return '(' + retVal + ' <span>px</span>)';
 
 		},
 
