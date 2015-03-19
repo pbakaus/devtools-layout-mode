@@ -165,8 +165,10 @@ var SPECIFICITY = (function() {
 		var matchedRules = getMatchedCSSRules(trackedElement) || [];
 		var rules = [];
 		for (var i = 0; i < matchedRules.length; i++) {
-			rules.push([matchedRules[i], parseInt(SPECIFICITY.calculate(matchedRules[i].selectorText)[0].specificity.replace(/\,/g, ''), 10)]);
+			rules.push([matchedRules[i], parseInt(SPECIFICITY.calculate(matchedRules[i].selectorText)[0].specificity.replace(/\,/g, ''), 10) + 0.01 * i]);
 		}
+
+
 
 		rules = rules
 			.sort(function(a, b) {
