@@ -254,6 +254,17 @@
 	opacity: 1;
 }
 
+
+.overlay.hover-padding .caption-padding span:nth-child(1) {
+	display: none;
+}
+
+/* only works for this one */
+.overlay.hover-padding.currently-padding-bottom .caption-padding.bottom span:nth-child(1) {
+	display: inline;
+}
+
+
 .overlay .caption-padding {
 	color: #fff;
 	background: #5BB500;

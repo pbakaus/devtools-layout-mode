@@ -427,6 +427,7 @@
 				var stop = function() {
 					this.removeAttribute('style');
 					that.interacting = false;
+					that.overlayElement.classList.remove('currently-padding-bottom');
 					drag();
 				};
 
@@ -442,6 +443,7 @@
 						this.curInnerHeight = $(that.currentElement).height();
 						this.curPaddingBottom = that.paddingBottom;
 						that.interacting = "padding";
+						that.overlayElement.classList.add('currently-padding-bottom');
 					},
 					drag: function(event, ui) {
 						ui.position.top = Math.max(this.curInnerHeight - handleOffset, ui.position.top);
@@ -681,15 +683,15 @@
 
 			this.captionHeight.innerHTML = '<span>height: </span>' + innerHeight + ' <span>px</span>';
 
-			this.captionPaddingLeft.innerHTML = '<span>padding: </span>' + paddingLeft + ' <span>px</span>';
-			this.captionPaddingRight.innerHTML = '<span>padding: </span>' + paddingRight + ' <span>px</span>';
-			this.captionPaddingTop.innerHTML = '<span>padding: </span>' + paddingTop + ' <span>px</span>';
-			this.captionPaddingBottom.innerHTML = '<span>padding: </span>' + paddingBottom + ' <span>px</span>';
+			this.captionPaddingLeft.innerHTML = '<span>padding-left: </span>' + paddingLeft + ' <span>px</span>';
+			this.captionPaddingRight.innerHTML = '<span>padding-right: </span>' + paddingRight + ' <span>px</span>';
+			this.captionPaddingTop.innerHTML = '<span>padding-top: </span>' + paddingTop + ' <span>px</span>';
+			this.captionPaddingBottom.innerHTML = '<span>padding-bottom: </span>' + paddingBottom + ' <span>px</span>';
 
-			this.captionMarginLeft.innerHTML = '<span>margin: </span>' + marginLeft + ' <span>px</span>';
-			this.captionMarginRight.innerHTML = '<span>margin: </span>' + marginRight + ' <span>px</span>';
-			this.captionMarginTop.innerHTML = '<span>margin: </span>' + marginTop + ' <span>px</span>';
-			this.captionMarginBottom.innerHTML = '<span>margin: </span>' + marginBottom + ' <span>px</span>';
+			this.captionMarginLeft.innerHTML = '<span>margin-left: </span>' + marginLeft + ' <span>px</span>';
+			this.captionMarginRight.innerHTML = '<span>margin-right: </span>' + marginRight + ' <span>px</span>';
+			this.captionMarginTop.innerHTML = '<span>margin-top: </span>' + marginTop + ' <span>px</span>';
+			this.captionMarginBottom.innerHTML = '<span>margin-bottom: </span>' + marginBottom + ' <span>px</span>';
 
 			hitsLeftEdge = (offset.left - 80 < 0);
 			this.captionPaddingLeft.classList[hitsLeftEdge ? 'add' : 'remove']('edge');
