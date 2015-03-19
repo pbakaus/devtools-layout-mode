@@ -119,6 +119,10 @@
 	opacity: 1;
 }
 
+.overlay.in-command .handle {
+	opacity: 0;
+}
+
 .overlay.hover .container-padding,
 .overlay.hover .container-margin {
 	opacity: 1;

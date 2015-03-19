@@ -161,131 +161,169 @@
 
 		},
 
+		processCommandOverLogic: function(e) {
+
+			var extraMargin = 10;
+			var offset = this.currentOffset;
+
+			// command over/out
+
+			if(
+				e.pageX > offset.left - this.marginLeft - extraMargin
+				&& e.pageY > offset.top - this.marginTop - extraMargin
+				&& e.pageX < (offset.left + this.outerWidth + this.marginRight + extraMargin)
+				&& e.pageY < (offset.top + this.outerHeight + this.marginBottom + extraMargin)
+			) {
+
+				if(!this.commandOver) {
+					this.commandOver = true;
+					this.visualizeRelationToWindow();
+				}
+
+			} else {
+
+				if(this.commandOver) {
+					this.commandOver = false;
+				}
+
+			}
+
+		},
+
+		processOverLogic: function(e) {
+
+			var extraMargin = 10;
+			var offset = this.currentOffset;
+
+			// general over/out
+
+			if(
+				e.pageX > offset.left - this.marginLeft - extraMargin
+				&& e.pageY > offset.top - this.marginTop - extraMargin
+				&& e.pageX < (offset.left + this.outerWidth + this.marginRight + extraMargin)
+				&& e.pageY < (offset.top + this.outerHeight + this.marginBottom + extraMargin)
+			) {
+
+				if(!this.over) {
+					this.over = true;
+					this.overlayElement.classList.add('hover');
+					this.hoverGhost.overlayElement.style.display = 'none';
+				}
+
+			} else {
+
+				if(this.over && !this.interacting) {
+					this.over = false;
+					this.overlayElement.classList.remove('hover');
+					this.hoverGhost.overlayElement.style.display = 'block';			
+				}
+
+			}
+
+			// over inner box
+
+			if(!this.interacting) {
+
+				if(
+					(e.pageX > offset.left + this.paddingLeft
+					&& e.pageY > offset.top + this.paddingTop
+					&& e.pageX < (offset.left + this.outerWidth - this.paddingRight)
+					&& e.pageY < (offset.top + this.outerHeight - this.paddingBottom))
+					|| this.overSizeHandle
+				) {
+
+					if(!this.overInner) {
+						this.overlayElement.classList.add('hover-inner');
+						this.overInner = true;
+					}
+
+				} else {
+
+					if(this.overInner) {
+						this.overInner = false;
+						this.overlayElement.classList.remove('hover-inner');		
+					}
+
+				}
+
+			}
+
+			// over padding box
+
+			if(!this.interacting) {
+
+				if(
+					(e.pageX > offset.left
+					&& e.pageY > offset.top
+					&& e.pageX < (offset.left + this.outerWidth)
+					&& e.pageY < (offset.top + this.outerHeight)
+					&& !this.overInner)
+					|| this.overPaddingHandle
+				) {
+
+					if(!this.overPadding) {
+						this.overlayElement.classList.add('hover-padding');
+						this.overPadding = true;
+					}
+
+				} else {
+
+					if(this.overPadding) {
+						this.overPadding = false;
+						this.overlayElement.classList.remove('hover-padding');		
+					}
+
+				}
+
+			}
+
+			// over margin box
+
+			if(!this.interacting) {
+
+				if(
+					(e.pageX > offset.left - this.marginLeft
+					&& e.pageY > offset.top - this.marginTop
+					&& e.pageX < (offset.left + this.outerWidth + this.marginRight)
+					&& e.pageY < (offset.top + this.outerHeight + this.marginBottom)
+					&& !this.overInner
+					&& !this.overPadding)
+					|| this.overMarginHandle
+				) {
+
+					if(!this.overMargin) {
+						this.overlayElement.classList.add('hover-margin');
+						this.overMargin = true;
+					}
+
+				} else {
+
+					if(this.overMargin) {
+						this.overMargin = false;
+						this.overlayElement.classList.remove('hover-margin');		
+					}
+
+				}
+
+			}
+
+		},
+
 		initHover: function() {
 
 			var that = this;
 
 			$('body').on('mousemove', function(e) {
 
-				var extraMargin = 10;
-				var offset = that.currentOffset;
-
+				that.__lastMouseMoveEvent = e;
 				if(!that.currentElement) {
 					return;
 				}
 
-				// general over/out
-
-				if(
-					e.pageX > offset.left - that.marginLeft - extraMargin
-					&& e.pageY > offset.top - that.marginTop - extraMargin
-					&& e.pageX < (offset.left + that.outerWidth + that.marginRight + extraMargin)
-					&& e.pageY < (offset.top + that.outerHeight + that.marginBottom + extraMargin)
-				) {
-
-					if(!that.over) {
-						that.over = true;
-						that.overlayElement.classList.add('hover');
-						that.hoverGhost.overlayElement.style.display = 'none';
-						if(that.vLineX) that.vLineX.style.display = 'none';
-						if(that.vLineY) that.vLineY.style.display = 'none';
-					}
-
+				if(that.commandPressed) {
+					that.processCommandOverLogic(e);
 				} else {
-
-					if(that.over && !that.interacting) {
-						that.over = false;
-						that.overlayElement.classList.remove('hover');
-						that.hoverGhost.overlayElement.style.display = 'block';			
-					}
-
-				}
-
-				// over inner box
-
-				if(!that.interacting) {
-
-					if(
-						(e.pageX > offset.left + that.paddingLeft
-						&& e.pageY > offset.top + that.paddingTop
-						&& e.pageX < (offset.left + that.outerWidth - that.paddingRight)
-						&& e.pageY < (offset.top + that.outerHeight - that.paddingBottom))
-						|| that.overSizeHandle
-					) {
-
-						if(!that.overInner) {
-							that.overlayElement.classList.add('hover-inner');
-							that.overInner = true;
-						}
-
-					} else {
-
-						if(that.overInner) {
-							that.overInner = false;
-							that.overlayElement.classList.remove('hover-inner');		
-						}
-
-					}
-
-				}
-
-				// over padding box
-
-				if(!that.interacting) {
-
-					if(
-						(e.pageX > offset.left
-						&& e.pageY > offset.top
-						&& e.pageX < (offset.left + that.outerWidth)
-						&& e.pageY < (offset.top + that.outerHeight)
-						&& !that.overInner)
-						|| that.overPaddingHandle
-					) {
-
-						if(!that.overPadding) {
-							that.overlayElement.classList.add('hover-padding');
-							that.overPadding = true;
-						}
-
-					} else {
-
-						if(that.overPadding) {
-							that.overPadding = false;
-							that.overlayElement.classList.remove('hover-padding');		
-						}
-
-					}
-
-				}
-
-				// over margin box
-
-				if(!that.interacting) {
-
-					if(
-						(e.pageX > offset.left - that.marginLeft
-						&& e.pageY > offset.top - that.marginTop
-						&& e.pageX < (offset.left + that.outerWidth + that.marginRight)
-						&& e.pageY < (offset.top + that.outerHeight + that.marginBottom)
-						&& !that.overInner
-						&& !that.overPadding)
-						|| that.overMarginHandle
-					) {
-
-						if(!that.overMargin) {
-							that.overlayElement.classList.add('hover-margin');
-							that.overMargin = true;
-						}
-
-					} else {
-
-						if(that.overMargin) {
-							that.overMargin = false;
-							that.overlayElement.classList.remove('hover-margin');		
-						}
-
-					}
-
+					that.processOverLogic(e);
 				}
 
 			});
@@ -313,7 +351,16 @@
 			$(document).on('keydown', function(e) {
 				if(e.which === 91) {
 					that.commandPressed = true;
+					that.commandOver = false;
+
+					that.overlayElement.classList.remove('hover', 'hover-inner', 'hover-margin', 'hover-padding');
+					that.overlayElement.classList.add('in-command');
 					that.hoverGhost.overlayElement.style.visibility = 'hidden';
+					that.titleBox.style.visibility = 'hidden';
+
+					if(that.__lastMouseMoveEvent)
+						that.processCommandOverLogic(that.__lastMouseMoveEvent);
+
 					if(that.hoverElement !== that.currentElement) {
 						that.visualizeRelationTo(that.hoverElement);
 					}
@@ -323,7 +370,21 @@
 			$(document).on('keyup', function(e) {
 				if(e.which === 91) {
 					that.commandPressed = false;
+
+					if(that.over) that.overlayElement.classList.add('hover');
+					if(that.overInner) that.overlayElement.classList.add('hover-inner');
+					if(that.overPadding) that.overlayElement.classList.add('hover-padding');
+					if(that.overMargin) that.overlayElement.classList.add('hover-margin');
+
+					that.overlayElement.classList.remove('in-command');
+
+					// edge case: user holds command, moves out, releases command
+					if(that.__lastMouseMoveEvent)
+						that.processOverLogic(that.__lastMouseMoveEvent);
+
 					that.hoverGhost.overlayElement.style.visibility = '';
+					that.titleBox.style.visibility = '';
+
 					if(that.vLineX) that.vLineX.style.display = 'none';
 					if(that.vLineY) that.vLineY.style.display = 'none';
 				}
@@ -593,16 +654,22 @@
 			this.handleMarginTop[0].style.marginTop = -(paddingTop + marginTop) + 'px';
 			this.handleMarginBottom[0].style.marginBottom = -(paddingBottom + marginBottom) + 'px';
 
-
 			// guides
 			this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
 			this.guideLeft.style.height = window.innerHeight + 'px';
+			this.guideLeft.style.left = -paddingLeft + 'px';
+
 			this.guideRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
 			this.guideRight.style.height = window.innerHeight + 'px';
+			this.guideRight.style.right = -paddingRight-1 + 'px';
+
 			this.guideBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
 			this.guideBottom.style.width = window.innerWidth + 'px';
+			this.guideBottom.style.bottom = -paddingBottom-1 + 'px';
+
 			this.guideTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
 			this.guideTop.style.width = window.innerWidth + 'px';
+			this.guideTop.style.top = -paddingTop-1 + 'px';
 
 			// captions
 			var hitsRightEdge, hitsLeftEdge;
@@ -675,6 +742,8 @@
 				this.exitRuleMode();
 			}
 
+			this.overlayElement.classList.remove('hover', 'hover-inner', 'hover-padding', 'hover-margin', 'in-command');
+
 			this.overlayElement.style.display = 'none';
 			this.titleBox.style.display = 'none';
 			this.currentElement.removeAttribute('contentEditable');
@@ -682,6 +751,9 @@
 
 			this.over = false;
 			this.overInner = false;
+			this.overPadding = false;
+			this.overMargin = false;
+			this.overCommand = false;
 			this.currentElement = null;
 
 		},
@@ -753,9 +825,7 @@
 			}		
 		},
 
-		visualizeRelationTo: function(relatedElement) {
-
-			var currentElement = this.currentElement;
+		createVisualizationLines: function() {
 
 			if(!this.vLineX) {
 				this.vLineX = document.createElement('div');
@@ -785,6 +855,33 @@
 				this.vLineY.appendChild(this.vLineYCrossBar);
 			}
 
+		},
+
+		visualizeRelationToWindow: function() {
+
+			var currentElement = this.currentElement;
+
+			this.createVisualizationLines();
+
+			this.vLineX.style.display = 'block';
+			this.vLineX.style.top = (currentElement.offsetTop + (currentElement.offsetHeight / 2)) + 'px';
+			this.vLineX.style.left = 0 + 'px';
+			this.vLineX.style.width = currentElement.offsetLeft + 'px';
+			this.vLineXCaption.innerHTML = currentElement.offsetLeft + ' <span>px</span>';
+
+			this.vLineY.style.display = 'block';
+			this.vLineY.style.left = (currentElement.offsetLeft + (currentElement.offsetWidth / 2)) + 'px';
+			this.vLineY.style.top = 0 + 'px';
+			this.vLineY.style.height = currentElement.offsetTop + 'px';
+			this.vLineYCaption.innerHTML = currentElement.offsetTop + ' <span>px</span>';
+
+		},
+
+		visualizeRelationTo: function(relatedElement) {
+
+			var currentElement = this.currentElement;
+
+			this.createVisualizationLines();
 
 			var reRightEdge = relatedElement.offsetLeft + relatedElement.offsetWidth;
 			var ceRightEdge = currentElement.offsetLeft + currentElement.offsetWidth;
@@ -798,19 +895,21 @@
 			
 			// horizontal connection
 			if(reRightEdge < ceLeftEdge) {
+
+				var top = currentElement.offsetTop + (currentElement.offsetHeight / 2);
 				this.vLineX.style.display = 'block';
-				this.vLineX.style.top = currentElement.offsetTop + (currentElement.offsetHeight / 2) + 'px';
+				this.vLineX.style.top = top + 'px';
 				this.vLineX.style.left = reRightEdge + 'px';
 				this.vLineX.style.width = ceLeftEdge - reRightEdge + 'px';
 				this.vLineXCaption.innerHTML = ceLeftEdge - reRightEdge + ' <span>px</span>';
 
-				if(reBottomEdge < ceTopEdge) {
+				if(reBottomEdge < top) {
 					this.vLineXCrossBar.style.display = 'block';
 					this.vLineXCrossBar.style.left = '0px';
 					this.vLineXCrossBar.style.bottom = '0px';
 					this.vLineXCrossBar.style.top = 'auto';
 					this.vLineXCrossBar.style.height = (currentElement.offsetHeight / 2) + (ceTopEdge - reBottomEdge) + 'px';
-				} else if(ceBottomEdge < reTopEdge) {
+				} else if(top < reTopEdge) {
 					this.vLineXCrossBar.style.display = 'block';
 					this.vLineXCrossBar.style.left = '0px';
 					this.vLineXCrossBar.style.top = '0px';
@@ -821,19 +920,21 @@
 				}
 
 			} else if(ceRightEdge < reLeftEdge) {
+
+				var top = currentElement.offsetTop + (currentElement.offsetHeight / 2);
 				this.vLineX.style.display = 'block';
-				this.vLineX.style.top = currentElement.offsetTop + (currentElement.offsetHeight / 2) + 'px';
+				this.vLineX.style.top = top + 'px';
 				this.vLineX.style.left = ceRightEdge + 'px';
 				this.vLineX.style.width = reLeftEdge - ceRightEdge + 'px';
 				this.vLineXCaption.innerHTML = reLeftEdge - ceRightEdge + ' <span>px</span>';
 
-				if(reBottomEdge < ceTopEdge) {
+				if(reBottomEdge < top) {
 					this.vLineXCrossBar.style.display = 'block';
 					this.vLineXCrossBar.style.left = '100%';
 					this.vLineXCrossBar.style.bottom = '0px';
 					this.vLineXCrossBar.style.top = 'auto';
 					this.vLineXCrossBar.style.height = (currentElement.offsetHeight / 2) + (ceTopEdge - reBottomEdge) + 'px';
-				} else if(ceBottomEdge < reTopEdge) {
+				} else if(top < reTopEdge) {
 					this.vLineXCrossBar.style.display = 'block';
 					this.vLineXCrossBar.style.left = '100%';
 					this.vLineXCrossBar.style.top = '0px';
@@ -849,19 +950,21 @@
 
 			// vertical connection
 			if(reBottomEdge < ceTopEdge) {
+
+				var left = currentElement.offsetLeft + (currentElement.offsetWidth / 2);
 				this.vLineY.style.display = 'block';
-				this.vLineY.style.left = currentElement.offsetLeft + (currentElement.offsetWidth / 2) + 'px';
+				this.vLineY.style.left = left + 'px';
 				this.vLineY.style.top = reBottomEdge + 'px';
 				this.vLineY.style.height = ceTopEdge - reBottomEdge + 'px';
 				this.vLineYCaption.innerHTML = ceTopEdge - reBottomEdge + ' <span>px</span>';
 
-				if(reRightEdge < ceLeftEdge) {
+				if(reRightEdge < left) {
 					this.vLineYCrossBar.style.display = 'block';
 					this.vLineYCrossBar.style.top = '0px';
 					this.vLineYCrossBar.style.right = '0px';
 					this.vLineYCrossBar.style.left = 'auto';
 					this.vLineYCrossBar.style.width = (currentElement.offsetWidth / 2) + (ceLeftEdge - reRightEdge) + 'px';
-				} else if(ceRightEdge < reLeftEdge) {
+				} else if(left < reLeftEdge) {
 					this.vLineYCrossBar.style.display = 'block';
 					this.vLineYCrossBar.style.top = '0px';
 					this.vLineYCrossBar.style.left = '0px';
@@ -872,19 +975,21 @@
 				}
 
 			} else if(ceBottomEdge < reTopEdge) {
+
+				var left = currentElement.offsetLeft + (currentElement.offsetWidth / 2);
 				this.vLineY.style.display = 'block';
-				this.vLineY.style.left = currentElement.offsetLeft + (currentElement.offsetWidth / 2) + 'px';
+				this.vLineY.style.left = left + 'px';
 				this.vLineY.style.top = ceBottomEdge + 'px';
 				this.vLineY.style.height = reTopEdge - ceBottomEdge + 'px';
 				this.vLineYCaption.innerHTML = reTopEdge - ceBottomEdge + ' <span>px</span>';
 
-				if(reRightEdge < ceLeftEdge) {
+				if(reRightEdge < left) {
 					this.vLineYCrossBar.style.display = 'block';
 					this.vLineYCrossBar.style.top = '100%';
 					this.vLineYCrossBar.style.right = '0px';
 					this.vLineYCrossBar.style.left = 'auto';
 					this.vLineYCrossBar.style.width = (currentElement.offsetWidth / 2) + (ceLeftEdge - reRightEdge) + 'px';
-				} else if(ceRightEdge < reLeftEdge) {
+				} else if(left < reLeftEdge) {
 					this.vLineYCrossBar.style.display = 'block';
 					this.vLineYCrossBar.style.top = '100%';
 					this.vLineYCrossBar.style.left = '0px';
@@ -951,7 +1056,7 @@
 	});
 
 
-	$(".boxes li:eq(0)").click();
+	$(".box").click();
 
 
 })();
