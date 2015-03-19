@@ -1,3 +1,146 @@
+/**
+ * Calculates the specificity of CSS selectors
+ * http://www.w3.org/TR/css3-selectors/#specificity
+ *
+ * Returns an array of objects with the following properties:
+ *  - selector: the input
+ *  - specificity: e.g. 0,1,0,0
+ *  - parts: array with details about each part of the selector that counts towards the specificity
+ */
+var SPECIFICITY = (function() {
+	var calculate,
+		calculateSingle;
+
+	calculate = function(input) {
+		var selectors,
+			selector,
+			i,
+			len,
+			results = [];
+
+		// Separate input by commas
+		selectors = input.split(',');
+
+		for (i = 0, len = selectors.length; i < len; i += 1) {
+			selector = selectors[i];
+			if (selector.length > 0) {
+				results.push(calculateSingle(selector));
+			}
+		}
+
+		return results;
+	};
+
+	// Calculate the specificity for a selector by dividing it into simple selectors and counting them
+	calculateSingle = function(input) {
+		var selector = input,
+			findMatch,
+			typeCount = {
+				'a': 0,
+				'b': 0,
+				'c': 0
+			},
+			parts = [],
+			// The following regular expressions assume that selectors matching the preceding regular expressions have been removed
+			attributeRegex = /(\[[^\]]+\])/g,
+			idRegex = /(#[^\s\+>~\.\[:]+)/g,
+			classRegex = /(\.[^\s\+>~\.\[:]+)/g,
+			pseudoElementRegex = /(::[^\s\+>~\.\[:]+|:first-line|:first-letter|:before|:after)/gi,
+			// A regex for pseudo classes with brackets - :nth-child(), :nth-last-child(), :nth-of-type(), :nth-last-type(), :lang()
+			pseudoClassWithBracketsRegex = /(:[\w-]+\([^\)]*\))/gi,
+			// A regex for other pseudo classes, which don't have brackets
+			pseudoClassRegex = /(:[^\s\+>~\.\[:]+)/g,
+			elementRegex = /([^\s\+>~\.\[:]+)/g;
+
+		// Find matches for a regular expression in a string and push their details to parts
+		// Type is "a" for IDs, "b" for classes, attributes and pseudo-classes and "c" for elements and pseudo-elements
+		findMatch = function(regex, type) {
+			var matches, i, len, match, index, length;
+			if (regex.test(selector)) {
+				matches = selector.match(regex);
+				for (i = 0, len = matches.length; i < len; i += 1) {
+					typeCount[type] += 1;
+					match = matches[i];
+					index = selector.indexOf(match);
+					length = match.length;
+					parts.push({
+						selector: match,
+						type: type,
+						index: index,
+						length: length
+					});
+					// Replace this simple selector with whitespace so it won't be counted in further simple selectors
+					selector = selector.replace(match, Array(length + 1).join(' '));
+				}
+			}
+		};
+
+		// Remove the negation psuedo-class (:not) but leave its argument because specificity is calculated on its argument
+		(function() {
+			var regex = /:not\(([^\)]*)\)/g;
+			if (regex.test(selector)) {
+				selector = selector.replace(regex, '     $1 ');
+			}
+		}());
+
+		// Remove anything after a left brace in case a user has pasted in a rule, not just a selector
+		(function() {
+			var regex = /{[^]*/gm,
+				matches, i, len, match;
+			if (regex.test(selector)) {
+				matches = selector.match(regex);
+				for (i = 0, len = matches.length; i < len; i += 1) {
+					match = matches[i];
+					selector = selector.replace(match, Array(match.length + 1).join(' '));
+				}
+			}
+		}());
+
+		// Add attribute selectors to parts collection (type b)
+		findMatch(attributeRegex, 'b');
+
+		// Add ID selectors to parts collection (type a)
+		findMatch(idRegex, 'a');
+
+		// Add class selectors to parts collection (type b)
+		findMatch(classRegex, 'b');
+
+		// Add pseudo-element selectors to parts collection (type c)
+		findMatch(pseudoElementRegex, 'c');
+
+		// Add pseudo-class selectors to parts collection (type b)
+		findMatch(pseudoClassWithBracketsRegex, 'b');
+		findMatch(pseudoClassRegex, 'b');
+
+		// Remove universal selector and separator characters
+		selector = selector.replace(/[\*\s\+>~]/g, ' ');
+
+		// Remove any stray dots or hashes which aren't attached to words
+		// These may be present if the user is live-editing this selector
+		selector = selector.replace(/[#\.]/g, ' ');
+
+		// The only things left should be element selectors (type c)
+		findMatch(elementRegex, 'c');
+
+		// Order the parts in the order they appear in the original selector
+		// This is neater for external apps to deal with
+		parts.sort(function(a, b) {
+			return a.index - b.index;
+		});
+
+		return {
+			selector: input,
+			specificity: '0,' + typeCount.a.toString() + ',' + typeCount.b.toString() + ',' + typeCount.c.toString(),
+			parts: parts
+		};
+	};
+
+	return {
+		calculate: calculate
+	};
+}());
+
+
 (function() {
 
 	var StyleParser = {};
@@ -19,69 +162,23 @@
 
 	StyleParser.resolve = function(trackedElement) {
 
-		// fill dropdown with css selectors
-		var resolutions = [];
-
-		var parent = trackedElement, parentChain = [];
-		while(parent && parent.tagName) {
-
-			//resolutions.push(parent.tagName + parentChain);
-			var parentChainItem = [parent.tagName.toLowerCase()];
-
-			if(parent.id) {
-				parentChainItem.push('#' + parent.id);
-				parentChainItem.push(parent.tagName.toLowerCase() + '#' + parent.id);
-			}
-
-			if(parent.classList && parent.classList.length) {
-				for (var i = 0; i < parent.classList.length; i++) {
-					parentChainItem.push('.' + parent.classList[i]);
-					parentChainItem.push(parent.tagName.toLowerCase() + '.' + parent.classList[i]);
-				}
-			}
-
-			parentChain.push(parentChainItem);
-			parent = parent.parentNode;
-
+		var matchedRules = getMatchedCSSRules(trackedElement) || [];
+		var rules = [];
+		for (var i = 0; i < matchedRules.length; i++) {
+			rules.push([matchedRules[i], parseInt(SPECIFICITY.calculate(matchedRules[i].selectorText)[0].specificity.replace(/\,/g, ''), 10)]);
 		}
 
-		var fn = function(set, chain) {
+		rules = rules
+			.sort(function(a, b) {
+				return b[1] - a[1];
+			})
+			.map(function(a) {
+				return a[0];
+			});
 
-			var newSet = [];
-			var chainItem = chain.shift();
-
-			for (var i = 0; i < set.length; i++) {
-				for (var j = 0; j < chainItem.length; j++) {
-					newSet.push(chainItem[j] + (set[i] ? ' ' + set[i] : ''));
-					resolutions.push(chainItem[j] + (set[i] ? ' ' + set[i] : ''));
-				}
-			}
-
-			if(chain.length) {
-				fn(newSet, chain);
-			}
-
-		};
-
-		fn([''], parentChain);
-
-		return resolutions;
+		return rules;
 
 	};
-
-	StyleParser.validate = function(paths) {
-
-		var resolved = [];
-		for (var i = 0; i < paths.length; i++) {
-			if(rules[paths[i]]) {
-				resolved.push(rules[paths[i]]);
-			}
-		}
-
-		return resolved;
-
-	};
-
 
 	window.StyleParser = StyleParser;
 

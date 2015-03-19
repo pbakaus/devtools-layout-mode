@@ -76,8 +76,8 @@
 					that.overSizeHandle = true;
 
 					if(!that.interacting) {
-						if(this === that.handleSizeRight[0]) { that.captionWidth.classList.add('over'); that.refreshCaptions(); }
-						if(this === that.handleSizeBottom[0]) that.captionHeight.classList.add('over');
+						if(this === that.handleSizeRight[0]) { that.captionWidth.classList.add('over'); that.refreshCaptions(); that.selectRule('width'); }
+						if(this === that.handleSizeBottom[0]) { that.captionHeight.classList.add('over'); that.selectRule('height'); }
 					}
 
 				}, function() {
@@ -85,8 +85,8 @@
 
 					var self = this;
 					var removeSpan = function() {
-						if(self === that.handleSizeRight[0]) { that.captionWidth.classList.remove('over'); that.refreshCaptions(); }
-						if(self === that.handleSizeBottom[0]) that.captionHeight.classList.remove('over');	
+						if(self === that.handleSizeRight[0]) { that.captionWidth.classList.remove('over'); that.refreshCaptions(); that.deselectRule(); }
+						if(self === that.handleSizeBottom[0]) { that.captionHeight.classList.remove('over'); that.deselectRule(); }	
 					};
 
 					if(!that.interacting) {
@@ -107,10 +107,10 @@
 					that.overPaddingHandle = true;
 
 					if(!that.interacting) {
-						if(this === that.handlePaddingRight[0]) { that.captionPaddingRight.classList.add('over'); }
-						if(this === that.handlePaddingBottom[0]) { that.captionPaddingBottom.classList.add('over'); }
-						if(this === that.handlePaddingLeft[0]) { that.captionPaddingLeft.classList.add('over'); }
-						if(this === that.handlePaddingTop[0]) { that.captionPaddingTop.classList.add('over'); }
+						if(this === that.handlePaddingRight[0]) { that.captionPaddingRight.classList.add('over'); that.selectRule('padding-right'); }
+						if(this === that.handlePaddingBottom[0]) { that.captionPaddingBottom.classList.add('over'); that.selectRule('padding-bottom'); }
+						if(this === that.handlePaddingLeft[0]) { that.captionPaddingLeft.classList.add('over'); that.selectRule('padding-left'); }
+						if(this === that.handlePaddingTop[0]) { that.captionPaddingTop.classList.add('over'); that.selectRule('padding-top'); }
 					}
 
 				}, function() {
@@ -118,10 +118,10 @@
 
 					var self = this;
 					var removeSpan = function() {
-						if(self === that.handlePaddingRight[0]) { that.captionPaddingRight.classList.remove('over'); }
-						if(self === that.handlePaddingBottom[0]) { that.captionPaddingBottom.classList.remove('over'); }
-						if(self === that.handlePaddingLeft[0]) { that.captionPaddingLeft.classList.remove('over'); }
-						if(self === that.handlePaddingTop[0]) { that.captionPaddingTop.classList.remove('over'); }
+						if(self === that.handlePaddingRight[0]) { that.captionPaddingRight.classList.remove('over'); that.deselectRule(); }
+						if(self === that.handlePaddingBottom[0]) { that.captionPaddingBottom.classList.remove('over'); that.deselectRule(); }
+						if(self === that.handlePaddingLeft[0]) { that.captionPaddingLeft.classList.remove('over'); that.deselectRule(); }
+						if(self === that.handlePaddingTop[0]) { that.captionPaddingTop.classList.remove('over'); that.deselectRule(); }
 					};
 
 					if(!that.interacting) {
@@ -142,10 +142,10 @@
 					that.overMarginHandle = true;
 
 					if(!that.interacting) {
-						if(this === that.handleMarginRight[0]) { that.captionMarginRight.classList.add('over'); that.refreshCaptions(); }
-						if(this === that.handleMarginBottom[0]) { that.captionMarginBottom.classList.add('over'); }
-						if(this === that.handleMarginLeft[0]) { that.captionMarginLeft.classList.add('over'); that.refreshCaptions(); }
-						if(this === that.handleMarginTop[0]) { that.captionMarginTop.classList.add('over'); }
+						if(this === that.handleMarginRight[0]) { that.captionMarginRight.classList.add('over'); that.refreshCaptions(); that.selectRule('margin-right'); }
+						if(this === that.handleMarginBottom[0]) { that.captionMarginBottom.classList.add('over'); that.selectRule('margin-bottom'); }
+						if(this === that.handleMarginLeft[0]) { that.captionMarginLeft.classList.add('over'); that.refreshCaptions(); that.selectRule('margin-left'); }
+						if(this === that.handleMarginTop[0]) { that.captionMarginTop.classList.add('over'); that.selectRule('margin-top'); }
 					}
 
 				}, function() {
@@ -153,10 +153,10 @@
 
 					var self = this;
 					var removeSpan = function() {
-						if(self === that.handleMarginRight[0]) { that.captionMarginRight.classList.remove('over'); that.refreshCaptions(); }
-						if(self === that.handleMarginBottom[0]) { that.captionMarginBottom.classList.remove('over'); }
-						if(self === that.handleMarginLeft[0]) { that.captionMarginLeft.classList.remove('over'); that.refreshCaptions(); }
-						if(self === that.handleMarginTop[0]) { that.captionMarginTop.classList.remove('over'); }
+						if(self === that.handleMarginRight[0]) { that.captionMarginRight.classList.remove('over'); that.refreshCaptions(); that.deselectRule(); }
+						if(self === that.handleMarginBottom[0]) { that.captionMarginBottom.classList.remove('over'); that.deselectRule(); }
+						if(self === that.handleMarginLeft[0]) { that.captionMarginLeft.classList.remove('over'); that.refreshCaptions(); that.deselectRule(); }
+						if(self === that.handleMarginTop[0]) { that.captionMarginTop.classList.remove('over'); that.deselectRule(); }
 					};
 
 					if(!that.interacting) {
@@ -406,13 +406,21 @@
 		initRuleShortcut: function() {
 
 			var titleDropdown = this.titleDropdown;
+			var that = this;
 
 			$(document).on('keydown', function(e) {
-				if(e.which === 16) titleDropdown.find('li:eq(1)').click();
+				this.__prevSelectedRule = that.selectedRule;
+				if(e.which === 16) titleDropdown.find('li:eq(0)').click();
 			});
 
 			$(document).on('keyup', function(e) {
-				if(e.which === 16) titleDropdown.find('li:eq(0)').click();
+				var ruleIndex = 0;
+				for (var i = 0; i < that.matchedRules.length; i++) {
+					if(that.matchedRules[i] === this.__prevSelectedRule) {
+						ruleIndex = i+1;
+					}
+				}
+				if(e.which === 16) titleDropdown.find('li:eq(' + ruleIndex + ')').click();
 			});
 
 		},
@@ -881,8 +889,8 @@
 
 		fillRules: function(trackedElement) {
 
-			var resolutions = StyleParser.resolve(trackedElement);
-			var resolved = StyleParser.validate(resolutions);
+			var resolved = StyleParser.resolve(trackedElement);
+			this.matchedRules = resolved;
 
 			this.titleDropdown.empty();
 			$('<li>inline style</li>').appendTo(this.titleDropdown);
@@ -892,6 +900,21 @@
 					.appendTo(this.titleDropdown);
 			}
 
+		},
+
+		selectRule: function(cssProperty) {
+
+			for (var i = 0; i < this.matchedRules.length; i++) {
+				if(this.matchedRules[i].style[cssProperty]) {
+					this.titleDropdown.find('li:eq(' + (i+1) + ')').click();
+					break;
+				}
+			}
+
+		},
+
+		deselectRule: function() {
+			this.exitRuleMode();
 		},
 
 		/*

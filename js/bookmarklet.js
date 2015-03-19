@@ -26,9 +26,16 @@
 			script.onload = function() {
 
 				var script = document.createElement('script');
-				script.src = "//paulbakaus.com/labs/layoutmode/js/main.js";
+				script.src = "//paulbakaus.com/labs/layoutmode/js/Ghost.js";
 				script.type = "text/javascript";
-				document.body.appendChild(script);
+				script.onload = function() {
+
+					var script = document.createElement('script');
+					script.src = "//paulbakaus.com/labs/layoutmode/js/main.js";
+					script.type = "text/javascript";
+					document.body.appendChild(script);
+
+				};
 
 			};
 			document.body.appendChild(script);
