@@ -498,8 +498,8 @@
 					that.interacting = false;
 				};
 
-				that.handleSizeBottom.draggable({ axis: 'y', cursor: 's-resize', start: start, drag: drag, stop: stop });
-				that.handleSizeRight.draggable({ axis: 'x', cursor: 'e-resize', start: start, drag: drag, stop: stop });
+				that.handleSizeBottom.draggable({ distance: 0, axis: 'y', cursor: 's-resize', start: start, drag: drag, stop: stop });
+				that.handleSizeRight.draggable({ distance: 0, axis: 'x', cursor: 'e-resize', start: start, drag: drag, stop: stop });
 
 			})();
 
@@ -520,6 +520,7 @@
 				};
 
 				that.handlePaddingBottom.draggable({
+					distance: 0,
 					axis: 'y',
 					cursor: 's-resize',
 					start: function() {
@@ -536,6 +537,7 @@
 				});
 
 				that.handlePaddingRight.draggable({
+					distance: 0,
 					axis: 'x',
 					cursor: 'e-resize',
 					start: function() {
@@ -552,6 +554,7 @@
 				});
 
 				that.handlePaddingTop.draggable({
+					distance: 0,
 					axis: 'y',
 					cursor: 'n-resize',
 					start: function(event, ui) {
@@ -568,6 +571,7 @@
 				});
 
 				that.handlePaddingLeft.draggable({
+					distance: 0,
 					axis: 'x',
 					cursor: 'w-resize',
 					start: function(event, ui) {
@@ -602,6 +606,7 @@
 				};
 
 				that.handleMarginBottom.draggable({
+					distance: 0,
 					axis: 'y',
 					cursor: 's-resize',
 					start: function() {
@@ -619,6 +624,7 @@
 				});
 
 				that.handleMarginRight.draggable({
+					distance: 0,
 					axis: 'x',
 					cursor: 'e-resize',
 					start: function() {
@@ -636,6 +642,7 @@
 				});
 
 				that.handleMarginLeft.draggable({
+					distance: 0,
 					axis: 'x',
 					cursor: 'w-resize',
 					start: function(event, ui) {
@@ -652,6 +659,7 @@
 				});
 
 				that.handleMarginTop.draggable({
+					distance: 0,
 					axis: 'y',
 					cursor: 'n-resize',
 					start: function(event, ui) {
