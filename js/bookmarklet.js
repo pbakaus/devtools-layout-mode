@@ -1,7 +1,7 @@
 (function() {
 
 	var link = document.createElement('link');
-	link.href = "//paulbakaus.com/labs/layoutmode/css/overlay.css";
+	link.href = "//pbakaus.github.io/devtools-layout-mode/css/overlay.css";
 	link.setAttribute('rel', 'stylesheet');
 	document.head.appendChild(link);
 
@@ -21,17 +21,17 @@
 		script.onload = function() {
 
 			var script = document.createElement('script');
-			script.src = "//paulbakaus.com/labs/layoutmode/js/StyleParser.js";
+			script.src = "//pbakaus.github.io/devtools-layout-mode/js/StyleParser.js";
 			script.type = "text/javascript";
 			script.onload = function() {
 
 				var script = document.createElement('script');
-				script.src = "//paulbakaus.com/labs/layoutmode/js/Ghost.js";
+				script.src = "//pbakaus.github.io/devtools-layout-mode/js/Ghost.js";
 				script.type = "text/javascript";
 				script.onload = function() {
 
 					var script = document.createElement('script');
-					script.src = "//paulbakaus.com/labs/layoutmode/js/main.js";
+					script.src = "//pbakaus.github.io/devtools-layout-mode/js/main.js";
 					script.type = "text/javascript";
 					document.body.appendChild(script);
 
