@@ -1,5 +1,7 @@
 (function() {
 
+	console.log('Layout Mode: Loading stylesheets..');
+
 	var link = document.createElement('link');
 	link.href = "//pbakaus.github.io/devtools-layout-mode/css/overlay.css";
 	link.setAttribute('rel', 'stylesheet');
@@ -36,6 +38,7 @@
 					document.body.appendChild(script);
 
 				};
+				document.body.appendChild(script);
 
 			};
 			document.body.appendChild(script);
