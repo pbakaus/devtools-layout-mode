@@ -73,6 +73,7 @@
 			this.handleSizeBottom
 				.add(this.handleSizeRight)
 				.hover(function() {
+					that.currentHandle = this;
 					that.overSizeHandle = true;
 
 					if(!that.interacting) {
@@ -81,6 +82,7 @@
 					}
 
 				}, function() {
+					that.currentHandle = null;
 					that.overSizeHandle = false;
 
 					var self = this;
@@ -104,6 +106,7 @@
 				.add(this.handlePaddingLeft)
 				.add(this.handlePaddingRight)
 				.hover(function() {
+					that.currentHandle = this;
 					that.overPaddingHandle = true;
 
 					if(!that.interacting) {
@@ -114,6 +117,7 @@
 					}
 
 				}, function() {
+					that.currentHandle = null;
 					that.overPaddingHandle = false;
 
 					var self = this;
@@ -139,6 +143,7 @@
 				.add(this.handleMarginLeft)
 				.add(this.handleMarginRight)
 				.hover(function() {
+					that.currentHandle = this;
 					that.overMarginHandle = true;
 
 					if(!that.interacting) {
@@ -149,6 +154,7 @@
 					}
 
 				}, function() {
+					that.currentHandle = null;
 					that.overMarginHandle = false;
 
 					var self = this;
@@ -409,18 +415,23 @@
 			var that = this;
 
 			$(document).on('keydown', function(e) {
-				this.__prevSelectedRule = that.selectedRule;
-				if(e.which === 16) titleDropdown.find('li:eq(0)').click();
+				if(e.which !== 16) return;
+				that.__prevSelectedRule = that.selectedRule;
+				that.shiftPressed = true;
+				titleDropdown.find('li:eq(0)').click();
 			});
 
 			$(document).on('keyup', function(e) {
+				if(e.which !== 16) return;
+				that.shiftPressed = false;
+
 				var ruleIndex = 0;
-				for (var i = 0; i < that.matchedRules.length; i++) {
-					if(that.matchedRules[i] === this.__prevSelectedRule) {
-						ruleIndex = i+1;
-					}
+
+				// re-process as if we've just hovered
+				if(that.currentHandle) {
+					$(that.currentHandle).trigger('mouseenter');
 				}
-				if(e.which === 16) titleDropdown.find('li:eq(' + ruleIndex + ')').click();
+
 			});
 
 		},
@@ -824,6 +835,12 @@
 
 		getCaptionProperty: function(cssProperty) {
 
+			// check in inline styles
+			if(this.currentElement.style[cssProperty]) {
+				return this.currentElement.style[cssProperty].replace(/(em|px)/, ' <span>$1</span>');
+			}
+
+			// check in rules
 			for (var i = 0; i < this.matchedRules.length; i++) {
 				if(this.matchedRules[i].style[cssProperty]) {
 					return this.matchedRules[i].style[cssProperty].replace(/(em|px)/, ' <span>$1</span>');
@@ -938,9 +955,11 @@
 			for (var i = 0; i < this.matchedRules.length; i++) {
 				if(this.matchedRules[i].style[cssProperty]) {
 					this.titleDropdown.find('li:eq(' + (i+1) + ')').click();
-					break;
+					return;
 				}
 			}
+
+			this.titleDropdown.find('li:eq(1)').click();
 
 		},
 
