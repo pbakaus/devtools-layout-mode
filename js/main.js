@@ -442,49 +442,65 @@
 
 			$(document).on('keydown', function(e) {
 				if(e.which === 91) {
-					that.commandPressed = true;
-					that.commandOver = false;
-
-					that.overlayElement.classList.remove('hover', 'hover-inner', 'hover-margin', 'hover-padding');
-					that.overlayElement.classList.add('in-command');
-					that.hoverGhost.overlayElement.style.visibility = 'hidden';
-					that.titleBox.style.opacity = 0;
-
-					if(that.__lastMouseMoveEvent)
-						that.processCommandOverLogic(that.__lastMouseMoveEvent);
-
-					if(that.hoverElement !== that.currentElement
-						&& !$.contains(that.hoverElement, that.currentElement)
-						&& !$.contains(that.currentElement, that.hoverElement)
-					) {
-						that.visualizeRelationTo(that.hoverElement);
-					}
+					that.enterDimensionMode();
 				}
 			});
 
 			$(document).on('keyup', function(e) {
 				if(e.which === 91) {
-					that.commandPressed = false;
-
-					if(that.over) that.overlayElement.classList.add('hover');
-					if(that.overInner) that.overlayElement.classList.add('hover-inner');
-					if(that.overPadding) that.overlayElement.classList.add('hover-padding');
-					if(that.overMargin) that.overlayElement.classList.add('hover-margin');
-
-					that.overlayElement.classList.remove('in-command');
-
-					// edge case: user holds command, moves out, releases command
-					if(that.__lastMouseMoveEvent)
-						that.processOverLogic(that.__lastMouseMoveEvent);
-
-					that.hoverGhost.overlayElement.style.visibility = '';
-					that.titleBox.style.opacity = 1;
-
-					if(that.vLineX) that.vLineX.style.opacity = 0;
-					if(that.vLineY) that.vLineY.style.opacity = 0;
+					that.exitDimensionMode();
 				}
 			});
 
+		},
+
+		enterDimensionMode: function() {
+
+			this.commandPressed = true;
+			this.commandOver = false;
+
+			this.overlayElement.classList.remove('hover', 'hover-inner', 'hover-margin', 'hover-padding');
+			this.overlayElement.classList.add('in-command');
+			this.hoverGhost.overlayElement.style.visibility = 'hidden';
+			this.titleBox.style.opacity = 0;
+
+			if(this.__lastMouseMoveEvent)
+				this.processCommandOverLogic(this.__lastMouseMoveEvent);
+
+			if(this.hoverElement !== this.currentElement
+				&& !$.contains(this.hoverElement, this.currentElement)
+				&& !$.contains(this.currentElement, this.hoverElement)
+			) {
+				this.visualizeRelationTo(this.hoverElement);
+			}
+
+		},
+
+		exitDimensionMode: function() {
+
+			this.commandPressed = false;
+
+			if(this.over) this.overlayElement.classList.add('hover');
+			if(this.overInner) this.overlayElement.classList.add('hover-inner');
+			if(this.overPadding) this.overlayElement.classList.add('hover-padding');
+			if(this.overMargin) this.overlayElement.classList.add('hover-margin');
+
+			this.overlayElement.classList.remove('in-command');
+
+			// edge case: user holds command, moves out, releases command
+			if(this.__lastMouseMoveEvent)
+				this.processOverLogic(this.__lastMouseMoveEvent);
+
+			this.hoverGhost.overlayElement.style.visibility = '';
+			this.titleBox.style.opacity = 1;
+
+			if(this.vLineX) this.vLineX.style.opacity = 0;
+			if(this.vLineY) this.vLineY.style.opacity = 0;
+
+		},
+
+		calculateSnap: function(currentValue, axis) {
+			return currentValue;
 		},
 
 		initHandles: function() {
@@ -499,7 +515,13 @@
 				var start = function() { that.interacting = "size"; this.__x = $(this).draggable('option', 'axis') === 'x'; };
 				var drag = function(event, ui) {
 					var x = this.__x;
+
+					// calculate normal handle position
 					ui.position[x ? "left" : "top"] = Math.max(0 - handleOffset, ui.position[x ? "left" : "top"]);
+
+					// apply possible snap
+					ui.position[x ? "left" : "top"] = that.calculateSnap(ui.position[x ? "left" : "top"], x ? 'x' : 'y');
+
 					(that.selectedRule || that.currentElement).style[x ? "width" : "height"] = (ui.position[x ? "left" : "top"] + handleOffset) + 'px';
 					that.sync(null, true);
 					that.updateGhosts();
