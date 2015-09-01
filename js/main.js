@@ -277,10 +277,10 @@
 			// general over/out
 
 			if(
-				e.pageX > offset.left - this.marginLeft - extraMargin
-				&& e.pageY > offset.top - this.marginTop - extraMargin
-				&& e.pageX < (offset.left + this.outerWidth + this.marginRight + extraMargin)
-				&& e.pageY < (offset.top + this.outerHeight + this.marginBottom + extraMargin)
+				e.pageX > offset.left - this.marginLeft - extraMargin &&
+				e.pageY > offset.top - this.marginTop - extraMargin &&
+				e.pageX < (offset.left + this.outerWidth + this.marginRight + extraMargin) &&
+				e.pageY < (offset.top + this.outerHeight + this.marginBottom + extraMargin)
 			) {
 
 				if(!this.over) {
@@ -304,10 +304,10 @@
 			if(!this.interacting) {
 
 				if(
-					(e.pageX > offset.left + this.paddingLeft
-					&& e.pageY > offset.top + this.paddingTop
-					&& e.pageX < (offset.left + this.outerWidth - this.paddingRight)
-					&& e.pageY < (offset.top + this.outerHeight - this.paddingBottom))
+					(e.pageX > offset.left + this.paddingLeft &&
+						e.pageY > offset.top + this.paddingTop &&
+						e.pageX < (offset.left + this.outerWidth - this.paddingRight) &&
+						e.pageY < (offset.top + this.outerHeight - this.paddingBottom))
 					|| this.overSizeHandle
 				) {
 
@@ -332,12 +332,11 @@
 			if(!this.interacting) {
 
 				if(
-					(e.pageX > offset.left
-					&& e.pageY > offset.top
-					&& e.pageX < (offset.left + this.outerWidth)
-					&& e.pageY < (offset.top + this.outerHeight)
-					&& !this.overInner)
-					|| this.overPaddingHandle
+					(e.pageX > offset.left && e.pageY > offset.top &&
+						e.pageX < (offset.left + this.outerWidth) &&
+						e.pageY < (offset.top + this.outerHeight) &&
+						!this.overInner) ||
+					this.overPaddingHandle
 				) {
 
 					if(!this.overPadding) {
@@ -361,13 +360,13 @@
 			if(!this.interacting) {
 
 				if(
-					(e.pageX > offset.left - this.marginLeft
-					&& e.pageY > offset.top - this.marginTop
-					&& e.pageX < (offset.left + this.outerWidth + this.marginRight)
-					&& e.pageY < (offset.top + this.outerHeight + this.marginBottom)
-					&& !this.overInner
-					&& !this.overPadding)
-					|| this.overMarginHandle
+					(e.pageX > offset.left - this.marginLeft &&
+						e.pageY > offset.top - this.marginTop && 
+						e.pageX < (offset.left + this.outerWidth + this.marginRight) &&
+						e.pageY < (offset.top + this.outerHeight + this.marginBottom) &&
+						!this.overInner &&
+						!this.overPadding) ||
+							this.overMarginHandle
 				) {
 
 					if(!this.overMargin) {
@@ -467,9 +466,9 @@
 			if(this.__lastMouseMoveEvent)
 				this.processCommandOverLogic(this.__lastMouseMoveEvent);
 
-			if(this.hoverElement !== this.currentElement
-				&& !$.contains(this.hoverElement, this.currentElement)
-				&& !$.contains(this.currentElement, this.hoverElement)
+			if(this.hoverElement !== this.currentElement &&
+				!$.contains(this.hoverElement, this.currentElement) &&
+				!$.contains(this.currentElement, this.hoverElement)
 			) {
 				this.visualizeRelationTo(this.hoverElement);
 			}
@@ -506,28 +505,34 @@
 		initHandles: function() {
 
 			var that = this;
-			var handleOffset = 7;
+			var handleOffset = 3;
 
 			// resize handles
 
 			(function() {
 
-				var start = function() { that.interacting = "size"; this.__x = $(this).draggable('option', 'axis') === 'x'; };
+				var start = function() { that.interacting = 'size'; this.__x = $(this).draggable('option', 'axis') === 'x'; };
 				var drag = function(event, ui) {
 					var x = this.__x;
 
 					// calculate normal handle position
-					ui.position[x ? "left" : "top"] = Math.max(0 - handleOffset, ui.position[x ? "left" : "top"]);
+					ui.position[x ? 'left' : 'top'] = Math.max(0 - handleOffset, ui.position[x ? 'left' : 'top']);
 
 					// apply possible snap
-					ui.position[x ? "left" : "top"] = that.calculateSnap(ui.position[x ? "left" : "top"], x ? 'x' : 'y');
+					ui.position[x ? 'left' : 'top'] = that.calculateSnap(ui.position[x ? 'left' : 'top'], x ? 'x' : 'y');
 
-					(that.selectedRule || that.currentElement).style[x ? "width" : "height"] = (ui.position[x ? "left" : "top"] + handleOffset) + 'px';
+					(that.selectedRule || that.currentElement).style[x ? 'width' : 'height'] = (ui.position[x ? 'left' : 'top'] + handleOffset) + 'px';
 					that.sync(null, true);
 					that.updateGhosts();
 				};
 				var stop = function() {
-					this.removeAttribute('style');
+					//this.removeAttribute('style');
+					this.style.height = '';
+					this.style.width = '';
+					this.style.bottom = '';
+					this.style.top = '';
+					this.style.left = '';
+					this.style.right = '';
 					that.interacting = false;
 				};
 
@@ -559,11 +564,11 @@
 					start: function() {
 						this.curInnerHeight = $(that.currentElement).height();
 						this.curPaddingBottom = that.paddingBottom;
-						that.interacting = "padding";
+						that.interacting = 'padding';
 					},
 					drag: function(event, ui) {
 						ui.position.top = Math.max(this.curInnerHeight - handleOffset, ui.position.top);
-						(that.selectedRule || that.currentElement).style.paddingBottom = Math.max(0, this.curPaddingBottom + (ui.position.top - ui.originalPosition.top)) + 'px';
+						(that.selectedRule || that.currentElement).style.paddingBottom = Math.max(0, this.curPaddingBottom + ((ui.position.top) - ui.originalPosition.top)) + 'px';
 						drag();
 					},
 					stop: stop
@@ -576,11 +581,11 @@
 					start: function() {
 						this.curInnerWidth = $(that.currentElement).width();
 						this.curPaddingRight = that.paddingRight;
-						that.interacting = "padding";
+						that.interacting = 'padding';
 					},
 					drag: function(event, ui) {
 						ui.position.left = Math.max(this.curInnerWidth - handleOffset, ui.position.left);
-						(that.selectedRule || that.currentElement).style.paddingRight = Math.max(0, this.curPaddingRight + (ui.position.left - ui.originalPosition.left)) + 'px';
+						(that.selectedRule || that.currentElement).style.paddingRight = Math.max(0, this.curPaddingRight + ((ui.position.left) - ui.originalPosition.left)) + 'px';
 						drag();
 					},
 					stop: stop
@@ -593,7 +598,7 @@
 					start: function(event, ui) {
 						this.curOffset = ui.offset.top;
 						this.curPaddingTop = that.paddingTop;
-						that.interacting = "padding";
+						that.interacting = 'padding';
 					},
 					drag: function(event, ui) {
 						ui.position.top = -handleOffset + 2;
@@ -610,7 +615,7 @@
 					start: function(event, ui) {
 						this.curOffset = ui.offset.left;
 						this.curPaddingLeft = that.paddingLeft;
-						that.interacting = "padding";
+						that.interacting = 'padding';
 					},
 					drag: function(event, ui) {
 						ui.position.left = -handleOffset + 2;
@@ -646,7 +651,7 @@
 						this.curInnerHeight = $(that.currentElement).height();
 						this.curMarginBottom = that.marginBottom;
 						this.curPaddingBottom = that.paddingBottom;
-						that.interacting = "margin";
+						that.interacting = 'margin';
 					},
 					drag: function(event, ui) {
 						ui.position.top = Math.max(this.curInnerHeight + this.curPaddingBottom - handleOffset, ui.position.top);
@@ -664,7 +669,7 @@
 						this.curInnerWidth = $(that.currentElement).width();
 						this.curMarginRight = that.marginRight;
 						this.curPaddingRight = that.paddingRight;
-						that.interacting = "margin";
+						that.interacting = 'margin';
 					},
 					drag: function(event, ui) {
 						ui.position.left = Math.max(this.curInnerWidth + this.curPaddingRight - handleOffset, ui.position.left);
@@ -681,10 +686,10 @@
 					start: function(event, ui) {
 						this.curOffset = ui.offset.left;
 						this.curMarginLeft = that.marginLeft;
-						that.interacting = "margin";
+						that.interacting = 'margin';
 					},
 					drag: function(event, ui) {
-						ui.position.left = -handleOffset + 2;
+						ui.position.left = -handleOffset;
 						(that.selectedRule || that.currentElement).style.marginLeft = Math.max(0, this.curMarginLeft - (ui.offset.left - this.curOffset)) + 'px';
 						drag();
 					},
@@ -698,10 +703,10 @@
 					start: function(event, ui) {
 						this.curOffset = ui.offset.top;
 						this.curMarginTop = that.marginTop;
-						that.interacting = "margin";
+						that.interacting = 'margin';
 					},
 					drag: function(event, ui) {
-						ui.position.top = -handleOffset + 2;
+						ui.position.top = -handleOffset;
 						(that.selectedRule || that.currentElement).style.marginTop = Math.max(0, this.curMarginTop - (ui.offset.top - this.curOffset)) + 'px';
 						drag();
 					},
@@ -762,7 +767,6 @@
 			this.containerPaddingTop.style.transform = 'translate(' + (0) + 'px, ' + (-paddingTop) + 'px) scale(' + innerWidth + ', ' + paddingTop + ')';
 			this.containerPaddingBottom.style.transform = 'translate(' + (0) + 'px, ' + (innerHeight) + 'px) scale(' + innerWidth + ', ' + paddingBottom + ')';
 
-
 			this.handlePaddingLeft[0].style.transform = 'translate(' + -paddingLeft + 'px, 0px)';
 			this.handlePaddingRight[0].style.marginRight = -paddingRight + 'px'; // TODO: find out why converting these to transforms messes with dragging
 			this.handlePaddingTop[0].style.transform = 'translate(0px, ' + -paddingTop + 'px)';
@@ -778,6 +782,21 @@
 			this.handleMarginRight[0].style.marginRight = -(paddingRight + marginRight) + 'px';
 			this.handleMarginTop[0].style.marginTop = -(paddingTop + marginTop) + 'px';
 			this.handleMarginBottom[0].style.marginBottom = -(paddingBottom + marginBottom) + 'px';
+
+			// offset magic
+			this.handleMarginLeft[0].style.marginTop = (marginLeft < 20 ? (-((4 * marginLeft) / 5) + 8) : -8) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
+			this.captionMarginLeft.style.marginTop = (marginLeft < 20 ? (-((4 * marginLeft) / 5) + 8) : -8) + 'px';
+			this.handleMarginRight[0].style.marginTop = (marginRight < 20 ? (-((4 * marginRight) / 5) + 8) : -8) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
+			this.captionMarginRight.style.marginTop = (marginRight < 20 ? (-((4 * marginRight) / 5) + 8) : -8) + 'px';
+			this.handleMarginTop[0].style.marginLeft = (marginTop < 20 ? (-((4 * marginTop) / 5) + 8) : -8) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
+			this.captionMarginTop.style.marginLeft = (marginTop < 20 ? (32 + (-16 * (marginTop / 20))) : 16) + 'px';
+			this.handleMarginBottom[0].style.marginLeft = (marginBottom < 20 ? (-((4 * marginBottom) / 5) + 8) : -8) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
+			this.captionMarginBottom.style.marginLeft = (marginBottom < 20 ? (32 + (-16 * (marginBottom / 20))) : 16) + 'px';
+
+			this.handleSizeRight[0].style.marginTop = (paddingRight < 20 ? (+((4 * paddingRight) / 5) - 24) : -8) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
+			this.captionWidth.style.marginTop = (paddingRight < 20 ? (-24 + (16 * (paddingRight / 20))) : -8) + 'px';
+			this.handleSizeBottom[0].style.marginLeft = (paddingBottom < 20 ? (+((4 * paddingBottom) / 5) - 24) : -8) + 'px';
+			this.captionHeight.style.marginLeft = (paddingBottom < 20 ? ((16 * (paddingBottom / 20))) : 16) + 'px';
 
 			// guides
 			this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
@@ -796,7 +815,8 @@
 			this.guideTop.style.width = window.innerWidth + 'px';
 			this.guideTop.style.top = -paddingTop-1 + 'px';
 
-			this.refreshCaptions(offset);
+			this.refreshHandles();
+			this.refreshCaptions();
 
 			// content editable
 			elem[0].setAttribute('contentEditable', true);
@@ -807,6 +827,10 @@
 
 		},
 
+		refreshHandles: function() {
+
+		},
+
 		refreshCaptions: function() {
 
 			var offset = { left: this.currentElement.offsetLeft, top: this.currentElement.offsetTop };
@@ -814,7 +838,7 @@
 			// captions
 			var hitsRightEdge, hitsLeftEdge;
 
-			var hitsRightEdge = (offset.left + this.outerWidth + 80 > window.innerWidth);
+			hitsRightEdge = (offset.left + this.outerWidth + 80 > window.innerWidth);
 			this.captionWidth.classList[hitsRightEdge ? 'add' : 'remove']('edge');
 			this.captionWidth.innerHTML = '<span>width: </span>' + this.getCaptionProperty('width');
 			this.captionWidth.style.right = (hitsRightEdge ? 16 : -(this.captionWidth.offsetWidth + 13)) + 'px';
@@ -1054,7 +1078,7 @@
 
 		visualizeRelationTo: function(relatedElement) {
 
-			var currentElement = this.currentElement;
+			var currentElement = this.currentElement, top, left;
 
 			this.createVisualizationLines();
 
@@ -1071,7 +1095,7 @@
 			// horizontal connection
 			if(reRightEdge < ceLeftEdge) {
 
-				var top = currentElement.offsetTop + (currentElement.offsetHeight / 2);
+				top = currentElement.offsetTop + (currentElement.offsetHeight / 2);
 				this.vLineX.style.opacity = 1;
 				this.vLineX.style.top = top + 'px';
 				this.vLineX.style.left = reRightEdge + 'px';
@@ -1096,7 +1120,7 @@
 
 			} else if(ceRightEdge < reLeftEdge) {
 
-				var top = currentElement.offsetTop + (currentElement.offsetHeight / 2);
+				top = currentElement.offsetTop + (currentElement.offsetHeight / 2);
 				this.vLineX.style.opacity = 1;
 				this.vLineX.style.top = top + 'px';
 				this.vLineX.style.left = ceRightEdge + 'px';
@@ -1126,7 +1150,7 @@
 			// vertical connection
 			if(reBottomEdge < ceTopEdge) {
 
-				var left = currentElement.offsetLeft + (currentElement.offsetWidth / 2);
+				left = currentElement.offsetLeft + (currentElement.offsetWidth / 2);
 				this.vLineY.style.opacity = 1;
 				this.vLineY.style.left = left + 'px';
 				this.vLineY.style.top = reBottomEdge + 'px';
@@ -1151,7 +1175,7 @@
 
 			} else if(ceBottomEdge < reTopEdge) {
 
-				var left = currentElement.offsetLeft + (currentElement.offsetWidth / 2);
+				left = currentElement.offsetLeft + (currentElement.offsetWidth / 2);
 				this.vLineY.style.opacity = 1;
 				this.vLineY.style.left = left + 'px';
 				this.vLineY.style.top = ceBottomEdge + 'px';
@@ -1190,16 +1214,16 @@
 
 
 	// make all elements on page inspectable
-	$("body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)").on('mouseover', function() {
+	$('body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)').on('mouseover', function() {
 
 		Overlay.hoverElement = this;
 
 		// if we're holding shift and hover another element, show guides
-		if(Overlay.commandPressed
-			&& Overlay.currentElement
-			&& this !== Overlay.currentElement
-			&& !$.contains(this, Overlay.currentElement)
-			&& !$.contains(Overlay.currentElement, this)
+		if(Overlay.commandPressed &&
+			Overlay.currentElement &&
+			this !== Overlay.currentElement &&
+			!$.contains(this, Overlay.currentElement) &&
+			!$.contains(Overlay.currentElement, this)
 		) {
 			Overlay.visualizeRelationTo(this);
 			return false;
@@ -1216,7 +1240,7 @@
 	});
 
 	// make all elements on page inspectable
-	$("body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)").on('click', function() {
+	$('body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)').on('click', function() {
 
 		if(Overlay.currentElement === this)
 			return false;
@@ -1236,7 +1260,7 @@
 	});
 
 	//$('ul').sortable();
-	$(".box").click();
+	$('.boxes li:eq(2)').click();
 
 
 })();

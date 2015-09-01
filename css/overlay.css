@@ -132,14 +132,40 @@
 }
 
 .handle {
-	height: 12px;
-	width: 12px;
-	border-radius: 20px;
+	height: 6px;
+	width: 16px;
+	border-radius: 1px;
 	background: black;
 	position: absolute;
 	box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.24);
 	opacity: 0.3;
 	pointer-events: all;
+}
+
+.handle.top::before,
+.handle.bottom::before {
+	content : "";
+	position: absolute;
+	width: 8px;
+	border-bottom: 2px dotted rgba(255,255,255,0.4);
+	top: 2px;
+	left: 4px;
+}
+
+.handle.right::before,
+.handle.left::before {
+	content : "";
+	position: absolute;
+	height: 8px;
+	border-right: 2px dotted rgba(255,255,255,0.4);
+	top: 4px;
+	left: 2px;
+}
+
+.handle.left,
+.handle.right {
+	height: 16px;
+	width: 6px;
 }
 
 .handle-size {
@@ -157,17 +183,17 @@
 /* bottom */
 
 .handle.bottom {
-	bottom: -5px;
+	bottom: -3px;
 	left: 50%;
 	cursor: s-resize;
 }
 
 .handle.bottom.handle-padding {
-	margin-left: -6px;
+	margin-left: -8px; /* - width of handle / 2 */
 }
 
 .handle.bottom.handle-size {
-	margin-left: -20px;
+	margin-left: -24px; /* - width of handle / 2 - width of handle - 2 */
 }
 
 .handle.bottom.handle-margin {
@@ -177,17 +203,17 @@
 /* right */
 
 .handle.right {
-	right: -5px;
+	right: -3px;
 	top: 50%;
 	cursor: e-resize;
 }
 
 .handle.right.handle-padding {
-	margin-top: -6px;
+	margin-top: -8px;
 }
 
 .handle.right.handle-size {
-	margin-top: -20px;
+	margin-top: -24px;
 }
 
 .handle.right.handle-margin {
@@ -197,13 +223,13 @@
 /* top */
 
 .handle.top {
-	top: -5px;
+	top: -3px;
 	left: 50%;
 	cursor: n-resize;
 }
 
 .handle.top.handle-padding {
-	margin-left: -6px;
+	margin-left: -8px;
 }
 
 .handle.top.handle-margin {
@@ -213,13 +239,13 @@
 /* left */
 
 .handle.left {
-	left: -5px;
+	left: -3px;
 	top: 50%;
 	cursor: w-resize;
 }
 
 .handle.left.handle-padding {
-	margin-top: -6px;
+	margin-top: -8px;
 }
 
 .handle.left.handle-margin {
