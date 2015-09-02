@@ -31,11 +31,21 @@
 
 			this.overlayElement = $('<div id="overlay" class="overlay"></div>')[0];
 
-			this.guideLeft = $('<div class="guide-left"></div>').appendTo(this.overlayElement)[0];
-			this.guideRight = $('<div class="guide-right"></div>').appendTo(this.overlayElement)[0];
-			this.guideBottom = $('<div class="guide-bottom"></div>').appendTo(this.overlayElement)[0];
-			this.guideTop = $('<div class="guide-top"></div>').appendTo(this.overlayElement)[0];
-			
+			this.guideLeft = $('<div class="guide guide-left"></div>').appendTo(this.overlayElement)[0];
+			this.guideRight = $('<div class="guide guide-right"></div>').appendTo(this.overlayElement)[0];
+			this.guideBottom = $('<div class="guide guide-bottom"></div>').appendTo(this.overlayElement)[0];
+			this.guideTop = $('<div class="guide guide-top"></div>').appendTo(this.overlayElement)[0];
+
+			this.guideMarginLeft = $('<div class="guide guide-margin-left"></div>').appendTo(this.overlayElement)[0];
+			this.guideMarginRight = $('<div class="guide guide-margin-right"></div>').appendTo(this.overlayElement)[0];
+			this.guideMarginBottom = $('<div class="guide guide-margin-bottom"></div>').appendTo(this.overlayElement)[0];
+			this.guideMarginTop = $('<div class="guide guide-margin-top"></div>').appendTo(this.overlayElement)[0];
+
+			this.guidePaddingLeft = $('<div class="guide guide-padding-left"></div>').appendTo(this.overlayElement)[0];
+			this.guidePaddingRight = $('<div class="guide guide-padding-right"></div>').appendTo(this.overlayElement)[0];
+			this.guidePaddingBottom = $('<div class="guide guide-padding-bottom"></div>').appendTo(this.overlayElement)[0];
+			this.guidePaddingTop = $('<div class="guide guide-padding-top"></div>').appendTo(this.overlayElement)[0];
+						
 			this.containerMarginTop = $('<div class="container-margin top"></div>').appendTo(this.overlayElement)[0];
 			this.containerMarginBottom = $('<div class="container-margin bottom"></div>').appendTo(this.overlayElement)[0];
 			this.containerMarginLeft = $('<div class="container-margin left"></div>').appendTo(this.overlayElement)[0];
@@ -220,14 +230,14 @@
 			var titleDropdown = this.titleDropdown;
 
 			$('span', titleBox).click(function() {
-				$(".dropdown", titleBox).toggle();
+				$('.dropdown', titleBox).toggle();
 			});
 
 
 			titleDropdown.on('click', 'li', function() {
 
 				titleDropdown.hide();
-				$(".selected", titleBox).html(this.innerHTML);
+				$('.selected', titleBox).html(this.innerHTML);
 				
 				var cssRule = $(this).data('cssRule');
 				if(cssRule) {
@@ -248,10 +258,10 @@
 			// command over/out
 
 			if(
-				e.pageX > offset.left - this.marginLeft - extraMargin
-				&& e.pageY > offset.top - this.marginTop - extraMargin
-				&& e.pageX < (offset.left + this.outerWidth + this.marginRight + extraMargin)
-				&& e.pageY < (offset.top + this.outerHeight + this.marginBottom + extraMargin)
+				e.pageX > offset.left - this.marginLeft - extraMargin &&
+				e.pageY > offset.top - this.marginTop - extraMargin &&
+				e.pageX < (offset.left + this.outerWidth + this.marginRight + extraMargin) &&
+				e.pageY < (offset.top + this.outerHeight + this.marginBottom + extraMargin)
 			) {
 
 				if(!this.commandOver) {
@@ -304,11 +314,13 @@
 			if(!this.interacting) {
 
 				if(
-					(e.pageX > offset.left + this.paddingLeft &&
+					((e.pageX > offset.left + this.paddingLeft &&
 						e.pageY > offset.top + this.paddingTop &&
 						e.pageX < (offset.left + this.outerWidth - this.paddingRight) &&
-						e.pageY < (offset.top + this.outerHeight - this.paddingBottom))
-					|| this.overSizeHandle
+						e.pageY < (offset.top + this.outerHeight - this.paddingBottom)) ||
+					this.overSizeHandle) &&
+					!this.overPaddingHandle && // cannot be over padding handle
+					!this.overMarginHandle
 				) {
 
 					if(!this.overInner) {
@@ -332,11 +344,13 @@
 			if(!this.interacting) {
 
 				if(
-					(e.pageX > offset.left && e.pageY > offset.top &&
+					((e.pageX > offset.left && e.pageY > offset.top &&
 						e.pageX < (offset.left + this.outerWidth) &&
 						e.pageY < (offset.top + this.outerHeight) &&
 						!this.overInner) ||
-					this.overPaddingHandle
+					this.overPaddingHandle) &&
+					!this.overSizeHandle &&
+					!this.overMarginHandle
 				) {
 
 					if(!this.overPadding) {
@@ -360,13 +374,15 @@
 			if(!this.interacting) {
 
 				if(
-					(e.pageX > offset.left - this.marginLeft &&
+					((e.pageX > offset.left - this.marginLeft &&
 						e.pageY > offset.top - this.marginTop && 
 						e.pageX < (offset.left + this.outerWidth + this.marginRight) &&
 						e.pageY < (offset.top + this.outerHeight + this.marginBottom) &&
 						!this.overInner &&
 						!this.overPadding) ||
-							this.overMarginHandle
+							this.overMarginHandle) &&
+					!this.overPaddingHandle &&
+					!this.overSizeHandle
 				) {
 
 					if(!this.overMargin) {
@@ -423,8 +439,6 @@
 			$(document).on('keyup', function(e) {
 				if(e.which !== 16) return;
 				that.shiftPressed = false;
-
-				var ruleIndex = 0;
 
 				// re-process as if we've just hovered
 				if(that.currentHandle) {
@@ -799,21 +813,55 @@
 			this.captionHeight.style.marginLeft = (paddingBottom < 20 ? ((16 * (paddingBottom / 20))) : 16) + 'px';
 
 			// guides
-			this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
+			this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top) + 'px)';
 			this.guideLeft.style.height = window.innerHeight + 'px';
-			this.guideLeft.style.left = -paddingLeft + 'px';
+			this.guideLeft.style.left =  '0px';
 
-			this.guideRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
+			this.guideRight.style.transform = 'translate(0px, ' + (-offset.top) + 'px)';
 			this.guideRight.style.height = window.innerHeight + 'px';
-			this.guideRight.style.right = -paddingRight-1 + 'px';
+			this.guideRight.style.right = -1 + 'px';
 
-			this.guideBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
+			this.guideBottom.style.transform = 'translate(' + (-offset.left) + 'px, 0px)';
 			this.guideBottom.style.width = window.innerWidth + 'px';
-			this.guideBottom.style.bottom = -paddingBottom-1 + 'px';
+			this.guideBottom.style.bottom = -1 + 'px';
 
-			this.guideTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
+			this.guideTop.style.transform = 'translate(' + (-offset.left) + 'px, 0px)';
 			this.guideTop.style.width = window.innerWidth + 'px';
-			this.guideTop.style.top = -paddingTop-1 + 'px';
+			this.guideTop.style.top = -1 + 'px';
+
+			// padding guides
+			this.guidePaddingLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
+			this.guidePaddingLeft.style.height = window.innerHeight + 'px';
+			this.guidePaddingLeft.style.left = -paddingLeft + 'px';
+
+			this.guidePaddingRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
+			this.guidePaddingRight.style.height = window.innerHeight + 'px';
+			this.guidePaddingRight.style.right = -paddingRight-1 + 'px';
+
+			this.guidePaddingBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
+			this.guidePaddingBottom.style.width = window.innerWidth + 'px';
+			this.guidePaddingBottom.style.bottom = -paddingBottom-1 + 'px';
+
+			this.guidePaddingTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
+			this.guidePaddingTop.style.width = window.innerWidth + 'px';
+			this.guidePaddingTop.style.top = -paddingTop-1 + 'px';
+
+			// margin guides
+			this.guideMarginLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop -marginTop) + 'px)';
+			this.guideMarginLeft.style.height = window.innerHeight + 'px';
+			this.guideMarginLeft.style.left = -paddingLeft -marginLeft + 'px';
+
+			this.guideMarginRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop -marginTop) + 'px)';
+			this.guideMarginRight.style.height = window.innerHeight + 'px';
+			this.guideMarginRight.style.right = -paddingRight -marginRight - 1 + 'px';
+
+			this.guideMarginBottom.style.transform = 'translate(' + (-offset.left -paddingLeft -marginLeft) + 'px, 0px)';
+			this.guideMarginBottom.style.width = window.innerWidth + 'px';
+			this.guideMarginBottom.style.bottom = -paddingBottom -marginBottom -1 + 'px';
+
+			this.guideMarginTop.style.transform = 'translate(' + (-offset.left -paddingLeft -marginLeft) + 'px, 0px)';
+			this.guideMarginTop.style.width = window.innerWidth + 'px';
+			this.guideMarginTop.style.top = -paddingTop -marginTop -1 + 'px';
 
 			this.refreshHandles();
 			this.refreshCaptions();
