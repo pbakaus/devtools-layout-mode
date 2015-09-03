@@ -764,6 +764,16 @@
 			var outerWidth = this.outerWidth = innerWidth + paddingLeft + paddingRight;
 			var outerHeight = this.outerHeight = innerHeight + paddingTop + paddingBottom;
 
+			// calculate handle size
+			var handleSizeX = 16;
+			var handleSizeY = 16;
+			if(innerWidth < 100) {
+				handleSizeX = Math.max(8, Math.min(16, handleSizeX * (innerWidth / 60)));
+			}
+			if(innerHeight < 100) {
+				handleSizeY = Math.max(8, Math.min(16, handleSizeY * (innerHeight / 60)));
+			}
+			this.refreshHandles(handleSizeX, handleSizeY);
 
 			// place and resize overlay
 			overlayElement.style.width = innerWidth + 'px';
@@ -798,19 +808,24 @@
 			this.handleMarginBottom[0].style.marginBottom = -(paddingBottom + marginBottom) + 'px';
 
 			// offset magic
-			this.handleMarginLeft[0].style.marginTop = (marginLeft < 20 ? (-((4 * marginLeft) / 5) + 8) : -8) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
-			this.captionMarginLeft.style.marginTop = (marginLeft < 20 ? (-((4 * marginLeft) / 5) + 8) : -8) + 'px';
-			this.handleMarginRight[0].style.marginTop = (marginRight < 20 ? (-((4 * marginRight) / 5) + 8) : -8) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
-			this.captionMarginRight.style.marginTop = (marginRight < 20 ? (-((4 * marginRight) / 5) + 8) : -8) + 'px';
-			this.handleMarginTop[0].style.marginLeft = (marginTop < 20 ? (-((4 * marginTop) / 5) + 8) : -8) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
-			this.captionMarginTop.style.marginLeft = (marginTop < 20 ? (32 + (-16 * (marginTop / 20))) : 16) + 'px';
-			this.handleMarginBottom[0].style.marginLeft = (marginBottom < 20 ? (-((4 * marginBottom) / 5) + 8) : -8) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
-			this.captionMarginBottom.style.marginLeft = (marginBottom < 20 ? (32 + (-16 * (marginBottom / 20))) : 16) + 'px';
+			this.handleMarginLeft[0].style.marginTop = (marginLeft < 20 ? (-(((handleSizeY / 4) * marginLeft) / 5) + (handleSizeY / 2)) : -(handleSizeY / 2)) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
+			this.captionMarginLeft.style.marginTop = (marginLeft < 20 ? (-(((handleSizeY / 4) * marginLeft) / 5) - 8 + handleSizeY) : -8) + 'px';
+			this.handleMarginRight[0].style.marginTop = (marginRight < 20 ? (-(((handleSizeY / 4) * marginRight) / 5) + (handleSizeY / 2)) : -(handleSizeY / 2)) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
+			this.captionMarginRight.style.marginTop = (marginRight < 20 ? (-(((handleSizeY / 4) * marginRight) / 5) - 8 + handleSizeY) : -8) + 'px';
+			this.handleMarginTop[0].style.marginLeft = (marginTop < 20 ? (-(((handleSizeX / 4) * marginTop) / 5) + (handleSizeX / 2)) : -(handleSizeX / 2)) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
+			this.captionMarginTop.style.marginLeft = (marginTop < 20 ? ((handleSizeX * 2) + (-(handleSizeX) * (marginTop / 20)) + 11) : handleSizeX + 11) + 'px';
+			this.handleMarginBottom[0].style.marginLeft = (marginBottom < 20 ? (-(((handleSizeX / 4) * marginBottom) / 5) + (handleSizeX / 2)) : -(handleSizeX / 2)) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
+			this.captionMarginBottom.style.marginLeft = (marginBottom < 20 ? ((handleSizeX * 2) + (-(handleSizeX) * (marginBottom / 20)) + 11) : handleSizeX + 11) + 'px';
 
-			this.handleSizeRight[0].style.marginTop = (paddingRight < 20 ? (+((4 * paddingRight) / 5) - 24) : -8) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
-			this.captionWidth.style.marginTop = (paddingRight < 20 ? (-24 + (16 * (paddingRight / 20))) : -8) + 'px';
-			this.handleSizeBottom[0].style.marginLeft = (paddingBottom < 20 ? (+((4 * paddingBottom) / 5) - 24) : -8) + 'px';
-			this.captionHeight.style.marginLeft = (paddingBottom < 20 ? ((16 * (paddingBottom / 20))) : 16) + 'px';
+			this.handleSizeRight[0].style.marginTop = (paddingRight < 20 ? (+(((handleSizeY / 4) * paddingRight) / 5) - (handleSizeY * 1.5)) : -(handleSizeY / 2)) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
+			this.captionWidth.style.marginTop = (paddingRight < 20 ? (-8 -(handleSizeY * 1) + (handleSizeY * 2 * (paddingRight / 20))) : -8) + 'px';
+			this.handleSizeBottom[0].style.marginLeft = (paddingBottom < 20 ? (+(((handleSizeX / 4) * paddingBottom) / 5) - (handleSizeX * 1.5)) : -(handleSizeX / 2)) + 'px';
+			this.captionHeight.style.marginLeft = (paddingBottom < 20 ? ((handleSizeX * 2 * (paddingBottom / 20))) : 16) + 'px';
+
+			this.handlePaddingLeft[0].style.marginTop = -(handleSizeY / 2) + 'px';
+			this.handlePaddingRight[0].style.marginTop = -(handleSizeY / 2) + 'px';
+			this.handlePaddingTop[0].style.marginLeft = -(handleSizeX / 2) + 'px';
+			this.handlePaddingBottom[0].style.marginLeft = -(handleSizeX / 2) + 'px';
 
 			// guides
 			this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
@@ -875,7 +890,20 @@
 
 		},
 
-		refreshHandles: function() {
+		refreshHandles: function(handleSizeX, handleSizeY) {
+
+			this.handleMarginLeft[0].style.height = handleSizeY + 'px';
+			this.handleMarginRight[0].style.height = handleSizeY + 'px';
+			this.handleMarginTop[0].style.width = handleSizeX + 'px';
+			this.handleMarginBottom[0].style.width = handleSizeX + 'px';
+
+			this.handlePaddingLeft[0].style.height = handleSizeY + 'px';
+			this.handlePaddingRight[0].style.height = handleSizeY + 'px';
+			this.handlePaddingTop[0].style.width = handleSizeX + 'px';
+			this.handlePaddingBottom[0].style.width = handleSizeX + 'px';
+
+			this.handleSizeRight[0].style.height = handleSizeY + 'px';
+			this.handleSizeBottom[0].style.width = handleSizeX + 'px';
 
 		},
 
