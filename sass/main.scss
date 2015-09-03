@@ -3,6 +3,10 @@ html, body {
 	padding: 0;
 }
 
+body {
+	overflow-y: scroll; /* avoid herky jerky scrollbar behavior */
+}
+
 .box {
 	background: #664337;
 	width: 100px;

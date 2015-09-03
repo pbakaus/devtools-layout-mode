@@ -606,7 +606,7 @@
 				});
 
 				that.handlePaddingTop.draggable({
-					distance: 0,
+					distance: 1,
 					axis: 'y',
 					cursor: 'n-resize',
 					start: function(event, ui) {
@@ -615,7 +615,7 @@
 						that.interacting = 'padding';
 					},
 					drag: function(event, ui) {
-						ui.position.top = -handleOffset + 2;
+						ui.position.top = -handleOffset;
 						(that.selectedRule || that.currentElement).style.paddingTop = Math.max(0, this.curPaddingTop - (ui.offset.top - this.curOffset)) + 'px';
 						drag();
 					},
@@ -623,7 +623,7 @@
 				});
 
 				that.handlePaddingLeft.draggable({
-					distance: 0,
+					distance: 1,
 					axis: 'x',
 					cursor: 'w-resize',
 					start: function(event, ui) {
@@ -632,7 +632,7 @@
 						that.interacting = 'padding';
 					},
 					drag: function(event, ui) {
-						ui.position.left = -handleOffset + 2;
+						ui.position.left = -handleOffset;
 						(that.selectedRule || that.currentElement).style.paddingLeft = Math.max(0, this.curPaddingLeft - (ui.offset.left - this.curOffset)) + 'px';
 						drag();
 					},
@@ -813,19 +813,19 @@
 			this.captionHeight.style.marginLeft = (paddingBottom < 20 ? ((16 * (paddingBottom / 20))) : 16) + 'px';
 
 			// guides
-			this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top) + 'px)';
+			this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
 			this.guideLeft.style.height = window.innerHeight + 'px';
 			this.guideLeft.style.left =  '0px';
 
-			this.guideRight.style.transform = 'translate(0px, ' + (-offset.top) + 'px)';
+			this.guideRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
 			this.guideRight.style.height = window.innerHeight + 'px';
 			this.guideRight.style.right = -1 + 'px';
 
-			this.guideBottom.style.transform = 'translate(' + (-offset.left) + 'px, 0px)';
+			this.guideBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
 			this.guideBottom.style.width = window.innerWidth + 'px';
 			this.guideBottom.style.bottom = -1 + 'px';
 
-			this.guideTop.style.transform = 'translate(' + (-offset.left) + 'px, 0px)';
+			this.guideTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
 			this.guideTop.style.width = window.innerWidth + 'px';
 			this.guideTop.style.top = -1 + 'px';
 
@@ -847,19 +847,19 @@
 			this.guidePaddingTop.style.top = -paddingTop-1 + 'px';
 
 			// margin guides
-			this.guideMarginLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop -marginTop) + 'px)';
+			this.guideMarginLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
 			this.guideMarginLeft.style.height = window.innerHeight + 'px';
 			this.guideMarginLeft.style.left = -paddingLeft -marginLeft + 'px';
 
-			this.guideMarginRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop -marginTop) + 'px)';
+			this.guideMarginRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
 			this.guideMarginRight.style.height = window.innerHeight + 'px';
 			this.guideMarginRight.style.right = -paddingRight -marginRight - 1 + 'px';
 
-			this.guideMarginBottom.style.transform = 'translate(' + (-offset.left -paddingLeft -marginLeft) + 'px, 0px)';
+			this.guideMarginBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
 			this.guideMarginBottom.style.width = window.innerWidth + 'px';
 			this.guideMarginBottom.style.bottom = -paddingBottom -marginBottom -1 + 'px';
 
-			this.guideMarginTop.style.transform = 'translate(' + (-offset.left -paddingLeft -marginLeft) + 'px, 0px)';
+			this.guideMarginTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
 			this.guideMarginTop.style.width = window.innerWidth + 'px';
 			this.guideMarginTop.style.top = -paddingTop -marginTop -1 + 'px';
 
