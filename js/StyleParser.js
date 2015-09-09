@@ -162,7 +162,7 @@ var SPECIFICITY = (function() {
 
 	StyleParser.resolve = function(trackedElement) {
 
-		var matchedRules = getMatchedCSSRules(trackedElement) || [];
+		var matchedRules = window.getMatchedCSSRules(trackedElement) || [];
 		var rules = [];
 		for (var i = 0; i < matchedRules.length; i++) {
 			rules.push([matchedRules[i], parseInt(SPECIFICITY.calculate(matchedRules[i].selectorText)[0].specificity.replace(/\,/g, ''), 10) + 0.01 * i]);

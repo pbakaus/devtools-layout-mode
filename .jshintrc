@@ -1,5 +1,0 @@
-{
-  "predef": [ "Ghost" ],
-  "jquery": true,
-  "node": true
-}

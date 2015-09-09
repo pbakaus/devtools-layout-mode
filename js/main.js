@@ -1,6 +1,5 @@
 (function() {
 
-
 	var Overlay = function() {
 
 		this.overlayElement = null; // the actual overlay div
@@ -512,7 +511,7 @@
 
 		},
 
-		calculateSnap: function(currentValue, axis) {
+		calculateSnap: function(currentValue/*, axis*/) {
 			return currentValue;
 		},
 
@@ -735,7 +734,7 @@
 		 * Core runtime functionality
 		 */
 
-		sync: function(newElem, duringInteraction) {
+		sync: function(newElem/*, duringInteraction*/) {
 
 			if(newElem) {
 				this.set(newElem);

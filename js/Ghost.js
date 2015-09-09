@@ -65,7 +65,7 @@ $.extend(Ghost.prototype, {
 		// modify padding box
 
 		// left
-		$(".container-padding.left", overlayElement).css({
+		$('.container-padding.left', overlayElement).css({
 			width: paddingLeft,
 			height: outerHeight,
 			top: -paddingTop,
@@ -73,7 +73,7 @@ $.extend(Ghost.prototype, {
 		});
 
 		// right
-		$(".container-padding.right", overlayElement).css({
+		$('.container-padding.right', overlayElement).css({
 			width: paddingRight,
 			height: outerHeight,
 			top: -paddingTop,
@@ -81,14 +81,14 @@ $.extend(Ghost.prototype, {
 		});
 
 		// top
-		$(".container-padding.top", overlayElement).css({
+		$('.container-padding.top', overlayElement).css({
 			width: innerWidth,
 			height: paddingTop,
 			top: -paddingTop
 		});
 
 		// bottom
-		$(".container-padding.bottom", overlayElement).css({
+		$('.container-padding.bottom', overlayElement).css({
 			width: innerWidth,
 			height: paddingBottom,
 			bottom: -paddingBottom
@@ -97,7 +97,7 @@ $.extend(Ghost.prototype, {
 		// modify margin box
 
 		// left
-		$(".container-margin.left", overlayElement).css({
+		$('.container-margin.left', overlayElement).css({
 			width: marginLeft,
 			height: outerHeight + marginTop + marginBottom,
 			top: -(paddingTop + marginTop),
@@ -105,7 +105,7 @@ $.extend(Ghost.prototype, {
 		});
 
 		// right
-		$(".container-margin.right", overlayElement).css({
+		$('.container-margin.right', overlayElement).css({
 			width: marginRight,
 			height: outerHeight + marginTop + marginBottom,
 			top: -(paddingTop + marginTop),
@@ -113,7 +113,7 @@ $.extend(Ghost.prototype, {
 		});
 
 		// top
-		$(".container-margin.top", overlayElement).css({
+		$('.container-margin.top', overlayElement).css({
 			width: outerWidth,
 			height: marginTop,
 			top: -(paddingTop + marginTop),
@@ -121,7 +121,7 @@ $.extend(Ghost.prototype, {
 		});
 
 		// bottom
-		$(".container-margin.bottom", overlayElement).css({
+		$('.container-margin.bottom', overlayElement).css({
 			width: outerWidth,
 			height: marginBottom,
 			bottom: -(paddingBottom + marginBottom),
