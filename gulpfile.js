@@ -32,7 +32,7 @@ gulp.task('scripts', function() {
 		// initialize source maps for JS
 		.pipe(sourcemaps.init())
 		//transpile from ES6 to ES5
-		.pipe(babel())
+		//.pipe(babel())
 		// combine all files into one
 		.pipe(concat('all.js'))
 		// Write the finished source maps into the output file
@@ -81,6 +81,7 @@ gulp.task('default', ['copy-html', 'styles', 'lint', 'scripts'], function() {
 	gulp.watch('js/**/*.js', ['lint', 'scripts']);
 	gulp.watch('./index.html', ['copy-html']);
 	gulp.watch('./build/index.html').on('change', browserSync.reload);
+	gulp.watch('./build/js/all.js').on('change', browserSync.reload);
 
 });
 

@@ -734,7 +734,9 @@
 		 * Core runtime functionality
 		 */
 
-		sync: function(newElem/*, duringInteraction*/) {
+		sync: function(newElem, duringInteraction) {
+
+			var computedStyle = this.computedStyle = getComputedStyle(newElem || this.currentElement);
 
 			if(newElem) {
 				this.set(newElem);
@@ -743,8 +745,6 @@
 			var overlayElement = this.overlayElement;
 			var elem = $(this.currentElement);
 			var offset = elem.offset();
-
-			var computedStyle = this.computedStyle = getComputedStyle(this.currentElement);
 
 			// we need to store outer height, bottom/right padding and margins for hover detection
 			var paddingLeft = this.paddingLeft = parseInt(computedStyle.paddingLeft);
@@ -880,12 +880,11 @@
 			this.refreshHandles();
 			this.refreshCaptions();
 
-			// content editable
-			elem[0].setAttribute('contentEditable', true);
-			elem[0].style.outline = 'none';
-
 			this.currentOffset = offset;
 
+			if(!duringInteraction) {
+				this.init();
+			}
 
 		},
 
@@ -994,6 +993,16 @@
 
 			// fill dropdown with correct CSS rules
 			this.fillRules(this.currentElement);
+
+			// content editable
+			this.currentElement.setAttribute('contentEditable', true);
+			this.currentElement.style.outline = 'none';
+
+			if(this.computedStyle.display === 'inline') {
+				this.overlayElement.classList.add('hover-inline');
+			} else {
+				this.overlayElement.classList.remove('hover-inline');
+			}
 
 		},
 
@@ -1335,7 +1344,7 @@
 	});
 
 	//$('ul').sortable();
-	$('.boxes li:eq(2)').click();
+	$('li strong').click();
 
 
 })();

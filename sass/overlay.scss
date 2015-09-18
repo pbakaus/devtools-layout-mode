@@ -42,6 +42,21 @@ $margin-color-light: #F6A723;
 		}
 	}
 
+	&.hover-inline {
+
+		.handle-size,
+		.caption-height,
+		.caption-width {
+			display: none;
+		}
+
+		.handle.top,
+		.handle.bottom {
+			display: none;
+		}
+
+	}
+
 }
 
 .overlay-title {
