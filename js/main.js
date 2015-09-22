@@ -207,16 +207,30 @@
 
 			this.initTitleBox();
 			this.initHover();
-			this.initRuleShortcut();
 			this.initDimensionShortcut();
 			this.initHandles();
+			this.initActiveHandles();
 
 			var that = this;
-			$(document).on('keyup', function(e) {
+			this.__keyup = function(e) {
+
+				if(e.which === 16) {
+					that.shiftPressed = false;
+				}
+
 				if(e.keyCode === 27) {
 					that.unset();
+				}		
+			};
+			this.__keydown = function(e) {
+
+				if(e.which === 16) {
+					that.shiftPressed = true;
 				}
-			});
+
+			};
+			$(document).on('keyup', this.__keyup);
+			$(document).on('keydown', this.__keydown);
 
 		},
 
@@ -354,6 +368,7 @@
 
 					if(!this.overPadding) {
 						this.overlayElement.classList.add('hover-padding');
+
 						this.overPadding = true;
 					}
 
@@ -417,31 +432,6 @@
 					that.processCommandOverLogic(e);
 				} else {
 					that.processOverLogic(e);
-				}
-
-			});
-
-		},
-
-		initRuleShortcut: function() {
-
-			var titleDropdown = this.titleDropdown;
-			var that = this;
-
-			$(document).on('keydown', function(e) {
-				if(e.which !== 16) return;
-				that.__prevSelectedRule = that.selectedRule;
-				that.shiftPressed = true;
-				//titleDropdown.find('li:eq(0)').click();
-			});
-
-			$(document).on('keyup', function(e) {
-				if(e.which !== 16) return;
-				that.shiftPressed = false;
-
-				// re-process as if we've just hovered
-				if(that.currentHandle) {
-					//$(that.currentHandle).trigger('mouseenter');
 				}
 
 			});
@@ -628,6 +618,34 @@
 
 			return currentValue;
 */
+		},
+
+		setActiveHandle: function(type, handleElement) {
+
+			// clear previous
+			this.clearActiveHandle();
+
+			this.activeHandle = {
+				node: handleElement,
+				type: type
+			};
+			handleElement.classList.add('active');
+		},
+
+		clearActiveHandle: function() {
+
+			if(this.activeHandle) {
+				this.activeHandle.node.classList.remove('active');
+				this.activeHandle = null;
+			}
+
+		},
+
+		initActiveHandles: function() {
+
+			var that = this;
+			this.handleSizeBottom[0].onmousedown = function() { that.setActiveHandle('height', this); };
+			this.handleSizeRight[0].onmousedown = function() { that.setActiveHandle('width', this); };
 		},
 
 		initHandles: function() {
@@ -1146,8 +1164,8 @@
 			this.fillRules(this.currentElement);
 
 			// content editable
-			this.currentElement.setAttribute('contentEditable', true);
-			this.currentElement.style.outline = 'none';
+			//this.currentElement.setAttribute('contentEditable', true);
+			//this.currentElement.style.outline = 'none';
 
 			if(this.computedStyle.display === 'inline') {
 				this.overlayElement.classList.add('hover-inline');
@@ -1170,8 +1188,8 @@
 
 			this.overlayElement.style.display = 'none';
 			this.titleBox.style.opacity = 0;
-			this.currentElement.removeAttribute('contentEditable');
-			this.currentElement.style.outline = '';
+			//this.currentElement.removeAttribute('contentEditable');
+			//this.currentElement.style.outline = '';
 
 			this.over = false;
 			this.overInner = false;
@@ -1179,6 +1197,11 @@
 			this.overMargin = false;
 			this.overCommand = false;
 			this.currentElement = null;
+
+			this.clearActiveHandle();
+
+			$(document).off('keyup', this.__keyup);
+			$(document).off('keydown', this.__keydown);
 
 		},
 
@@ -1446,10 +1469,6 @@
 
 	// Create Overlay (singleton)
 	Overlay = new Overlay();
-
-	// Initialize overlay
-	Overlay.init();
-
 
 	// make all elements on page inspectable
 	$('body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)').on('mouseover', function() {

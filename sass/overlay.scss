@@ -23,6 +23,9 @@ $margin-color-light: #F6A723;
 	z-index: 10000;
 	will-change: transform;
 
+	&.ghost {
+	}
+
 	&.hover {
 
 		.handle {
@@ -142,7 +145,7 @@ $margin-color-light: #F6A723;
 .container-margin,
 .container-padding {
 	position: absolute;
-	opacity: 0.3;
+	opacity: 0.5;
 	pointer-events: none;
 	width: 1px;
 	height: 1px;
