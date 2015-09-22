@@ -28,7 +28,7 @@ body {
 }
 
 ul {
-
+	margin-top: 220px;
 }
 
 li {
@@ -37,10 +37,27 @@ li {
 
 #testbox {
 	line-height: 2em;
+	position: absolute;
+	top: 100px;
+	left: 100px;
+}
+
+#sidebar {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	top: 0;
+	width: 200px;
+	background: #157EF4;
+	color: #fff;
 }
 
 #sidebar h2 {
 
+}
+
+.boxes {
+	margin-top: 10px;
 }
 
 .boxes li {

@@ -30,10 +30,10 @@
 
 			this.overlayElement = $('<div id="overlay" class="overlay"></div>')[0];
 
-			this.guideLeft = $('<div class="guide guide-left"></div>').appendTo(this.overlayElement)[0];
-			this.guideRight = $('<div class="guide guide-right"></div>').appendTo(this.overlayElement)[0];
-			this.guideBottom = $('<div class="guide guide-bottom"></div>').appendTo(this.overlayElement)[0];
-			this.guideTop = $('<div class="guide guide-top"></div>').appendTo(this.overlayElement)[0];
+			//this.guideLeft = $('<div class="guide guide-left"></div>').appendTo(this.overlayElement)[0];
+			//this.guideRight = $('<div class="guide guide-right"></div>').appendTo(this.overlayElement)[0];
+			//this.guideBottom = $('<div class="guide guide-bottom"></div>').appendTo(this.overlayElement)[0];
+			//this.guideTop = $('<div class="guide guide-top"></div>').appendTo(this.overlayElement)[0];
 
 			this.guideMarginLeft = $('<div class="guide guide-margin-left"></div>').appendTo(this.overlayElement)[0];
 			this.guideMarginRight = $('<div class="guide guide-margin-right"></div>').appendTo(this.overlayElement)[0];
@@ -432,7 +432,7 @@
 				if(e.which !== 16) return;
 				that.__prevSelectedRule = that.selectedRule;
 				that.shiftPressed = true;
-				titleDropdown.find('li:eq(0)').click();
+				//titleDropdown.find('li:eq(0)').click();
 			});
 
 			$(document).on('keyup', function(e) {
@@ -441,7 +441,7 @@
 
 				// re-process as if we've just hovered
 				if(that.currentHandle) {
-					$(that.currentHandle).trigger('mouseenter');
+					//$(that.currentHandle).trigger('mouseenter');
 				}
 
 			});
@@ -511,14 +511,138 @@
 
 		},
 
-		calculateSnap: function(currentValue/*, axis*/) {
+		isVisible: function(node, rects) {
+
+			var offsetTop = rects.top + document.body.scrollTop;
+			var offsetLeft = rects.top + document.body.scrollTop;
+
+			if(offsetTop > window.innerHeight ||
+				offsetLeft > window.innerWidth ||
+				offsetTop + rects.height < 0 ||
+				offsetLeft + rects.width < 0) {
+				return false;
+			}
+
+			return true;
+
+		},
+
+		calculateSnapAreas: function() {
+
+			var that = this;
+			var start = document.body;
+			var candidates = [];
+
+			var isEligible = function(node, rects) {
+
+				var width = rects.width;
+				var height = rects.height;
+
+				if(width < 100 && height < 100) {
+					return false;
+				}
+
+				if(node.id === 'overlay' ||
+					node.className === 'overlay-title' ||
+					node === that.currentElement) {
+					return false;
+				}
+
+				if(!that.isVisible(node, rects)) {
+					return false;
+				}
+
+				return true;
+
+			};
+
+			var recurse = function(node) {
+
+				// no children? exit
+				if(!node.children) {
+					return;
+				}
+
+				var candidate, rects;
+				for (var i = 0; i < node.children.length; i++) {
+					candidate = node.children[i];
+					rects = candidate.getBoundingClientRect();
+					if(isEligible(candidate, rects)) {
+						candidates.push([candidate, rects]);
+						recurse(candidate);
+					}
+				}
+			};
+
+
+			recurse(start);
+			this.currentSnapTargets = candidates;
+
+		},
+
+		calculateSnap: function(currentValue, axis, add) {
+
+			// this part is still somewhat broken.
 			return currentValue;
+/*
+			var offset = this.currentOffset;
+			offset.left = parseInt(offset.left);
+			var targets = this.currentSnapTargets;
+
+
+			if(axis === "y") {
+
+				var target;
+				for (var i = 0; i < targets.length; i++) {
+					target = targets[i];
+
+					if(Math.abs(target[1].bottom - (offset.top + add + currentValue)) < 10) {
+						currentValue = parseInt(target[1].bottom) - offset.top - add - 3;
+						break;
+					}
+
+					if(Math.abs(target[1].top - (offset.top + add + currentValue)) < 10) {
+						currentValue = parseInt(target[1].top) - offset.top - add - 3;
+						break;
+					}
+				}
+
+			} else {
+
+				var target;
+				for (var i = 0; i < targets.length; i++) {
+					target = targets[i];
+
+					if(Math.abs(target[1].right - (offset.left + add + currentValue)) < 10) {
+						currentValue = parseInt(target[1].right) - offset.left - add - 3;
+						break;
+					}
+
+					if(Math.abs(target[1].left - (offset.left + add + currentValue)) < 10) {
+						currentValue = parseInt(target[1].left) - offset.left - add - 3;
+						break;
+					}
+				}
+
+			}
+
+			return currentValue;
+*/
 		},
 
 		initHandles: function() {
 
 			var that = this;
 			var handleOffset = 3;
+
+			var applyPrecision = function(orig, current) {
+				if(that.shiftPressed) {
+					var delta = orig - current;
+					var precisionDelta = delta / 4;
+					return current + Math.round(delta - precisionDelta);
+				}
+				return current;
+			};
 
 			// resize handles
 
@@ -527,14 +651,18 @@
 				var start = function() { that.interacting = 'size'; this.__x = $(this).draggable('option', 'axis') === 'x'; };
 				var drag = function(event, ui) {
 					var x = this.__x;
+					var prop = x ? 'left' : 'top';
+
+					// apply precision drag
+					ui.position[prop] = applyPrecision(ui.originalPosition[prop], ui.position[prop]);
 
 					// calculate normal handle position
-					ui.position[x ? 'left' : 'top'] = Math.max(0 - handleOffset, ui.position[x ? 'left' : 'top']);
+					ui.position[prop] = Math.max(0 - handleOffset, ui.position[prop]);
 
 					// apply possible snap
-					ui.position[x ? 'left' : 'top'] = that.calculateSnap(ui.position[x ? 'left' : 'top'], x ? 'x' : 'y');
+					ui.position[prop] = that.calculateSnap(ui.position[prop], x ? 'x' : 'y', x ? that.paddingLeft + that.paddingRight : that.paddingTop + that.paddingBottom);
 
-					(that.selectedRule || that.currentElement).style[x ? 'width' : 'height'] = (ui.position[x ? 'left' : 'top'] + handleOffset) + 'px';
+					(that.selectedRule || that.currentElement).style[x ? 'width' : 'height'] = (ui.position[prop] + handleOffset) + 'px';
 					that.sync(null, true);
 					that.updateGhosts();
 				};
@@ -580,7 +708,9 @@
 						that.interacting = 'padding';
 					},
 					drag: function(event, ui) {
+						ui.position.top = applyPrecision(ui.originalPosition.top, ui.position.top);
 						ui.position.top = Math.max(this.curInnerHeight - handleOffset, ui.position.top);
+						ui.position.top = that.calculateSnap(ui.position.top, 'y', that.paddingTop);
 						(that.selectedRule || that.currentElement).style.paddingBottom = Math.max(0, this.curPaddingBottom + ((ui.position.top) - ui.originalPosition.top)) + 'px';
 						drag();
 					},
@@ -597,7 +727,9 @@
 						that.interacting = 'padding';
 					},
 					drag: function(event, ui) {
+						ui.position.left = applyPrecision(ui.originalPosition.left, ui.position.left);
 						ui.position.left = Math.max(this.curInnerWidth - handleOffset, ui.position.left);
+						ui.position.left = that.calculateSnap(ui.position.left, 'x', that.paddingLeft);
 						(that.selectedRule || that.currentElement).style.paddingRight = Math.max(0, this.curPaddingRight + ((ui.position.left) - ui.originalPosition.left)) + 'px';
 						drag();
 					},
@@ -615,7 +747,9 @@
 					},
 					drag: function(event, ui) {
 						ui.position.top = -handleOffset;
-						(that.selectedRule || that.currentElement).style.paddingTop = Math.max(0, this.curPaddingTop - (ui.offset.top - this.curOffset)) + 'px';
+						var delta = (ui.offset.top - this.curOffset);
+						delta = that.shiftPressed ? Math.round(delta / 4) : delta;
+						(that.selectedRule || that.currentElement).style.paddingTop = Math.max(0, this.curPaddingTop - delta) + 'px';
 						drag();
 					},
 					stop: stop
@@ -632,7 +766,9 @@
 					},
 					drag: function(event, ui) {
 						ui.position.left = -handleOffset;
-						(that.selectedRule || that.currentElement).style.paddingLeft = Math.max(0, this.curPaddingLeft - (ui.offset.left - this.curOffset)) + 'px';
+						var delta = (ui.offset.left - this.curOffset);
+						delta = that.shiftPressed ? Math.round(delta / 4) : delta;
+						(that.selectedRule || that.currentElement).style.paddingLeft = Math.max(0, this.curPaddingLeft - delta) + 'px';
 						drag();
 					},
 					stop: stop
@@ -667,6 +803,7 @@
 						that.interacting = 'margin';
 					},
 					drag: function(event, ui) {
+						ui.position.top = applyPrecision(ui.originalPosition.top, ui.position.top);
 						ui.position.top = Math.max(this.curInnerHeight + this.curPaddingBottom - handleOffset, ui.position.top);
 						(that.selectedRule || that.currentElement).style.marginBottom = Math.max(0, this.curMarginBottom + (ui.position.top - ui.originalPosition.top)) + 'px';
 						drag();
@@ -685,6 +822,7 @@
 						that.interacting = 'margin';
 					},
 					drag: function(event, ui) {
+						ui.position.left = applyPrecision(ui.originalPosition.left, ui.position.left);
 						ui.position.left = Math.max(this.curInnerWidth + this.curPaddingRight - handleOffset, ui.position.left);
 						(that.selectedRule || that.currentElement).style.marginRight = Math.max(0, this.curMarginRight + (ui.position.left - ui.originalPosition.left)) + 'px';
 						drag();
@@ -703,7 +841,9 @@
 					},
 					drag: function(event, ui) {
 						ui.position.left = -handleOffset;
-						(that.selectedRule || that.currentElement).style.marginLeft = Math.max(0, this.curMarginLeft - (ui.offset.left - this.curOffset)) + 'px';
+						var delta = (ui.offset.left - this.curOffset);
+						delta = that.shiftPressed ? Math.round(delta / 4) : delta;
+						(that.selectedRule || that.currentElement).style.marginLeft = Math.max(0, this.curMarginLeft - delta) + 'px';
 						drag();
 					},
 					stop: stop
@@ -720,7 +860,9 @@
 					},
 					drag: function(event, ui) {
 						ui.position.top = -handleOffset;
-						(that.selectedRule || that.currentElement).style.marginTop = Math.max(0, this.curMarginTop - (ui.offset.top - this.curOffset)) + 'px';
+						var delta = (ui.offset.top - this.curOffset);
+						delta = that.shiftPressed ? Math.round(delta / 4) : delta;
+						(that.selectedRule || that.currentElement).style.marginTop = Math.max(0, this.curMarginTop - delta) + 'px';
 						drag();
 					},
 					stop: stop
@@ -745,6 +887,11 @@
 			var overlayElement = this.overlayElement;
 			var elem = $(this.currentElement);
 			var offset = elem.offset();
+
+			if(!duringInteraction) {
+				this.offsetWidth = this.currentElement.offsetWidth;
+				this.offsetHeight = this.currentElement.offsetHeight;				
+			}
 
 			// we need to store outer height, bottom/right padding and margins for hover detection
 			var paddingLeft = this.paddingLeft = parseInt(computedStyle.paddingLeft);
@@ -781,7 +928,7 @@
 
 			// place title box
 			this.titleBox.style.opacity = 1;
-			this.titleBox.style.transform = 'translate(' + (offset.left + ((outerWidth - this.titleBox.offsetWidth) / 2)) + 'px, ' + (offset.top - marginTop - 30) + 'px)';
+			this.titleBox.style.transform = 'translate(' + (offset.left + ((outerWidth - this.titleBox.offsetWidth) / 2)) + 'px, ' + (offset.top - marginTop - 55) + 'px)';
 			this.titleProportions.innerHTML = outerWidth + ' x ' + outerHeight;
 
 			// modify padding box
@@ -809,17 +956,21 @@
 			// offset magic
 			this.handleMarginLeft[0].style.marginTop = (marginLeft < 20 ? (-(((handleSizeY / 4) * marginLeft) / 5) + (handleSizeY / 2)) : -(handleSizeY / 2)) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
 			this.captionMarginLeft.style.marginTop = (marginLeft < 20 ? (-(((handleSizeY / 4) * marginLeft) / 5) - 8 + handleSizeY) : -8) + 'px';
+			
 			this.handleMarginRight[0].style.marginTop = (marginRight < 20 ? (-(((handleSizeY / 4) * marginRight) / 5) + (handleSizeY / 2)) : -(handleSizeY / 2)) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
 			this.captionMarginRight.style.marginTop = (marginRight < 20 ? (-(((handleSizeY / 4) * marginRight) / 5) - 8 + handleSizeY) : -8) + 'px';
+			
 			this.handleMarginTop[0].style.marginLeft = (marginTop < 20 ? (-(((handleSizeX / 4) * marginTop) / 5) + (handleSizeX / 2)) : -(handleSizeX / 2)) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
-			this.captionMarginTop.style.marginLeft = (marginTop < 20 ? ((handleSizeX * 2) + (-(handleSizeX) * (marginTop / 20)) + 11) : handleSizeX + 11) + 'px';
+			this.captionMarginTop.style.marginLeft = (marginTop < 20 ? ((handleSizeX) + (-(handleSizeX) * (marginTop / 20)) - 8) : -11) + 'px';
+			
 			this.handleMarginBottom[0].style.marginLeft = (marginBottom < 20 ? (-(((handleSizeX / 4) * marginBottom) / 5) + (handleSizeX / 2)) : -(handleSizeX / 2)) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
-			this.captionMarginBottom.style.marginLeft = (marginBottom < 20 ? ((handleSizeX * 2) + (-(handleSizeX) * (marginBottom / 20)) + 11) : handleSizeX + 11) + 'px';
+			this.captionMarginBottom.style.marginLeft = (marginBottom < 20 ? ((handleSizeX) + (-(handleSizeX) * (marginBottom / 20)) - 8) : -11) + 'px';
 
 			this.handleSizeRight[0].style.marginTop = (paddingRight < 20 ? (+(((handleSizeY / 4) * paddingRight) / 5) - (handleSizeY * 1.5)) : -(handleSizeY / 2)) + 'px'; // (-8 * (marginLeft / 20)) + (8 - 8 * (marginLeft / 20))
-			this.captionWidth.style.marginTop = (paddingRight < 20 ? (-8 -(handleSizeY * 1) + (handleSizeY * 2 * (paddingRight / 20))) : -8) + 'px';
+			this.captionWidth.style.marginTop = (paddingRight < 20 ? (+(((handleSizeY / 4) * paddingRight) / 5) - (handleSizeY * 1.5)) : -8) + 'px';
+
 			this.handleSizeBottom[0].style.marginLeft = (paddingBottom < 20 ? (+(((handleSizeX / 4) * paddingBottom) / 5) - (handleSizeX * 1.5)) : -(handleSizeX / 2)) + 'px';
-			this.captionHeight.style.marginLeft = (paddingBottom < 20 ? ((handleSizeX * 2 * (paddingBottom / 20))) : 16) + 'px';
+			this.captionHeight.style.marginLeft = (paddingBottom < 20 ? ((handleSizeX * (paddingBottom / 20)) - handleSizeX * 2 + handleSizeX - 9) : -10) + 'px';
 
 			this.handlePaddingLeft[0].style.marginTop = -(handleSizeY / 2) + 'px';
 			this.handlePaddingRight[0].style.marginTop = -(handleSizeY / 2) + 'px';
@@ -827,21 +978,21 @@
 			this.handlePaddingBottom[0].style.marginLeft = -(handleSizeX / 2) + 'px';
 
 			// guides
-			this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
-			this.guideLeft.style.height = window.innerHeight + 'px';
-			this.guideLeft.style.left =  '0px';
+			//this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
+			//this.guideLeft.style.height = window.innerHeight + 'px';
+			//this.guideLeft.style.left =  '0px';
 
-			this.guideRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
-			this.guideRight.style.height = window.innerHeight + 'px';
-			this.guideRight.style.right = -1 + 'px';
+			//this.guideRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
+			//this.guideRight.style.height = window.innerHeight + 'px';
+			//this.guideRight.style.right = -1 + 'px';
 
-			this.guideBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
-			this.guideBottom.style.width = window.innerWidth + 'px';
-			this.guideBottom.style.bottom = -1 + 'px';
+			//this.guideBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
+			//this.guideBottom.style.width = window.innerWidth + 'px';
+			//this.guideBottom.style.bottom = -1 + 'px';
 
-			this.guideTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
-			this.guideTop.style.width = window.innerWidth + 'px';
-			this.guideTop.style.top = -1 + 'px';
+			//this.guideTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
+			//this.guideTop.style.width = window.innerWidth + 'px';
+			//this.guideTop.style.top = -1 + 'px';
 
 			// padding guides
 			this.guidePaddingLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
@@ -937,8 +1088,8 @@
 			this.captionPaddingRight.classList[hitsRightEdge ? 'add' : 'remove']('edge');
 			this.captionPaddingRight.style.marginLeft = (hitsRightEdge ? this.paddingRight - this.captionPaddingRight.offsetWidth-16 : this.paddingRight + 14) + 'px';
 
-			this.captionPaddingBottom.style.bottom = -(this.paddingBottom  + 7) + 'px';
-			this.captionPaddingTop.style.top = -(this.paddingTop  + 7) + 'px';
+			this.captionPaddingBottom.style.bottom = -(this.paddingBottom  + 24) + 'px';
+			this.captionPaddingTop.style.top = -(this.paddingTop  + 24) + 'px';
 
 			hitsLeftEdge = (offset.left - this.marginLeft - 80 < 0);
 			this.captionMarginLeft.classList[hitsLeftEdge ? 'add' : 'remove']('edge');
@@ -948,8 +1099,8 @@
 			this.captionMarginRight.classList[hitsRightEdge ? 'add' : 'remove']('edge');
 			this.captionMarginRight.style.marginLeft = this.paddingRight + this.marginRight + (hitsRightEdge ? -this.captionMarginRight.offsetWidth-17 : 14) + 'px';
 
-			this.captionMarginBottom.style.bottom = -this.marginBottom -this.paddingBottom -7 + 'px';
-			this.captionMarginTop.style.top = -this.marginTop -this.paddingTop -7 + 'px';
+			this.captionMarginBottom.style.bottom = -this.marginBottom -this.paddingBottom -24 + 'px';
+			this.captionMarginTop.style.top = -this.marginTop -this.paddingTop -24 + 'px';
 
 		},
 
@@ -1003,6 +1154,9 @@
 			} else {
 				this.overlayElement.classList.remove('hover-inline');
 			}
+
+			// compute the list of visible elements to snap to
+			this.calculateSnapAreas();
 
 		},
 
@@ -1344,7 +1498,7 @@
 	});
 
 	//$('ul').sortable();
-	$('li strong').click();
+	$('#testbox').click();
 
 
 })();

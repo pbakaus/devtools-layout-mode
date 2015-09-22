@@ -313,6 +313,36 @@ $margin-color-light: #F6A723;
 	right: auto;
 }
 
+@mixin triangle-bottom($color) {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 0; 
+	height: 0; 
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-bottom: none;
+	border-top: 6px solid $color;
+	left: 4px;
+	bottom: -6px;
+	right: auto;
+}
+
+@mixin triangle-top($color) {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 0; 
+	height: 0; 
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-top: none;
+	border-bottom: 6px solid $color;
+	left: 4px;
+	top: -6px;
+	right: auto;
+}
+
 .overlay {
 
 	.caption {
@@ -347,7 +377,7 @@ $margin-color-light: #F6A723;
 		&.left {
 			top: 50%;
 			right: 100%;
-			margin-top: -7px;
+			margin-top: -8px;
 			&::before {
 				@include triangle-right($padding-color-dark);
 			}
@@ -359,7 +389,7 @@ $margin-color-light: #F6A723;
 		&.right {
 			top: 50%;
 			left: 100%;
-			margin-top: -7px;
+			margin-top: -8px;
 			&::before {
 				@include triangle-left($padding-color-dark);
 			}
@@ -370,17 +400,17 @@ $margin-color-light: #F6A723;
 
 		&.bottom {
 			left: 50%;
-			margin-left: 19px;
+			margin-left: -11px;
 			&::before {
-				@include triangle-left($padding-color-dark);
+				@include triangle-top($padding-color-dark);
 			}
 		}
 
 		&.top {
 			left: 50%;
-			margin-left: 19px;
+			margin-left: -11px;
 			&::before {
-				@include triangle-left($padding-color-dark);
+				@include triangle-bottom($padding-color-dark);
 			}
 		}
 	}
@@ -415,9 +445,8 @@ $margin-color-light: #F6A723;
 
 		&.bottom {
 			left: 50%;
-			margin-left: 29px;
 			&::before {
-				@include triangle-left($margin-color-light);
+				@include triangle-top($margin-color-light);
 			}
 		}
 
@@ -425,7 +454,7 @@ $margin-color-light: #F6A723;
 			left: 50%;
 			margin-left: 29px;
 			&::before {
-				@include triangle-left($margin-color-light);
+				@include triangle-bottom($margin-color-light);
 			}
 		}
 	}
@@ -446,15 +475,11 @@ $margin-color-light: #F6A723;
 
 	.caption-height {
 		left: 50%;
-		bottom: -6px;
-		margin-left: 1px;
+		bottom: -24px;
 		background: $size-color-light;
 		color: #fff;
 		&::before {
-			@include triangle-left($size-color-light);
-		}
-		&.edge::before {
-			@include triangle-right($size-color-light);
+			@include triangle-top($size-color-light);
 		}
 	}
 
