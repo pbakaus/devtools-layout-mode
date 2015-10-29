@@ -1,11 +1,10 @@
 (function() {
 
-	var Overlay = function() {
+	var LayoutMode = function() {
 
 		this.overlayElement = null; // the actual overlay div
 		this.currentElement = null; // the currently selected element
 		this.selectedRule = null; // when defined, we're in rule mode
-		this.ghosts = []; // ghosts are elements created to visualize hovering, or when we edit based on rule
 		this.hoverGhost = new Ghost(); // the hover ghost
 		this.over = false; // on whether we're currenly hovering a certain part of the overlay
 		this.overInner = false;
@@ -17,33 +16,33 @@
 
 	};
 
-	$.extend(Overlay.prototype, {
+	$.extend(LayoutMode.prototype, {
+
+		plugins: [],
+
+		registerPlugin: function(plugin) {
+			this.plugins.push(plugin);
+			if(plugin.create) {
+				plugin.create.call(plugin);
+			}
+		},
+
+		callPlugin: function(eventName, a, b, c, d, e, f) {
+			for (var i = 0; i < this.plugins.length; i++) {
+				if(this.plugins[i][eventName]) {
+					this.plugins[i][eventName].call(this.plugins[i], a, b, c, d, e, f);
+				}
+			}
+		},
 
 		create: function() {
-
 			this.createOverlay();
-			this.createTitle();
-
+			
 		},
 
 		createOverlay: function() {
 
 			this.overlayElement = $('<div id="overlay" class="overlay"></div>')[0];
-
-			//this.guideLeft = $('<div class="guide guide-left"></div>').appendTo(this.overlayElement)[0];
-			//this.guideRight = $('<div class="guide guide-right"></div>').appendTo(this.overlayElement)[0];
-			//this.guideBottom = $('<div class="guide guide-bottom"></div>').appendTo(this.overlayElement)[0];
-			//this.guideTop = $('<div class="guide guide-top"></div>').appendTo(this.overlayElement)[0];
-
-			this.guideMarginLeft = $('<div class="guide guide-margin-left"></div>').appendTo(this.overlayElement)[0];
-			this.guideMarginRight = $('<div class="guide guide-margin-right"></div>').appendTo(this.overlayElement)[0];
-			this.guideMarginBottom = $('<div class="guide guide-margin-bottom"></div>').appendTo(this.overlayElement)[0];
-			this.guideMarginTop = $('<div class="guide guide-margin-top"></div>').appendTo(this.overlayElement)[0];
-
-			this.guidePaddingLeft = $('<div class="guide guide-padding-left"></div>').appendTo(this.overlayElement)[0];
-			this.guidePaddingRight = $('<div class="guide guide-padding-right"></div>').appendTo(this.overlayElement)[0];
-			this.guidePaddingBottom = $('<div class="guide guide-padding-bottom"></div>').appendTo(this.overlayElement)[0];
-			this.guidePaddingTop = $('<div class="guide guide-padding-top"></div>').appendTo(this.overlayElement)[0];
 						
 			this.containerMarginTop = $('<div class="container-margin top"></div>').appendTo(this.overlayElement)[0];
 			this.containerMarginBottom = $('<div class="container-margin bottom"></div>').appendTo(this.overlayElement)[0];
@@ -110,6 +109,7 @@
 					}
 
 				});
+
 			this.handlePaddingBottom
 				.add(this.handlePaddingTop)
 				.add(this.handlePaddingLeft)
@@ -147,6 +147,7 @@
 					}
 
 				});
+
 			this.handleMarginBottom
 				.add(this.handleMarginTop)
 				.add(this.handleMarginLeft)
@@ -189,27 +190,14 @@
 
 		},
 
-		createTitle: function() {
-
-			this.titleBox = $('<div class="overlay-title"><div class="title-rule"><span class="selected">inline style</span> <span class="toggle">▾</span><ul class="dropdown"><li>inline style</li></ul></div><div class="title-proportions">100 x 100</div></div>')
-				.appendTo(document.body)[0];
-
-			this.titleProportions = $('.title-proportions', this.titleBox)[0];
-			this.titleDropdown = $('.dropdown', this.titleBox);
-
-		},
-
 		/*
 		 * Events & Behaviour initialization
 		 */
 
 		init: function() {
 
-			this.initTitleBox();
 			this.initHover();
-			this.initDimensionShortcut();
 			this.initHandles();
-			this.initActiveHandles();
 
 			var that = this;
 			this.__keyup = function(e) {
@@ -219,7 +207,7 @@
 				}
 
 				if(e.keyCode === 27) {
-					that.unset();
+					that.deactivate();
 				}		
 			};
 			this.__keydown = function(e) {
@@ -231,64 +219,6 @@
 			};
 			$(document).on('keyup', this.__keyup);
 			$(document).on('keydown', this.__keydown);
-
-		},
-
-		initTitleBox: function() {
-
-			// initialize title box behaviour
-
-			var that = this;
-			var titleBox = this.titleBox;
-			var titleDropdown = this.titleDropdown;
-
-			$('span', titleBox).click(function() {
-				$('.dropdown', titleBox).toggle();
-			});
-
-
-			titleDropdown.on('click', 'li', function() {
-
-				titleDropdown.hide();
-				$('.selected', titleBox).html(this.innerHTML);
-				
-				var cssRule = $(this).data('cssRule');
-				if(cssRule) {
-					that.enterRuleMode(cssRule);
-				} else {
-					that.exitRuleMode();
-				}
-
-			});
-
-		},
-
-		processCommandOverLogic: function(e) {
-
-			var extraMargin = 10;
-			var offset = this.currentOffset;
-
-			// command over/out
-
-			if(
-				e.pageX > offset.left - this.marginLeft - extraMargin &&
-				e.pageY > offset.top - this.marginTop - extraMargin &&
-				e.pageX < (offset.left + this.outerWidth + this.marginRight + extraMargin) &&
-				e.pageY < (offset.top + this.outerHeight + this.marginBottom + extraMargin)
-			) {
-
-				if(!this.commandOver) {
-					this.commandOver = true;
-					this.visualizeRelationToWindow();
-				}
-
-			} else {
-
-				if(this.commandOver) {
-					this.commandOver = false;
-				}
-
-			}
 
 		},
 
@@ -428,224 +358,10 @@
 					return;
 				}
 
-				if(that.commandPressed) {
-					that.processCommandOverLogic(e);
-				} else {
-					that.processOverLogic(e);
-				}
+				that.processOverLogic(e);
 
 			});
 
-		},
-
-		initDimensionShortcut: function() {
-
-			var that = this;
-
-			$(document).on('keydown', function(e) {
-				if(e.which === 91) {
-					that.enterDimensionMode();
-				}
-			});
-
-			$(document).on('keyup', function(e) {
-				if(e.which === 91) {
-					that.exitDimensionMode();
-				}
-			});
-
-		},
-
-		enterDimensionMode: function() {
-
-			this.commandPressed = true;
-			this.commandOver = false;
-
-			this.overlayElement.classList.remove('hover', 'hover-inner', 'hover-margin', 'hover-padding');
-			this.overlayElement.classList.add('in-command');
-			this.hoverGhost.overlayElement.style.visibility = 'hidden';
-			this.titleBox.style.opacity = 0;
-
-			if(this.__lastMouseMoveEvent)
-				this.processCommandOverLogic(this.__lastMouseMoveEvent);
-
-			if(this.hoverElement !== this.currentElement &&
-				!$.contains(this.hoverElement, this.currentElement) &&
-				!$.contains(this.currentElement, this.hoverElement)
-			) {
-				this.visualizeRelationTo(this.hoverElement);
-			}
-
-		},
-
-		exitDimensionMode: function() {
-
-			this.commandPressed = false;
-
-			if(this.over) this.overlayElement.classList.add('hover');
-			if(this.overInner) this.overlayElement.classList.add('hover-inner');
-			if(this.overPadding) this.overlayElement.classList.add('hover-padding');
-			if(this.overMargin) this.overlayElement.classList.add('hover-margin');
-
-			this.overlayElement.classList.remove('in-command');
-
-			// edge case: user holds command, moves out, releases command
-			if(this.__lastMouseMoveEvent)
-				this.processOverLogic(this.__lastMouseMoveEvent);
-
-			this.hoverGhost.overlayElement.style.visibility = '';
-			this.titleBox.style.opacity = 1;
-
-			if(this.vLineX) this.vLineX.style.opacity = 0;
-			if(this.vLineY) this.vLineY.style.opacity = 0;
-
-		},
-
-		isVisible: function(node, rects) {
-
-			var offsetTop = rects.top + document.body.scrollTop;
-			var offsetLeft = rects.top + document.body.scrollTop;
-
-			if(offsetTop > window.innerHeight ||
-				offsetLeft > window.innerWidth ||
-				offsetTop + rects.height < 0 ||
-				offsetLeft + rects.width < 0) {
-				return false;
-			}
-
-			return true;
-
-		},
-
-		calculateSnapAreas: function() {
-
-			var that = this;
-			var start = document.body;
-			var candidates = [];
-
-			var isEligible = function(node, rects) {
-
-				var width = rects.width;
-				var height = rects.height;
-
-				if(width < 100 && height < 100) {
-					return false;
-				}
-
-				if(node.id === 'overlay' ||
-					node.className === 'overlay-title' ||
-					node === that.currentElement) {
-					return false;
-				}
-
-				if(!that.isVisible(node, rects)) {
-					return false;
-				}
-
-				return true;
-
-			};
-
-			var recurse = function(node) {
-
-				// no children? exit
-				if(!node.children) {
-					return;
-				}
-
-				var candidate, rects;
-				for (var i = 0; i < node.children.length; i++) {
-					candidate = node.children[i];
-					rects = candidate.getBoundingClientRect();
-					if(isEligible(candidate, rects)) {
-						candidates.push([candidate, rects]);
-						recurse(candidate);
-					}
-				}
-			};
-
-
-			recurse(start);
-			this.currentSnapTargets = candidates;
-
-		},
-
-		calculateSnap: function(currentValue, axis, add) {
-
-			// this part is still somewhat broken.
-			return currentValue;
-/*
-			var offset = this.currentOffset;
-			offset.left = parseInt(offset.left);
-			var targets = this.currentSnapTargets;
-
-
-			if(axis === "y") {
-
-				var target;
-				for (var i = 0; i < targets.length; i++) {
-					target = targets[i];
-
-					if(Math.abs(target[1].bottom - (offset.top + add + currentValue)) < 10) {
-						currentValue = parseInt(target[1].bottom) - offset.top - add - 3;
-						break;
-					}
-
-					if(Math.abs(target[1].top - (offset.top + add + currentValue)) < 10) {
-						currentValue = parseInt(target[1].top) - offset.top - add - 3;
-						break;
-					}
-				}
-
-			} else {
-
-				var target;
-				for (var i = 0; i < targets.length; i++) {
-					target = targets[i];
-
-					if(Math.abs(target[1].right - (offset.left + add + currentValue)) < 10) {
-						currentValue = parseInt(target[1].right) - offset.left - add - 3;
-						break;
-					}
-
-					if(Math.abs(target[1].left - (offset.left + add + currentValue)) < 10) {
-						currentValue = parseInt(target[1].left) - offset.left - add - 3;
-						break;
-					}
-				}
-
-			}
-
-			return currentValue;
-*/
-		},
-
-		setActiveHandle: function(type, handleElement) {
-
-			// clear previous
-			this.clearActiveHandle();
-
-			this.activeHandle = {
-				node: handleElement,
-				type: type
-			};
-			handleElement.classList.add('active');
-		},
-
-		clearActiveHandle: function() {
-
-			if(this.activeHandle) {
-				this.activeHandle.node.classList.remove('active');
-				this.activeHandle = null;
-			}
-
-		},
-
-		initActiveHandles: function() {
-
-			var that = this;
-			this.handleSizeBottom[0].onmousedown = function() { that.setActiveHandle('height', this); };
-			this.handleSizeRight[0].onmousedown = function() { that.setActiveHandle('width', this); };
 		},
 
 		initHandles: function() {
@@ -677,11 +393,8 @@
 					// calculate normal handle position
 					ui.position[prop] = Math.max(0 - handleOffset, ui.position[prop]);
 
-					// apply possible snap
-					ui.position[prop] = that.calculateSnap(ui.position[prop], x ? 'x' : 'y', x ? that.paddingLeft + that.paddingRight : that.paddingTop + that.paddingBottom);
-
 					(that.selectedRule || that.currentElement).style[x ? 'width' : 'height'] = (ui.position[prop] + handleOffset) + 'px';
-					that.sync(null, true);
+					that.relayout();
 					that.updateGhosts();
 				};
 				var stop = function() {
@@ -712,7 +425,7 @@
 				};
 
 				var drag = function() {
-					that.sync(null, true);
+					that.relayout();
 					that.updateGhosts();					
 				};
 
@@ -728,7 +441,6 @@
 					drag: function(event, ui) {
 						ui.position.top = applyPrecision(ui.originalPosition.top, ui.position.top);
 						ui.position.top = Math.max(this.curInnerHeight - handleOffset, ui.position.top);
-						ui.position.top = that.calculateSnap(ui.position.top, 'y', that.paddingTop);
 						(that.selectedRule || that.currentElement).style.paddingBottom = Math.max(0, this.curPaddingBottom + ((ui.position.top) - ui.originalPosition.top)) + 'px';
 						drag();
 					},
@@ -747,7 +459,6 @@
 					drag: function(event, ui) {
 						ui.position.left = applyPrecision(ui.originalPosition.left, ui.position.left);
 						ui.position.left = Math.max(this.curInnerWidth - handleOffset, ui.position.left);
-						ui.position.left = that.calculateSnap(ui.position.left, 'x', that.paddingLeft);
 						(that.selectedRule || that.currentElement).style.paddingRight = Math.max(0, this.curPaddingRight + ((ui.position.left) - ui.originalPosition.left)) + 'px';
 						drag();
 					},
@@ -806,7 +517,7 @@
 				};
 
 				var drag = function() {
-					that.sync(null, true);
+					that.relayout();
 					that.updateGhosts();
 				};
 
@@ -894,22 +605,13 @@
 		 * Core runtime functionality
 		 */
 
-		sync: function(newElem, duringInteraction) {
+		relayout: function() {
 
-			var computedStyle = this.computedStyle = getComputedStyle(newElem || this.currentElement);
-
-			if(newElem) {
-				this.set(newElem);
-			}
+			var computedStyle = this.computedStyle = getComputedStyle(this.currentElement);
 
 			var overlayElement = this.overlayElement;
 			var elem = $(this.currentElement);
 			var offset = elem.offset();
-
-			if(!duringInteraction) {
-				this.offsetWidth = this.currentElement.offsetWidth;
-				this.offsetHeight = this.currentElement.offsetHeight;				
-			}
 
 			// we need to store outer height, bottom/right padding and margins for hover detection
 			var paddingLeft = this.paddingLeft = parseInt(computedStyle.paddingLeft);
@@ -943,11 +645,6 @@
 			overlayElement.style.width = innerWidth + 'px';
 			overlayElement.style.height = innerHeight + 'px';
 			overlayElement.style.transform = 'translate(' + (offset.left + paddingLeft) + 'px, ' + (offset.top + paddingTop) + 'px)';
-
-			// place title box
-			this.titleBox.style.opacity = 1;
-			this.titleBox.style.transform = 'translate(' + (offset.left + ((outerWidth - this.titleBox.offsetWidth) / 2)) + 'px, ' + (offset.top - marginTop - 55) + 'px)';
-			this.titleProportions.innerHTML = outerWidth + ' x ' + outerHeight;
 
 			// modify padding box
 			this.containerPaddingLeft.style.transform = 'translate(' + (-paddingLeft) + 'px, ' + (-paddingTop) + 'px) scale(' + paddingLeft + ', ' + outerHeight + ')';
@@ -995,65 +692,33 @@
 			this.handlePaddingTop[0].style.marginLeft = -(handleSizeX / 2) + 'px';
 			this.handlePaddingBottom[0].style.marginLeft = -(handleSizeX / 2) + 'px';
 
-			// guides
-			//this.guideLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
-			//this.guideLeft.style.height = window.innerHeight + 'px';
-			//this.guideLeft.style.left =  '0px';
-
-			//this.guideRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
-			//this.guideRight.style.height = window.innerHeight + 'px';
-			//this.guideRight.style.right = -1 + 'px';
-
-			//this.guideBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
-			//this.guideBottom.style.width = window.innerWidth + 'px';
-			//this.guideBottom.style.bottom = -1 + 'px';
-
-			//this.guideTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
-			//this.guideTop.style.width = window.innerWidth + 'px';
-			//this.guideTop.style.top = -1 + 'px';
-
-			// padding guides
-			this.guidePaddingLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
-			this.guidePaddingLeft.style.height = window.innerHeight + 'px';
-			this.guidePaddingLeft.style.left = -paddingLeft + 'px';
-
-			this.guidePaddingRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
-			this.guidePaddingRight.style.height = window.innerHeight + 'px';
-			this.guidePaddingRight.style.right = -paddingRight-1 + 'px';
-
-			this.guidePaddingBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
-			this.guidePaddingBottom.style.width = window.innerWidth + 'px';
-			this.guidePaddingBottom.style.bottom = -paddingBottom-1 + 'px';
-
-			this.guidePaddingTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
-			this.guidePaddingTop.style.width = window.innerWidth + 'px';
-			this.guidePaddingTop.style.top = -paddingTop-1 + 'px';
-
-			// margin guides
-			this.guideMarginLeft.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
-			this.guideMarginLeft.style.height = window.innerHeight + 'px';
-			this.guideMarginLeft.style.left = -paddingLeft -marginLeft + 'px';
-
-			this.guideMarginRight.style.transform = 'translate(0px, ' + (-offset.top -paddingTop) + 'px)';
-			this.guideMarginRight.style.height = window.innerHeight + 'px';
-			this.guideMarginRight.style.right = -paddingRight -marginRight - 1 + 'px';
-
-			this.guideMarginBottom.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
-			this.guideMarginBottom.style.width = window.innerWidth + 'px';
-			this.guideMarginBottom.style.bottom = -paddingBottom -marginBottom -1 + 'px';
-
-			this.guideMarginTop.style.transform = 'translate(' + (-offset.left -paddingLeft) + 'px, 0px)';
-			this.guideMarginTop.style.width = window.innerWidth + 'px';
-			this.guideMarginTop.style.top = -paddingTop -marginTop -1 + 'px';
-
 			this.refreshHandles();
 			this.refreshCaptions();
 
 			this.currentOffset = offset;
 
-			if(!duringInteraction) {
-				this.init();
-			}
+			// inform plugins that a relayout has happened
+			this.callPlugin('relayout', {
+
+				computedStyle: computedStyle,
+				offset: offset,
+
+				paddingLeft: paddingLeft,
+				paddingTop: paddingTop,
+				paddingRight: paddingRight,
+				paddingBottom: paddingBottom,
+
+				marginLeft: marginLeft,
+				marginTop: marginTop,
+				marginRight: marginRight,
+				marginBottom: marginBottom,
+
+				innerWidth: innerWidth,
+				innerHeight: innerHeight,
+				outerWidth: outerWidth,
+				outerHeight: outerHeight
+
+			});
 
 		},
 
@@ -1151,21 +816,15 @@
 
 		},
 
-		set: function(newElem) {
+		activate: function(newElem) {
 
 			this.currentElement = newElem;
+			this.computedStyle = getComputedStyle(this.currentElement);
 
 			// initial hover
 			this.overlayElement.classList.add('hover');
 			this.overlayElement.style.display = 'block';
 			this.over = true;
-
-			// fill dropdown with correct CSS rules
-			this.fillRules(this.currentElement);
-
-			// content editable
-			//this.currentElement.setAttribute('contentEditable', true);
-			//this.currentElement.style.outline = 'none';
 
 			if(this.computedStyle.display === 'inline') {
 				this.overlayElement.classList.add('hover-inline');
@@ -1173,23 +832,34 @@
 				this.overlayElement.classList.remove('hover-inline');
 			}
 
-			// compute the list of visible elements to snap to
-			this.calculateSnapAreas();
+			// hide the hover ghost for inspection
+			this.hoverGhost.overlayElement.style.display = 'none';
+
+			// find matching rules
+			this.matchedRules = StyleParser.resolve(this.currentElement);
+
+			// execute plugins
+			this.callPlugin('activate');
+
+			// init events
+			this.init();
+
+			// relayout
+			this.relayout();
 
 		},
 
-		unset: function() {
+		deactivate: function() {
 
 			if(this.selectedRule) {
 				this.exitRuleMode();
 			}
 
 			this.overlayElement.classList.remove('hover', 'hover-inner', 'hover-padding', 'hover-margin', 'in-command');
-
 			this.overlayElement.style.display = 'none';
-			this.titleBox.style.opacity = 0;
-			//this.currentElement.removeAttribute('contentEditable');
-			//this.currentElement.style.outline = '';
+
+			// execute plugins
+			this.callPlugin('deactivate');
 
 			this.over = false;
 			this.overInner = false;
@@ -1197,8 +867,6 @@
 			this.overMargin = false;
 			this.overCommand = false;
 			this.currentElement = null;
-
-			this.clearActiveHandle();
 
 			$(document).off('keyup', this.__keyup);
 			$(document).off('keydown', this.__keydown);
@@ -1209,316 +877,52 @@
 		 * Functions related to rule-based editing
 		 */
 
-		enterRuleMode: function(cssRule) {
+		enterRuleMode: function(cssRule, index) {
 
-			var ghosts = this.ghosts;
+			// if selectedRule and new cssRule are the same, don't do anything
+			if(this.selectedRule === cssRule) {
+				return;
+			}
 
-			this.selectedRule = cssRule;
-			this.titleBox.classList.add('rule');
-			this.overlayElement.style.zIndex = 10002;
-
-			$(this.selectedRule.selectorText).not(this.currentElement).not('.overlay, .overlay *').each(function() {
-
-				var ghost = new Ghost(this);
-				ghost.sync();
-				ghosts.push(ghost);
-
-			});
+			// if selectedRule wasn't empty, we simply change the rule
+			if(this.selectedRule) {
+				this.selectedRule = cssRule;
+				this.callPlugin('changeRule', index);
+			} else {
+				this.selectedRule = cssRule;
+				this.callPlugin('enterRule', index);
+			}
 
 		},
 
 		exitRuleMode: function() {
-			
-			$('span.selected', this.titleBox).html('inline style');
-			this.titleBox.classList.remove('rule');
-			this.overlayElement.style.zIndex = '';
-
-			for (var i = 0; i < this.ghosts.length; i++) {
-				this.ghosts[i].destroy();
-			}
-
+			this.callPlugin('exitRule');
 			this.selectedRule = null;
-			this.ghosts = [];
-
-		},
-
-		fillRules: function(trackedElement) {
-
-			var resolved = StyleParser.resolve(trackedElement);
-			this.matchedRules = resolved;
-
-			this.titleDropdown.empty();
-			$('<li>inline style</li>').appendTo(this.titleDropdown);
-			for (var i = 0; i < resolved.length; i++) {
-				$('<li>' + resolved[i].selectorText + '</li>')
-					.data('cssRule', resolved[i])
-					.appendTo(this.titleDropdown);
-			}
-
 		},
 
 		selectRule: function(cssProperty) {
 
 			for (var i = 0; i < this.matchedRules.length; i++) {
 				if(this.matchedRules[i].style[cssProperty]) {
-					this.titleDropdown.find('li:eq(' + (i+1) + ')').click();
+					this.enterRuleMode(this.matchedRules[i], i);
 					return;
 				}
 			}
 
-			this.titleDropdown.find('li:eq(1)').click();
+			// no rule matching? exit rule mode then
+			this.exitRuleMode();
 
 		},
 
 		deselectRule: function() {
 			this.exitRuleMode();
-		},
-
-		/*
-		 * Functions related to ghosts
-		 */
-
-		updateGhosts: function() {
-			if(!this.ghosts) return;
-			for (var i = 0; i < this.ghosts.length; i++) {
-				this.ghosts[i].sync();
-			}		
-		},
-
-		createVisualizationLines: function() {
-
-			if(!this.vLineX) {
-				this.vLineX = document.createElement('div');
-				this.vLineX.className = 'vline-x';
-				document.body.appendChild(this.vLineX);
-
-				this.vLineXCaption = document.createElement('div');
-				this.vLineXCaption.className = 'caption';
-				this.vLineX.appendChild(this.vLineXCaption);
-
-				this.vLineXCrossBar = document.createElement('div');
-				this.vLineXCrossBar.className = 'crossbar';
-				this.vLineX.appendChild(this.vLineXCrossBar);
-			}
-
-			if(!this.vLineY) {
-				this.vLineY = document.createElement('div');
-				this.vLineY.className = 'vline-y';
-				document.body.appendChild(this.vLineY);
-
-				this.vLineYCaption = document.createElement('div');
-				this.vLineYCaption.className = 'caption';
-				this.vLineY.appendChild(this.vLineYCaption);
-
-				this.vLineYCrossBar = document.createElement('div');
-				this.vLineYCrossBar.className = 'crossbar';
-				this.vLineY.appendChild(this.vLineYCrossBar);
-			}
-
-		},
-
-		visualizeRelationToWindow: function() {
-
-			var currentElement = this.currentElement;
-
-			this.createVisualizationLines();
-
-			this.vLineX.style.opacity = 1;
-			this.vLineX.style.top = (currentElement.offsetTop + (currentElement.offsetHeight / 2)) + 'px';
-			this.vLineX.style.left = 0 + 'px';
-			this.vLineX.style.width = currentElement.offsetLeft + 'px';
-			this.vLineXCaption.innerHTML = currentElement.offsetLeft + ' <span>px</span>';
-
-			this.vLineY.style.opacity = 1;
-			this.vLineY.style.left = (currentElement.offsetLeft + (currentElement.offsetWidth / 2)) + 'px';
-			this.vLineY.style.top = 0 + 'px';
-			this.vLineY.style.height = currentElement.offsetTop + 'px';
-			this.vLineYCaption.innerHTML = currentElement.offsetTop + ' <span>px</span>';
-
-		},
-
-		visualizeRelationTo: function(relatedElement) {
-
-			var currentElement = this.currentElement, top, left;
-
-			this.createVisualizationLines();
-
-			var reRightEdge = relatedElement.offsetLeft + relatedElement.offsetWidth;
-			var ceRightEdge = currentElement.offsetLeft + currentElement.offsetWidth;
-			var reLeftEdge = relatedElement.offsetLeft;
-			var ceLeftEdge = currentElement.offsetLeft;
-
-			var reBottomEdge = relatedElement.offsetTop + relatedElement.offsetHeight;
-			var ceBottomEdge = currentElement.offsetTop + currentElement.offsetHeight;
-			var reTopEdge = relatedElement.offsetTop;
-			var ceTopEdge = currentElement.offsetTop;
-			
-			// horizontal connection
-			if(reRightEdge < ceLeftEdge) {
-
-				top = currentElement.offsetTop + (currentElement.offsetHeight / 2);
-				this.vLineX.style.opacity = 1;
-				this.vLineX.style.top = top + 'px';
-				this.vLineX.style.left = reRightEdge + 'px';
-				this.vLineX.style.width = ceLeftEdge - reRightEdge + 'px';
-				this.vLineXCaption.innerHTML = ceLeftEdge - reRightEdge + ' <span>px</span>';
-
-				if(reBottomEdge < top) {
-					this.vLineXCrossBar.style.display = 'block';
-					this.vLineXCrossBar.style.left = '0px';
-					this.vLineXCrossBar.style.bottom = '0px';
-					this.vLineXCrossBar.style.top = 'auto';
-					this.vLineXCrossBar.style.height = (currentElement.offsetHeight / 2) + (ceTopEdge - reBottomEdge) + 'px';
-				} else if(top < reTopEdge) {
-					this.vLineXCrossBar.style.display = 'block';
-					this.vLineXCrossBar.style.left = '0px';
-					this.vLineXCrossBar.style.top = '0px';
-					this.vLineXCrossBar.style.bottom = 'auto';
-					this.vLineXCrossBar.style.height = (currentElement.offsetHeight / 2) + (reTopEdge - ceBottomEdge) + 'px';
-				} else {
-					this.vLineXCrossBar.style.display = 'none';
-				}
-
-			} else if(ceRightEdge < reLeftEdge) {
-
-				top = currentElement.offsetTop + (currentElement.offsetHeight / 2);
-				this.vLineX.style.opacity = 1;
-				this.vLineX.style.top = top + 'px';
-				this.vLineX.style.left = ceRightEdge + 'px';
-				this.vLineX.style.width = reLeftEdge - ceRightEdge + 'px';
-				this.vLineXCaption.innerHTML = reLeftEdge - ceRightEdge + ' <span>px</span>';
-
-				if(reBottomEdge < top) {
-					this.vLineXCrossBar.style.display = 'block';
-					this.vLineXCrossBar.style.left = '100%';
-					this.vLineXCrossBar.style.bottom = '0px';
-					this.vLineXCrossBar.style.top = 'auto';
-					this.vLineXCrossBar.style.height = (currentElement.offsetHeight / 2) + (ceTopEdge - reBottomEdge) + 'px';
-				} else if(top < reTopEdge) {
-					this.vLineXCrossBar.style.display = 'block';
-					this.vLineXCrossBar.style.left = '100%';
-					this.vLineXCrossBar.style.top = '0px';
-					this.vLineXCrossBar.style.bottom = 'auto';
-					this.vLineXCrossBar.style.height = (currentElement.offsetHeight / 2) + (reTopEdge - ceBottomEdge) + 'px';
-				} else {
-					this.vLineXCrossBar.style.display = 'none';
-				}
-
-			} else {
-				this.vLineX.style.opacity = 0;
-			}
-
-			// vertical connection
-			if(reBottomEdge < ceTopEdge) {
-
-				left = currentElement.offsetLeft + (currentElement.offsetWidth / 2);
-				this.vLineY.style.opacity = 1;
-				this.vLineY.style.left = left + 'px';
-				this.vLineY.style.top = reBottomEdge + 'px';
-				this.vLineY.style.height = ceTopEdge - reBottomEdge + 'px';
-				this.vLineYCaption.innerHTML = ceTopEdge - reBottomEdge + ' <span>px</span>';
-
-				if(reRightEdge < left) {
-					this.vLineYCrossBar.style.display = 'block';
-					this.vLineYCrossBar.style.top = '0px';
-					this.vLineYCrossBar.style.right = '0px';
-					this.vLineYCrossBar.style.left = 'auto';
-					this.vLineYCrossBar.style.width = (currentElement.offsetWidth / 2) + (ceLeftEdge - reRightEdge) + 'px';
-				} else if(left < reLeftEdge) {
-					this.vLineYCrossBar.style.display = 'block';
-					this.vLineYCrossBar.style.top = '0px';
-					this.vLineYCrossBar.style.left = '0px';
-					this.vLineYCrossBar.style.right = 'auto';
-					this.vLineYCrossBar.style.width = (currentElement.offsetWidth / 2) + (reLeftEdge - ceRightEdge) + 'px';
-				} else {
-					this.vLineYCrossBar.style.display = 'none';
-				}
-
-			} else if(ceBottomEdge < reTopEdge) {
-
-				left = currentElement.offsetLeft + (currentElement.offsetWidth / 2);
-				this.vLineY.style.opacity = 1;
-				this.vLineY.style.left = left + 'px';
-				this.vLineY.style.top = ceBottomEdge + 'px';
-				this.vLineY.style.height = reTopEdge - ceBottomEdge + 'px';
-				this.vLineYCaption.innerHTML = reTopEdge - ceBottomEdge + ' <span>px</span>';
-
-				if(reRightEdge < left) {
-					this.vLineYCrossBar.style.display = 'block';
-					this.vLineYCrossBar.style.top = '100%';
-					this.vLineYCrossBar.style.right = '0px';
-					this.vLineYCrossBar.style.left = 'auto';
-					this.vLineYCrossBar.style.width = (currentElement.offsetWidth / 2) + (ceLeftEdge - reRightEdge) + 'px';
-				} else if(left < reLeftEdge) {
-					this.vLineYCrossBar.style.display = 'block';
-					this.vLineYCrossBar.style.top = '100%';
-					this.vLineYCrossBar.style.left = '0px';
-					this.vLineYCrossBar.style.right = 'auto';
-					this.vLineYCrossBar.style.width = (currentElement.offsetWidth / 2) + (reLeftEdge - ceRightEdge) + 'px';
-				} else {
-					this.vLineYCrossBar.style.display = 'none';
-				}
-
-			} else {
-				this.vLineY.style.opacity = 0;
-			}
-
 		}
+
 
 	});
 
-	// Create Overlay (singleton)
-	Overlay = new Overlay();
-
-	// make all elements on page inspectable
-	$('body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)').on('mouseover', function() {
-
-		Overlay.hoverElement = this;
-
-		// if we're holding shift and hover another element, show guides
-		if(Overlay.commandPressed &&
-			Overlay.currentElement &&
-			this !== Overlay.currentElement &&
-			!$.contains(this, Overlay.currentElement) &&
-			!$.contains(Overlay.currentElement, this)
-		) {
-			Overlay.visualizeRelationTo(this);
-			return false;
-		}
-
-		// in normal mode, don't activate the hover ghost when interacting or over the current el
-		if(Overlay.hoverGhost.currentElement === this || Overlay.interacting || Overlay.over)
-			return;
-
-		Overlay.hoverGhost.sync(this);
-
-		return false;
-
-	});
-
-	// make all elements on page inspectable
-	$('body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)').on('click', function() {
-
-		if(Overlay.currentElement === this)
-			return false;
-
-		if(Overlay.currentElement) {
-			Overlay.unset();
-		}
-
-		//hide hover ghost
-		Overlay.hoverGhost.overlayElement.style.display = 'none';
-
-		// sync on the element
-		Overlay.sync(this);
-
-		return false;
-
-	});
-
-	//$('ul').sortable();
-	$('#testbox').click();
-
+	// Create Layout Mode (singleton)
+	window.LayoutMode = new LayoutMode();
 
 })();
 

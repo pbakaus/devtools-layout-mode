@@ -28,7 +28,7 @@ $.extend(Ghost.prototype, {
 		this.overlayElement.parentNode.removeChild(this.overlayElement);
 	},
 
-	sync: function(newElem) {
+	relayout: function(newElem) {
 
 		if(newElem) {
 			this.currentElement = newElem;

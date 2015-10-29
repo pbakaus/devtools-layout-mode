@@ -9,6 +9,18 @@ var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var babel = require('gulp-babel');
 
+var scripts = [
+	'js/Ghost.js',
+	'js/StyleParser.js',
+	'js/LayoutMode.js',
+	// plugins
+	'js/plugins/Title.js',
+	'js/plugins/Guides.js',
+	'js/plugins/Ghosts.js',
+	'js/plugins/ContentEditable.js',
+	// init
+	'js/scripts/init.js'];
+
 gulp.task('styles', function() {
 	gulp.src('sass/**/*.scss')
 		// initialize source maps for Sass
@@ -28,7 +40,7 @@ gulp.task('styles', function() {
 
 // Scripts for source mode
 gulp.task('scripts', function() {
-	return gulp.src(['js/Ghost.js', 'js/StyleParser.js', 'js/main.js'])
+	return gulp.src(scripts)
 		// initialize source maps for JS
 		.pipe(sourcemaps.init())
 		//transpile from ES6 to ES5
@@ -42,7 +54,7 @@ gulp.task('scripts', function() {
 
 // Scripts for production
 gulp.task('scripts-dist', function() {
-	return gulp.src(['js/Ghost.js', 'js/StyleParser.js', 'js/main.js'])
+	return gulp.src(scripts)
 		//transpile from ES6 to ES5
 		.pipe(babel())
 		// combine all files into one
@@ -58,7 +70,7 @@ gulp.task('copy-html', function() {
 });
 
 gulp.task('lint', function () {
-	return gulp.src(['js/**/*.js'])
+	return gulp.src(scripts)
 		// eslint() attaches the lint output to the eslint property 
 		// of the file object so it can be used by other modules. 
 		.pipe(eslint())

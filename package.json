@@ -1,0 +1,29 @@
+{
+  "name": "devtools-layout-mode",
+  "version": "0.1.0",
+  "description": "Prototype of the DevTools Layout Mode/Editor",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pbakaus/devtools-layout-mode.git"
+  },
+  "author": "Paul Bakaus",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pbakaus/devtools-layout-mode/issues"
+  },
+  "dependencies": {
+    "gulp": "*",
+    "gulp-sass": "*",
+    "gulp-autoprefixer": "*",
+    "gulp-eslint": "*",
+    "browser-sync": "*",
+    "gulp-concat": "*",
+    "gulp-uglify": "*",
+    "gulp-sourcemaps": "*",
+    "gulp-babel": "*"
+  }
+}
