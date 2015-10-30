@@ -11,6 +11,7 @@ var babel = require('gulp-babel');
 
 var scripts = [
 	'js/Ghost.js',
+	'js/Dragger.js',
 	'js/StyleParser.js',
 	'js/LayoutMode.js',
 	// plugins

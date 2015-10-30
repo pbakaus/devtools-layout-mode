@@ -25,7 +25,8 @@
     "globals": {
         "Ghost": true,
         "StyleParser": true,
-        "LayoutMode": true
+        "LayoutMode": true,
+        "Dragger": true
     },
     "extends": "eslint:recommended"
 }

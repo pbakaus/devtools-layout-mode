@@ -61,8 +61,14 @@
 				})
 				.on('click', function() {
 
-					if(that.currentElement === this)
+					if(that.currentElement === this || that.interacting)
 						return false;
+
+					// this is an insanely ugly workaround for a propagation issue from drag,
+					// but I just dont give a shit! :D
+					if(Date.now() - that.lastInteractionTime < 5) {
+						return false;
+					}
 
 					if(that.currentElement) {
 						that.deactivate();
@@ -79,7 +85,7 @@
 
 		create: function() {
 			this.createOverlay();
-			
+			this.init();
 		},
 
 		createOverlay: function() {
@@ -119,45 +125,69 @@
 			this.captionMarginTop = $('<div class="caption caption-margin top"></div>').appendTo(this.overlayElement)[0];
 			this.captionMarginBottom = $('<div class="caption caption-margin bottom"></div>').appendTo(this.overlayElement)[0];
 
+			document.body.appendChild(this.overlayElement);
+
+		},
+
+		/*
+		 * Events & Behaviour initialization
+		 */
+
+		init: function() {
+
+			this.initHover();
+			this.initHandleHover();
+			this.initHandles();
+
 			var that = this;
-			this.handleSizeBottom
-				.add(this.handleSizeRight)
-				.hover(function() {
-					that.currentHandle = this;
-					that.overSizeHandle = true;
+			this.__keyup = function(e) {
 
-					if(!that.interacting) {
-						if(this === that.handleSizeRight[0]) { that.captionWidth.classList.add('over'); that.refreshCaptions(); that.selectRule('width'); }
-						if(this === that.handleSizeBottom[0]) { that.captionHeight.classList.add('over'); that.selectRule('height'); }
-					}
+				if(e.which === 16) {
+					that.shiftPressed = false;
+				}
 
-				}, function() {
-					that.currentHandle = null;
-					that.overSizeHandle = false;
+				if(e.keyCode === 27) {
+					that.deactivate();
+				}		
+			};
+			this.__keydown = function(e) {
 
-					var self = this;
-					var removeSpan = function() {
-						if(self === that.handleSizeRight[0]) { that.captionWidth.classList.remove('over'); that.refreshCaptions(); that.deselectRule(); }
-						if(self === that.handleSizeBottom[0]) { that.captionHeight.classList.remove('over'); that.deselectRule(); }	
-					};
+				if(e.which === 16) {
+					that.shiftPressed = true;
+				}
 
-					if(!that.interacting) {
-						removeSpan();
-					} else if(!that.__catchMouseUp) {
-						that.__catchMouseUp = $(document).one('mouseup', function() {
-							if(!that.overSizeHandle) removeSpan();
-							that.__catchMouseUp = null;
-						});
-					}
+			};
+			$(document).on('keyup', this.__keyup);
+			$(document).on('keydown', this.__keydown);
 
-				});
+		},
+
+		initHover: function() {
+
+			var that = this;
+
+			$('body').on('mousemove', function(e) {
+
+				that.__lastMouseMoveEvent = e;
+				if(!that.currentElement || that.hidden) {
+					return;
+				}
+
+				that.processOverLogic(e);
+
+			});
+
+		},
+
+		initHandleHover: function() {
+
+			var that = this;
 
 			this.handlePaddingBottom
 				.add(this.handlePaddingTop)
 				.add(this.handlePaddingLeft)
 				.add(this.handlePaddingRight)
 				.hover(function() {
-					that.currentHandle = this;
 					that.overPaddingHandle = true;
 
 					if(!that.interacting) {
@@ -168,7 +198,6 @@
 					}
 
 				}, function() {
-					that.currentHandle = null;
 					that.overPaddingHandle = false;
 
 					var self = this;
@@ -195,7 +224,6 @@
 				.add(this.handleMarginLeft)
 				.add(this.handleMarginRight)
 				.hover(function() {
-					that.currentHandle = this;
 					that.overMarginHandle = true;
 
 					if(!that.interacting) {
@@ -206,7 +234,6 @@
 					}
 
 				}, function() {
-					that.currentHandle = null;
 					that.overMarginHandle = false;
 
 					var self = this;
@@ -227,40 +254,6 @@
 					}
 
 				});
-
-			document.body.appendChild(this.overlayElement);
-
-		},
-
-		/*
-		 * Events & Behaviour initialization
-		 */
-
-		init: function() {
-
-			this.initHover();
-			this.initHandles();
-
-			var that = this;
-			this.__keyup = function(e) {
-
-				if(e.which === 16) {
-					that.shiftPressed = false;
-				}
-
-				if(e.keyCode === 27) {
-					that.deactivate();
-				}		
-			};
-			this.__keydown = function(e) {
-
-				if(e.which === 16) {
-					that.shiftPressed = true;
-				}
-
-			};
-			$(document).on('keyup', this.__keyup);
-			$(document).on('keydown', this.__keydown);
 
 		},
 
@@ -294,115 +287,124 @@
 
 			}
 
+			// don't process if interacting
+			if(this.interacting) {
+				return;
+			}
+
 			// over inner box
+			if(
+				((e.pageX > offset.left + this.paddingLeft &&
+					e.pageY > offset.top + this.paddingTop &&
+					e.pageX < (offset.left + this.outerWidth - this.paddingRight) &&
+					e.pageY < (offset.top + this.outerHeight - this.paddingBottom)) ||
+				this.overWidth || this.overHeight) &&
+				!this.overPaddingHandle && // cannot be over padding handle
+				!this.overMarginHandle
+			) {
 
-			if(!this.interacting) {
+				if(!this.overInner) {
+					this.overlayElement.classList.add('hover-inner');
+					this.overInner = true;
+				}
 
-				if(
-					((e.pageX > offset.left + this.paddingLeft &&
-						e.pageY > offset.top + this.paddingTop &&
-						e.pageX < (offset.left + this.outerWidth - this.paddingRight) &&
-						e.pageY < (offset.top + this.outerHeight - this.paddingBottom)) ||
-					this.overSizeHandle) &&
-					!this.overPaddingHandle && // cannot be over padding handle
-					!this.overMarginHandle
-				) {
+			} else {
 
-					if(!this.overInner) {
-						this.overlayElement.classList.add('hover-inner');
-						this.overInner = true;
-					}
-
-				} else {
-
-					if(this.overInner) {
-						this.overInner = false;
-						this.overlayElement.classList.remove('hover-inner');		
-					}
-
+				if(this.overInner) {
+					this.overInner = false;
+					this.overlayElement.classList.remove('hover-inner');
 				}
 
 			}
+
+
+			// over right side
+			if(
+				(e.pageX > offset.left + this.paddingLeft + this.innerWidth - 10 &&
+					e.pageY > offset.top + this.paddingTop &&
+					e.pageX < (offset.left + this.outerWidth - this.paddingRight) &&
+					e.pageY < (offset.top + this.outerHeight - this.paddingBottom)) &&
+				!this.overPaddingHandle && // cannot be over padding handle
+				!this.overMarginHandle
+			) {
+
+				if(!this.overWidth) {
+					document.body.style.cursor = 'e-resize';
+					this.captionWidth.classList.add('over');
+					this.refreshCaptions();
+					this.selectRule('width');
+					this.overWidth = true;
+
+				}
+
+			} else {
+
+				if(this.overWidth) {
+					this.overWidth = false;
+					document.body.style.cursor = '';
+					this.captionWidth.classList.remove('over');
+					this.refreshCaptions();
+					this.deselectRule();
+					this.currentHandle = null;
+				}
+
+			}
+
+
 
 			// over padding box
+			if(
+				((e.pageX > offset.left && e.pageY > offset.top &&
+					e.pageX < (offset.left + this.outerWidth) &&
+					e.pageY < (offset.top + this.outerHeight) &&
+					!this.overInner) ||
+				this.overPaddingHandle) &&
+				!(this.overWidth || this.overHeight) &&
+				!this.overMarginHandle
+			) {
 
-			if(!this.interacting) {
+				if(!this.overPadding) {
+					this.overlayElement.classList.add('hover-padding');
 
-				if(
-					((e.pageX > offset.left && e.pageY > offset.top &&
-						e.pageX < (offset.left + this.outerWidth) &&
-						e.pageY < (offset.top + this.outerHeight) &&
-						!this.overInner) ||
-					this.overPaddingHandle) &&
-					!this.overSizeHandle &&
-					!this.overMarginHandle
-				) {
+					this.overPadding = true;
+				}
 
-					if(!this.overPadding) {
-						this.overlayElement.classList.add('hover-padding');
+			} else {
 
-						this.overPadding = true;
-					}
-
-				} else {
-
-					if(this.overPadding) {
-						this.overPadding = false;
-						this.overlayElement.classList.remove('hover-padding');		
-					}
-
+				if(this.overPadding) {
+					this.overPadding = false;
+					this.overlayElement.classList.remove('hover-padding');		
 				}
 
 			}
+
 
 			// over margin box
+			if(
+				((e.pageX > offset.left - this.marginLeft &&
+					e.pageY > offset.top - this.marginTop && 
+					e.pageX < (offset.left + this.outerWidth + this.marginRight) &&
+					e.pageY < (offset.top + this.outerHeight + this.marginBottom) &&
+					!this.overInner &&
+					!this.overPadding) ||
+						this.overMarginHandle) &&
+				!this.overPaddingHandle &&
+				!(this.overWidth || this.overHeight)
+			) {
 
-			if(!this.interacting) {
+				if(!this.overMargin) {
+					this.overlayElement.classList.add('hover-margin');
+					this.overMargin = true;
+				}
 
-				if(
-					((e.pageX > offset.left - this.marginLeft &&
-						e.pageY > offset.top - this.marginTop && 
-						e.pageX < (offset.left + this.outerWidth + this.marginRight) &&
-						e.pageY < (offset.top + this.outerHeight + this.marginBottom) &&
-						!this.overInner &&
-						!this.overPadding) ||
-							this.overMarginHandle) &&
-					!this.overPaddingHandle &&
-					!this.overSizeHandle
-				) {
+			} else {
 
-					if(!this.overMargin) {
-						this.overlayElement.classList.add('hover-margin');
-						this.overMargin = true;
-					}
-
-				} else {
-
-					if(this.overMargin) {
-						this.overMargin = false;
-						this.overlayElement.classList.remove('hover-margin');		
-					}
-
+				if(this.overMargin) {
+					this.overMargin = false;
+					this.overlayElement.classList.remove('hover-margin');		
 				}
 
 			}
-
-		},
-
-		initHover: function() {
-
-			var that = this;
-
-			$('body').on('mousemove', function(e) {
-
-				that.__lastMouseMoveEvent = e;
-				if(!that.currentElement || that.hidden) {
-					return;
-				}
-
-				that.processOverLogic(e);
-
-			});
 
 		},
 
@@ -410,9 +412,10 @@
 
 			var that = this;
 			var handleOffset = 3;
+			var isTouch = 'ontouchstart' in document;
 
 			var applyPrecision = function(orig, current) {
-				if(that.shiftPressed) {
+				if(!that.shiftPressed) {
 					var delta = orig - current;
 					var precisionDelta = delta / 4;
 					return current + Math.round(delta - precisionDelta);
@@ -420,44 +423,79 @@
 				return current;
 			};
 
-			// resize handles
 
-			(function() {
+			// height
+			that.handleSizeBottom.on(isTouch ? 'touchstart' : 'mousedown', function(event) {
 
-				var start = function() { that.interacting = 'size'; this.__x = $(this).draggable('option', 'axis') === 'x'; };
-				var drag = function(event, ui) {
-					var x = this.__x;
-					var prop = x ? 'left' : 'top';
+				that.interacting = 'size';
+				var startHeight = that.innerHeight;
 
-					// apply precision drag
-					ui.position[prop] = applyPrecision(ui.originalPosition[prop], ui.position[prop]);
+				new Dragger(event.originalEvent, {
+					vertical: true,
+					move: function(delta) {
+						delta = that.shiftPressed ? delta : delta / 4;
+						(that.selectedRule || that.currentElement).style.height = Math.round(Math.max(0, startHeight - delta)) + 'px';
+						that.relayout();
+					},
+					stop: function() {
+						that.interacting = false;
+					}
+				});
 
-					// calculate normal handle position
-					ui.position[prop] = Math.max(0 - handleOffset, ui.position[prop]);
+			});
 
-					(that.selectedRule || that.currentElement).style[x ? 'width' : 'height'] = (ui.position[prop] + handleOffset) + 'px';
-					that.relayout();
+			// width
+			$(document).on(isTouch ? 'touchstart' : 'mousedown', function(event) {
 
-				};
-				var stop = function() {
-					//this.removeAttribute('style');
-					this.style.height = '';
-					this.style.width = '';
-					this.style.bottom = '';
-					this.style.top = '';
-					this.style.left = '';
-					this.style.right = '';
-					that.interacting = false;
-				};
+				if(that.overWidth) {
+					that.interacting = 'size';
+					var startWidth = that.innerWidth;
 
-				that.handleSizeBottom.draggable({ distance: 0, axis: 'y', cursor: 's-resize', start: start, drag: drag, stop: stop });
-				that.handleSizeRight.draggable({ distance: 0, axis: 'x', cursor: 'e-resize', start: start, drag: drag, stop: stop });
+					new Dragger(event.originalEvent, {
+						vertical: false,
+						move: function(delta) {
+							delta = that.shiftPressed ? delta : delta / 4;
+							(that.selectedRule || that.currentElement).style.width = Math.round(Math.max(0, startWidth - delta)) + 'px';
+							that.relayout();
+						},
+						stop: function() {
+							that.lastInteractionTime = Date.now();
+							that.interacting = false;
+						}
+					});					
+				}
 
-			})();
 
+
+			});
+
+			// padding bottom
+			$(document).on(isTouch ? 'touchstart' : 'mousedown', function(event) {
+
+				if(!that.overPadding) {
+					return;
+				}
+
+				that.interacting = 'padding';
+				var startPaddingBottom = that.paddingBottom;
+
+				new Dragger(event.originalEvent, {
+					vertical: true,
+					move: function(delta) {
+						delta = that.shiftPressed ? delta : delta / 4;
+						(that.selectedRule || that.currentElement).style.paddingBottom = Math.round(Math.max(0, startPaddingBottom - delta)) + 'px';
+						that.relayout();
+					},
+					stop: function() {
+						that.lastInteractionTime = Date.now();
+						that.interacting = false;
+					}
+				});
+
+			});
 
 			// resize padding
-
+/*
 			(function() {
 
 				var stop = function() {
@@ -518,7 +556,7 @@
 					drag: function(event, ui) {
 						ui.position.top = -handleOffset;
 						var delta = (ui.offset.top - this.curOffset);
-						delta = that.shiftPressed ? Math.round(delta / 4) : delta;
+						delta = !that.shiftPressed ? Math.round(delta / 4) : delta;
 						(that.selectedRule || that.currentElement).style.paddingTop = Math.max(0, this.curPaddingTop - delta) + 'px';
 						drag();
 					},
@@ -537,7 +575,7 @@
 					drag: function(event, ui) {
 						ui.position.left = -handleOffset;
 						var delta = (ui.offset.left - this.curOffset);
-						delta = that.shiftPressed ? Math.round(delta / 4) : delta;
+						delta = !that.shiftPressed ? Math.round(delta / 4) : delta;
 						(that.selectedRule || that.currentElement).style.paddingLeft = Math.max(0, this.curPaddingLeft - delta) + 'px';
 						drag();
 					},
@@ -545,7 +583,7 @@
 				});				
 
 			})();
-
+*/
 
 			// resize margin
 
@@ -611,7 +649,7 @@
 					drag: function(event, ui) {
 						ui.position.left = -handleOffset;
 						var delta = (ui.offset.left - this.curOffset);
-						delta = that.shiftPressed ? Math.round(delta / 4) : delta;
+						delta = !that.shiftPressed ? Math.round(delta / 4) : delta;
 						(that.selectedRule || that.currentElement).style.marginLeft = Math.max(0, this.curMarginLeft - delta) + 'px';
 						drag();
 					},
@@ -630,7 +668,7 @@
 					drag: function(event, ui) {
 						ui.position.top = -handleOffset;
 						var delta = (ui.offset.top - this.curOffset);
-						delta = that.shiftPressed ? Math.round(delta / 4) : delta;
+						delta = !that.shiftPressed ? Math.round(delta / 4) : delta;
 						(that.selectedRule || that.currentElement).style.marginTop = Math.max(0, this.curMarginTop - delta) + 'px';
 						drag();
 					},
@@ -880,9 +918,6 @@
 
 			// execute plugins
 			this.callPlugin('activate');
-
-			// init events
-			this.init();
 
 			// relayout
 			this.relayout();
