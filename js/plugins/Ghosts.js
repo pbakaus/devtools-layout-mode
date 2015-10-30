@@ -26,6 +26,10 @@ LayoutMode.registerPlugin({
 		this.destroyGhosts();
 	},
 
+	relayout: function() {
+		this.updateGhosts();
+	},
+
 	/* member functions */
 
 	ghosts: [],

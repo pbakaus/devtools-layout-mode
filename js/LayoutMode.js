@@ -35,6 +35,48 @@
 			}
 		},
 
+		enable: function() {
+
+			var that = this;
+
+			// make all elements on page inspectable
+			$('body *:not(.overlay,.overlay *,.overlay-title,.overlay-title *)')
+				.on('mouseover', function(e) {
+
+					var targetChanged = that.hoverElement !== this;
+					that.hoverElement = this;
+
+					if(targetChanged) {
+						that.callPlugin('hoverTargetChange', e);
+					}
+
+					// in normal mode, don't activate the hover ghost when interacting or over the current el
+					if(that.hoverGhost.currentElement === this || that.interacting || that.over)
+						return;
+
+					that.hoverGhost.relayout(this);
+
+					return false;
+
+				})
+				.on('click', function() {
+
+					if(that.currentElement === this)
+						return false;
+
+					if(that.currentElement) {
+						that.deactivate();
+					}
+
+					// sync on the element
+					that.activate(this);
+
+					return false;
+
+				});		
+
+		},
+
 		create: function() {
 			this.createOverlay();
 			
@@ -354,7 +396,7 @@
 			$('body').on('mousemove', function(e) {
 
 				that.__lastMouseMoveEvent = e;
-				if(!that.currentElement) {
+				if(!that.currentElement || that.hidden) {
 					return;
 				}
 
@@ -395,7 +437,7 @@
 
 					(that.selectedRule || that.currentElement).style[x ? 'width' : 'height'] = (ui.position[prop] + handleOffset) + 'px';
 					that.relayout();
-					that.updateGhosts();
+
 				};
 				var stop = function() {
 					//this.removeAttribute('style');
@@ -425,8 +467,7 @@
 				};
 
 				var drag = function() {
-					that.relayout();
-					that.updateGhosts();					
+					that.relayout();					
 				};
 
 				that.handlePaddingBottom.draggable({
@@ -518,7 +559,6 @@
 
 				var drag = function() {
 					that.relayout();
-					that.updateGhosts();
 				};
 
 				that.handleMarginBottom.draggable({
@@ -855,7 +895,7 @@
 				this.exitRuleMode();
 			}
 
-			this.overlayElement.classList.remove('hover', 'hover-inner', 'hover-padding', 'hover-margin', 'in-command');
+			this.overlayElement.classList.remove('hover', 'hover-inner', 'hover-padding', 'hover-margin', 'hidden');
 			this.overlayElement.style.display = 'none';
 
 			// execute plugins
@@ -916,6 +956,47 @@
 
 		deselectRule: function() {
 			this.exitRuleMode();
+		},
+
+		/* 
+		 * functions to temporarily disable
+		 * layout mode, i.e. for previewing.
+		 */
+
+		show: function() {
+
+			this.hidden = false;
+			this.over = this.__lastOver;
+
+			if(this.over) this.overlayElement.classList.add('hover');
+			if(this.overInner) this.overlayElement.classList.add('hover-inner');
+			if(this.overPadding) this.overlayElement.classList.add('hover-padding');
+			if(this.overMargin) this.overlayElement.classList.add('hover-margin');
+
+			this.overlayElement.classList.remove('hidden');
+
+			// edge case: user holds command, moves out, releases command
+			if(this.__lastMouseMoveEvent)
+				this.processOverLogic(this.__lastMouseMoveEvent);
+
+			this.hoverGhost.overlayElement.style.visibility = '';
+
+			this.callPlugin('show');
+
+		},
+
+		hide: function() {
+
+			this.hidden = true;
+			this.__lastOver = this.over;
+			this.over = false;
+
+			this.overlayElement.classList.remove('hover', 'hover-inner', 'hover-margin', 'hover-padding');
+			this.overlayElement.classList.add('hidden');
+			this.hoverGhost.overlayElement.style.visibility = 'hidden';
+
+			this.callPlugin('hide');
+
 		}
 
 

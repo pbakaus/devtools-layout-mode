@@ -1,47 +1,107 @@
 LayoutMode.registerPlugin({
 
-	enterDimensionMode: function() {
+	create: function() {
 
-		this.commandPressed = true;
-		this.commandOver = false;
+	},
 
-		this.overlayElement.classList.remove('hover', 'hover-inner', 'hover-margin', 'hover-padding');
-		this.overlayElement.classList.add('in-command');
-		this.hoverGhost.overlayElement.style.visibility = 'hidden';
-		this.titleBox.style.opacity = 0;
+	activate: function() {
 
-		if(this.__lastMouseMoveEvent)
-			this.processCommandOverLogic(this.__lastMouseMoveEvent);
+		var that = this;
 
-		if(this.hoverElement !== this.currentElement &&
-			!$.contains(this.hoverElement, this.currentElement) &&
-			!$.contains(this.currentElement, this.hoverElement)
+		$(document)
+			.on('keydown', function(e) {
+				if(e.keyCode === 91) { // cmd key
+					that.enable();
+				}
+			})
+			.on('keyup', function(e) {
+				if(e.keyCode === 91) { // cmd key
+					that.disable();
+				}
+			});
+
+	},
+
+	deactivate: function() {
+		this.disable();
+	},
+
+	hoverTargetChange: function(e) {
+
+		if(this.enabled)
+			this.processCommandOverLogic(e);
+
+		// if we're holding shift and hover another element, show guides
+		if(this.enabled &&
+			LayoutMode.currentElement &&
+			LayoutMode.hoverElement !== LayoutMode.currentElement &&
+			!$.contains(LayoutMode.hoverElement, LayoutMode.currentElement) &&
+			!$.contains(LayoutMode.currentElement, LayoutMode.hoverElement)
 		) {
-			this.visualizeRelationTo(this.hoverElement);
+			this.visualizeRelationTo(LayoutMode.hoverElement);
+			return false;
 		}
 
 	},
 
-	exitDimensionMode: function() {
+	/* member functions */
 
-		this.commandPressed = false;
+	enable: function() {
 
-		if(this.over) this.overlayElement.classList.add('hover');
-		if(this.overInner) this.overlayElement.classList.add('hover-inner');
-		if(this.overPadding) this.overlayElement.classList.add('hover-padding');
-		if(this.overMargin) this.overlayElement.classList.add('hover-margin');
+		this.enabled = true;
 
-		this.overlayElement.classList.remove('in-command');
+		LayoutMode.hide();
 
-		// edge case: user holds command, moves out, releases command
-		if(this.__lastMouseMoveEvent)
-			this.processOverLogic(this.__lastMouseMoveEvent);
+		//LayoutMode.over = false;
 
-		this.hoverGhost.overlayElement.style.visibility = '';
-		this.titleBox.style.opacity = 1;
+		// process over logic once
+		if(LayoutMode.__lastMouseMoveEvent)
+			this.processCommandOverLogic(LayoutMode.__lastMouseMoveEvent);
 
+		// visualize right away with what we previously hovered
+		if(LayoutMode.hoverElement !== LayoutMode.currentElement &&
+			!$.contains(LayoutMode.hoverElement, LayoutMode.currentElement) &&
+			!$.contains(LayoutMode.currentElement, LayoutMode.hoverElement)
+		) {
+			this.visualizeRelationTo(LayoutMode.hoverElement);
+		}
+
+	},
+
+	disable: function() {
+		this.enabled = false;
+		this.commandOver = false;
 		if(this.vLineX) this.vLineX.style.opacity = 0;
 		if(this.vLineY) this.vLineY.style.opacity = 0;
+		LayoutMode.show();
+	},
+
+	processCommandOverLogic: function(e) {
+
+		var extraMargin = 10;
+		var offset = LayoutMode.currentOffset;
+
+		// command over/out
+
+		if(
+			e.pageX > offset.left - LayoutMode.marginLeft - extraMargin &&
+			e.pageY > offset.top - LayoutMode.marginTop - extraMargin &&
+			e.pageX < (offset.left + LayoutMode.outerWidth + LayoutMode.marginRight + extraMargin) &&
+			e.pageY < (offset.top + LayoutMode.outerHeight + LayoutMode.marginBottom + extraMargin)
+		) {
+
+			if(!this.commandOver) {
+				this.commandOver = true;
+				this.visualizeRelationToWindow();
+			}
+
+		} else {
+
+			if(this.commandOver) {
+				this.commandOver = false;
+			}
+
+		}
 
 	},
 
@@ -79,44 +139,46 @@ LayoutMode.registerPlugin({
 
 	visualizeRelationToWindow: function() {
 
-		var currentElement = this.currentElement;
+		var currentElement = LayoutMode.currentElement;
 
 		this.createVisualizationLines();
 
 		this.vLineX.style.opacity = 1;
-		this.vLineX.style.top = (currentElement.offsetTop + (currentElement.offsetHeight / 2)) + 'px';
+		this.vLineX.style.top = (LayoutMode.currentOffset.top + (currentElement.offsetHeight / 2)) + 'px';
 		this.vLineX.style.left = 0 + 'px';
-		this.vLineX.style.width = currentElement.offsetLeft + 'px';
-		this.vLineXCaption.innerHTML = currentElement.offsetLeft + ' <span>px</span>';
+		this.vLineX.style.width = LayoutMode.currentOffset.left + 'px';
+		this.vLineXCaption.innerHTML = LayoutMode.currentOffset.left + ' <span>px</span>';
 
 		this.vLineY.style.opacity = 1;
-		this.vLineY.style.left = (currentElement.offsetLeft + (currentElement.offsetWidth / 2)) + 'px';
+		this.vLineY.style.left = (LayoutMode.currentOffset.left + (currentElement.offsetWidth / 2)) + 'px';
 		this.vLineY.style.top = 0 + 'px';
-		this.vLineY.style.height = currentElement.offsetTop + 'px';
-		this.vLineYCaption.innerHTML = currentElement.offsetTop + ' <span>px</span>';
+		this.vLineY.style.height = LayoutMode.currentOffset.top + 'px';
+		this.vLineYCaption.innerHTML = LayoutMode.currentOffset.top + ' <span>px</span>';
 
 	},
 
 	visualizeRelationTo: function(relatedElement) {
 
-		var currentElement = this.currentElement, top, left;
+		var currentElement = LayoutMode.currentElement, top, left;
+		var currentOffset = LayoutMode.currentOffset;
+		var relatedOffset = $(relatedElement).offset();
 
 		this.createVisualizationLines();
 
-		var reRightEdge = relatedElement.offsetLeft + relatedElement.offsetWidth;
-		var ceRightEdge = currentElement.offsetLeft + currentElement.offsetWidth;
-		var reLeftEdge = relatedElement.offsetLeft;
-		var ceLeftEdge = currentElement.offsetLeft;
+		var reRightEdge = relatedOffset.left + relatedElement.offsetWidth;
+		var ceRightEdge = currentOffset.left + currentElement.offsetWidth;
+		var reLeftEdge = relatedOffset.left;
+		var ceLeftEdge = currentOffset.left;
 
-		var reBottomEdge = relatedElement.offsetTop + relatedElement.offsetHeight;
-		var ceBottomEdge = currentElement.offsetTop + currentElement.offsetHeight;
-		var reTopEdge = relatedElement.offsetTop;
-		var ceTopEdge = currentElement.offsetTop;
+		var reBottomEdge = relatedOffset.top + relatedElement.offsetHeight;
+		var ceBottomEdge = currentOffset.top + currentElement.offsetHeight;
+		var reTopEdge = relatedOffset.top;
+		var ceTopEdge = currentOffset.top;
 		
 		// horizontal connection
 		if(reRightEdge < ceLeftEdge) {
 
-			top = currentElement.offsetTop + (currentElement.offsetHeight / 2);
+			top = currentOffset.top + (currentElement.offsetHeight / 2);
 			this.vLineX.style.opacity = 1;
 			this.vLineX.style.top = top + 'px';
 			this.vLineX.style.left = reRightEdge + 'px';
@@ -141,7 +203,7 @@ LayoutMode.registerPlugin({
 
 		} else if(ceRightEdge < reLeftEdge) {
 
-			top = currentElement.offsetTop + (currentElement.offsetHeight / 2);
+			top = currentOffset.top + (currentElement.offsetHeight / 2);
 			this.vLineX.style.opacity = 1;
 			this.vLineX.style.top = top + 'px';
 			this.vLineX.style.left = ceRightEdge + 'px';
@@ -171,7 +233,7 @@ LayoutMode.registerPlugin({
 		// vertical connection
 		if(reBottomEdge < ceTopEdge) {
 
-			left = currentElement.offsetLeft + (currentElement.offsetWidth / 2);
+			left = currentOffset.left + (currentElement.offsetWidth / 2);
 			this.vLineY.style.opacity = 1;
 			this.vLineY.style.left = left + 'px';
 			this.vLineY.style.top = reBottomEdge + 'px';
@@ -196,7 +258,7 @@ LayoutMode.registerPlugin({
 
 		} else if(ceBottomEdge < reTopEdge) {
 
-			left = currentElement.offsetLeft + (currentElement.offsetWidth / 2);
+			left = currentOffset.left + (currentElement.offsetWidth / 2);
 			this.vLineY.style.opacity = 1;
 			this.vLineY.style.left = left + 'px';
 			this.vLineY.style.top = ceBottomEdge + 'px';
@@ -221,35 +283,6 @@ LayoutMode.registerPlugin({
 
 		} else {
 			this.vLineY.style.opacity = 0;
-		}
-
-	},
-
-	processCommandOverLogic: function(e) {
-
-		var extraMargin = 10;
-		var offset = this.currentOffset;
-
-		// command over/out
-
-		if(
-			e.pageX > offset.left - this.marginLeft - extraMargin &&
-			e.pageY > offset.top - this.marginTop - extraMargin &&
-			e.pageX < (offset.left + this.outerWidth + this.marginRight + extraMargin) &&
-			e.pageY < (offset.top + this.outerHeight + this.marginBottom + extraMargin)
-		) {
-
-			if(!this.commandOver) {
-				this.commandOver = true;
-				this.visualizeRelationToWindow();
-			}
-
-		} else {
-
-			if(this.commandOver) {
-				this.commandOver = false;
-			}
-
 		}
 
 	}

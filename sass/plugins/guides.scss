@@ -1,0 +1,84 @@
+/* guides */
+$size-color-light: #4A90E2;
+$padding-color-dark: #5BB500;
+$padding-color-light: #6BD500;
+$margin-color-light: #F6A723;
+
+.guide {
+	opacity: 0.4;
+}
+
+.overlay {
+	&.hover-margin {
+		.guide-margin-left,
+		.guide-margin-right,
+		.guide-margin-bottom,
+		.guide-margin-top {
+			opacity: 1;
+		}		
+	}
+	&.hover-padding {
+		.guide-padding-left,
+		.guide-padding-right,
+		.guide-padding-bottom,
+		.guide-padding-top {
+			opacity: 1;
+		}
+	}
+}
+
+.guide-margin-left,
+.guide-margin-right,
+.guide-padding-left,
+.guide-padding-right {
+	border-left: 1px dashed $size-color-light;
+	width: 0;
+	height: 100%;
+	position: absolute;
+	top: 0;
+}
+
+.guide-margin-left,
+.guide-padding-left {
+	left: 0;
+}
+
+.guide-margin-right,
+.guide-padding-right {
+	right: 0;
+}
+
+.guide-margin-bottom,
+.guide-margin-top,
+.guide-padding-bottom,
+.guide-padding-top {
+	border-top: 1px dashed $size-color-light;
+	height: 0;
+	width: 100%;
+	position: absolute;
+	left: 0;
+}
+
+.guide-margin-top,
+.guide-padding-top {
+	top: 0;
+}
+
+.guide-margin-bottom,
+.guide-padding-bottom {
+	bottom: 0;
+}
+
+.guide-margin-top,
+.guide-margin-right,
+.guide-margin-bottom,
+.guide-margin-left {
+	border-color: $margin-color-light;
+}
+
+.guide-padding-top,
+.guide-padding-right,
+.guide-padding-bottom,
+.guide-padding-left {
+	border-color: $padding-color-light;
+}

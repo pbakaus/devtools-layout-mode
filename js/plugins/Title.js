@@ -63,6 +63,14 @@ LayoutMode.registerPlugin({
 
 	},
 
+	show: function() {
+		this.titleBox.style.opacity = 1;
+	},
+
+	hide: function() {
+		this.titleBox.style.opacity = 0;
+	},
+
 	/* member functions */
 
 	fillRules: function() {

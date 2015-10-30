@@ -18,6 +18,7 @@ var scripts = [
 	'js/plugins/Guides.js',
 	'js/plugins/Ghosts.js',
 	'js/plugins/ContentEditable.js',
+	'js/plugins/CompareAndPreview.js',
 	// init
 	'js/scripts/init.js'];
 
