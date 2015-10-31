@@ -20,6 +20,8 @@ var scripts = [
 	'js/plugins/Ghosts.js',
 	'js/plugins/ContentEditable.js',
 	'js/plugins/CompareAndPreview.js',
+	'js/plugins/ModifySize.js',
+	'js/plugins/ModifyPadding.js',
 	// init
 	'js/scripts/init.js'];
 

@@ -135,7 +135,6 @@ $margin-color-light: #F6A723;
 	&.bottom {
 		bottom: -3px;
 		left: 50%;
-		cursor: s-resize;
 
 		&.handle-padding {
 			margin-left: -8px; /* - width of handle / 2 */
@@ -155,7 +154,6 @@ $margin-color-light: #F6A723;
 	&.right {
 		right: -3px;
 		top: 50%;
-		cursor: e-resize;
 
 		&.handle-padding {
 			margin-top: -8px;
@@ -175,7 +173,6 @@ $margin-color-light: #F6A723;
 	&.top {
 		top: -3px;
 		left: 50%;
-		cursor: n-resize;
 
 		&.handle-padding {
 			margin-left: -8px;
@@ -191,7 +188,6 @@ $margin-color-light: #F6A723;
 	&.left {
 		left: -3px;
 		top: 50%;
-		cursor: w-resize;
 
 		&.handle-padding {
 			margin-top: -8px;

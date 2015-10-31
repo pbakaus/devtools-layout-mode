@@ -16,6 +16,7 @@
 		start: function() {
 
 			event.preventDefault();
+			LayoutMode.interacting = true;
 
 			var self = this;
 			this.__move = function(e) { self.move(e); };
@@ -46,7 +47,9 @@
 			document.removeEventListener(isTouch ? 'touchend' : 'mouseup', this.__stop);
 
 			event.preventDefault();
-			this.options.stop();
+			LayoutMode.lastInteractionTime = Date.now();
+			LayoutMode.interacting = false;
+			if(this.options.stop) this.options.stop();
 
 		}
 	});
