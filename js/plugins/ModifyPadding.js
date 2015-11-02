@@ -1,11 +1,13 @@
 LayoutMode.registerPlugin({
 
+	priority: 1,
+
 	create: function() {
 
-		this.handlePaddingBottom = $('<div class="handle bottom handle-padding" title="Drag to change padding-bottom"></div>').appendTo(LayoutMode.overlayElement);
-		this.handlePaddingRight = $('<div class="handle right handle-padding" title="Drag to change padding-right"></div>').appendTo(LayoutMode.overlayElement);
-		this.handlePaddingTop = $('<div class="handle top handle-padding" title="Drag to change padding-top"></div>').appendTo(LayoutMode.overlayElement);
-		this.handlePaddingLeft = $('<div class="handle left handle-padding" title="Drag to change padding-left"></div>').appendTo(LayoutMode.overlayElement);
+		this.handlePaddingBottom = $('<div class="handle bottom handle-padding"></div>').appendTo(LayoutMode.overlayElement);
+		this.handlePaddingRight = $('<div class="handle right handle-padding"></div>').appendTo(LayoutMode.overlayElement);
+		this.handlePaddingTop = $('<div class="handle top handle-padding"></div>').appendTo(LayoutMode.overlayElement);
+		this.handlePaddingLeft = $('<div class="handle left handle-padding"></div>').appendTo(LayoutMode.overlayElement);
 
 		var that = this;
 		this.handlePaddingTop.hover(function() {
@@ -40,6 +42,7 @@ LayoutMode.registerPlugin({
 
 	deactivate: function() {
 		this.overPadding = false;
+		LayoutMode.overPadding = false;
 		LayoutMode.overlayElement.classList.remove('hover-padding');
 	},
 
@@ -108,20 +111,24 @@ LayoutMode.registerPlugin({
 			e.pageX < offset.left + LayoutMode.outerWidth // bottom side
 		) || this.overRightHandle || overLineRight;
 
+		var notOverCompetingHandle = !LayoutMode.overSize && !e.target.classList.contains('handle-margin');
+
 		// if over any padding area, show padding handles
 		if(
-			overPaddingTop ||
+			(overPaddingTop ||
 			overPaddingBottom ||
 			overPaddingLeft ||
-			overPaddingRight
+			overPaddingRight) && notOverCompetingHandle
 		) {
 			if(!this.overPadding) {
 				LayoutMode.overlayElement.classList.add('hover-padding');
 				this.overPadding = true;
+				LayoutMode.overPadding = true;
 			}
 		} else {
 			if(this.overPadding) {
 				this.overPadding = false;
+				LayoutMode.overPadding = false;
 				LayoutMode.overlayElement.classList.remove('hover-padding');		
 			}
 		}
@@ -129,11 +136,11 @@ LayoutMode.registerPlugin({
 		var cursorAdded = false;
 		var cursorRemoved = false;
 
-		if(overPaddingTop) {
+		if(overPaddingTop && notOverCompetingHandle) {
 			if(!this.overPaddingTop) {
 				this.overPaddingTop = true;
 				this.captionPaddingTop.classList.add('over');
-				document.body.style.cursor = 'n-resize';
+				document.body.classList.add('resize-padding-top');
 				cursorAdded = true;
 			}
 		} else {
@@ -144,11 +151,11 @@ LayoutMode.registerPlugin({
 			}
 		}
 
-		if(overPaddingBottom) {
+		if(overPaddingBottom && notOverCompetingHandle) {
 			if(!this.overPaddingBottom) {
 				this.overPaddingBottom = true;
 				this.captionPaddingBottom.classList.add('over');
-				document.body.style.cursor = 's-resize';
+				document.body.classList.add('resize-padding-bottom');
 				cursorAdded = true;
 			}
 		} else {
@@ -159,11 +166,11 @@ LayoutMode.registerPlugin({
 			}
 		}
 
-		if(overPaddingLeft) {
+		if(overPaddingLeft && notOverCompetingHandle) {
 			if(!this.overPaddingLeft) {
 				this.overPaddingLeft = true;
 				this.captionPaddingLeft.classList.add('over');
-				document.body.style.cursor = 'w-resize';
+				document.body.classList.add('resize-padding-left');
 				cursorAdded = true;
 			}
 		} else {
@@ -174,11 +181,11 @@ LayoutMode.registerPlugin({
 			}
 		}
 
-		if(overPaddingRight) {
+		if(overPaddingRight && notOverCompetingHandle) {
 			if(!this.overPaddingRight) {
 				this.overPaddingRight = true;
 				this.captionPaddingRight.classList.add('over');
-				document.body.style.cursor = 'e-resize';
+				document.body.classList.add('resize-padding-right');
 				cursorAdded = true;
 			}
 		} else {
@@ -190,7 +197,7 @@ LayoutMode.registerPlugin({
 		}
 
 		if(!cursorAdded && cursorRemoved) {
-			document.body.style.cursor = '';
+			document.body.classList.remove('resize-padding-top', 'resize-padding-bottom', 'resize-padding-left', 'resize-padding-right');
 		}
 
 	},
@@ -325,69 +332,6 @@ LayoutMode.registerPlugin({
 			}
 
 		});
-
-
-/*
-			(function() {
-
-				that.handlePaddingRight.draggable({
-					distance: 0,
-					axis: 'x',
-					cursor: 'e-resize',
-					start: function() {
-						this.curInnerWidth = $(that.currentElement).width();
-						this.curPaddingRight = that.paddingRight;
-						that.interacting = 'padding';
-					},
-					drag: function(event, ui) {
-						ui.position.left = applyPrecision(ui.originalPosition.left, ui.position.left);
-						ui.position.left = Math.max(this.curInnerWidth - handleOffset, ui.position.left);
-						(that.selectedRule || that.currentElement).style.paddingRight = Math.max(0, this.curPaddingRight + ((ui.position.left) - ui.originalPosition.left)) + 'px';
-						drag();
-					},
-					stop: stop
-				});
-
-				that.handlePaddingTop.draggable({
-					distance: 1,
-					axis: 'y',
-					cursor: 'n-resize',
-					start: function(event, ui) {
-						this.curOffset = ui.offset.top;
-						this.curPaddingTop = that.paddingTop;
-						that.interacting = 'padding';
-					},
-					drag: function(event, ui) {
-						ui.position.top = -handleOffset;
-						var delta = (ui.offset.top - this.curOffset);
-						delta = !that.shiftPressed ? Math.round(delta / 4) : delta;
-						(that.selectedRule || that.currentElement).style.paddingTop = Math.max(0, this.curPaddingTop - delta) + 'px';
-						drag();
-					},
-					stop: stop
-				});
-
-				that.handlePaddingLeft.draggable({
-					distance: 1,
-					axis: 'x',
-					cursor: 'w-resize',
-					start: function(event, ui) {
-						this.curOffset = ui.offset.left;
-						this.curPaddingLeft = that.paddingLeft;
-						that.interacting = 'padding';
-					},
-					drag: function(event, ui) {
-						ui.position.left = -handleOffset;
-						var delta = (ui.offset.left - this.curOffset);
-						delta = !that.shiftPressed ? Math.round(delta / 4) : delta;
-						(that.selectedRule || that.currentElement).style.paddingLeft = Math.max(0, this.curPaddingLeft - delta) + 'px';
-						drag();
-					},
-					stop: stop
-				});				
-
-			})();
-*/
 
 	}
 

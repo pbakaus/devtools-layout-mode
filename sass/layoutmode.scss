@@ -285,7 +285,7 @@ $margin-color-light: #F6A723;
 			}
 		}
 
-		&.over span:nth-child(1) {
+		&.active span:nth-child(1) {
 			display: inline;
 		}
 
@@ -423,6 +423,28 @@ $margin-color-light: #F6A723;
 		}
 	}
 
+}
+
+body.resize-padding-top,
+body.resize-margin-top {
+	cursor: n-resize;
+}
+
+body.resize-width,
+body.resize-padding-right,
+body.resize-margin-right {
+	cursor: e-resize;
+}
+
+body.resize-height,
+body.resize-padding-bottom,
+body.resize-margin-bottom {
+	cursor: s-resize;
+}
+
+body.resize-padding-left,
+body.resize-margin-left {
+	cursor: w-resize;
 }
 
 @import 'plugins/compareandpreview';

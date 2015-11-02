@@ -22,6 +22,7 @@ var scripts = [
 	'js/plugins/CompareAndPreview.js',
 	'js/plugins/ModifySize.js',
 	'js/plugins/ModifyPadding.js',
+	'js/plugins/ModifyMargin.js',
 	// init
 	'js/scripts/init.js'];
 

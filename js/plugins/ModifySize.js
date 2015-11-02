@@ -1,9 +1,11 @@
 LayoutMode.registerPlugin({
 
+	priority: 0,
+
 	create: function() {
 
-		this.handleHeight = $('<div class="handle bottom handle-size" title="Drag to change height"></div>').appendTo(LayoutMode.overlayElement);
-		this.handleWidth = $('<div class="handle right handle-size" title="Drag to change width"></div>').appendTo(LayoutMode.overlayElement);
+		this.handleHeight = $('<div class="handle bottom handle-size"></div>').appendTo(LayoutMode.overlayElement);
+		this.handleWidth = $('<div class="handle right handle-size"></div>').appendTo(LayoutMode.overlayElement);
 
 		this.captionWidth = $('<div class="caption caption-width"></div>').appendTo(LayoutMode.overlayElement)[0];
 		this.captionHeight = $('<div class="caption caption-height"></div>').appendTo(LayoutMode.overlayElement)[0];
@@ -14,6 +16,7 @@ LayoutMode.registerPlugin({
 
 	deactivate: function() {
 		this.overInner = false;
+		LayoutMode.overSize = false;
 		LayoutMode.overlayElement.classList.remove('hover-inner');
 	},
 
@@ -34,7 +37,9 @@ LayoutMode.registerPlugin({
 			e.pageX > offset.left + LayoutMode.paddingLeft &&
 			e.pageY > offset.top + LayoutMode.paddingTop &&
 			e.pageX < (offset.left + LayoutMode.outerWidth - LayoutMode.paddingRight) &&
-			e.pageY < (offset.top + LayoutMode.outerHeight - LayoutMode.paddingBottom)
+			e.pageY < (offset.top + LayoutMode.outerHeight - LayoutMode.paddingBottom) &&
+			!e.target.classList.contains('handle-padding') &&
+			!e.target.classList.contains('handle-margin')
 		) {
 			if(!this.overInner) {
 				LayoutMode.overlayElement.classList.add('hover-inner');
@@ -75,18 +80,21 @@ LayoutMode.registerPlugin({
 
 		// over right side
 		if(
-			e.pageX > offset.left + LayoutMode.paddingLeft + LayoutMode.innerWidth - 10 &&
+			e.pageX > offset.left + LayoutMode.paddingLeft + LayoutMode.innerWidth - 5 &&
 			e.pageY > offset.top + LayoutMode.paddingTop &&
 			e.pageX < (offset.left + LayoutMode.outerWidth - LayoutMode.paddingRight) &&
-			e.pageY < (offset.top + LayoutMode.outerHeight - LayoutMode.paddingBottom)
+			e.pageY < (offset.top + LayoutMode.outerHeight - LayoutMode.paddingBottom) &&
+			!e.target.classList.contains('handle-padding') &&
+			!e.target.classList.contains('handle-margin')
 		) {
 
 			if(!this.overWidth) {
-				document.body.style.cursor = 'e-resize';
+				document.body.classList.add('resize-width');
 				this.captionWidth.classList.add('over');
 				this.refreshCaptions();
 				LayoutMode.selectRule('width');
 				this.overWidth = true;
+				LayoutMode.overSize = true;
 
 			}
 
@@ -94,7 +102,8 @@ LayoutMode.registerPlugin({
 
 			if(this.overWidth) {
 				this.overWidth = false;
-				document.body.style.cursor = '';
+				LayoutMode.overSize = false;
+				document.body.classList.remove('resize-width');
 				this.captionWidth.classList.remove('over');
 				this.refreshCaptions();
 				LayoutMode.deselectRule();
@@ -110,25 +119,29 @@ LayoutMode.registerPlugin({
 
 		// over bottom side
 		if(
-			e.pageY > offset.top + LayoutMode.paddingTop + LayoutMode.innerHeight - 10 &&
+			e.pageY > offset.top + LayoutMode.paddingTop + LayoutMode.innerHeight - 5 &&
 			e.pageX > offset.left + LayoutMode.paddingLeft &&
 			e.pageY < (offset.top + LayoutMode.outerHeight - LayoutMode.paddingBottom) &&
-			e.pageX < (offset.left + LayoutMode.outerWidth - LayoutMode.paddingRight)
+			e.pageX < (offset.left + LayoutMode.outerWidth - LayoutMode.paddingRight) &&
+			!e.target.classList.contains('handle-padding')
+			&& !e.target.classList.contains('handle-margin')
 		) {
 
 			if(!this.overHeight) {
-				document.body.style.cursor = 's-resize';
+				document.body.classList.add('resize-height');
 				this.captionHeight.classList.add('over');
 				this.refreshCaptions();
 				LayoutMode.selectRule('height');
 				this.overHeight = true;
+				LayoutMode.overSize = true;
 			}
 
 		} else {
 
 			if(this.overHeight) {
 				this.overHeight = false;
-				document.body.style.cursor = '';
+				LayoutMode.overSize = false;
+				document.body.classList.remove('resize-height');
 				this.captionHeight.classList.remove('over');
 				this.refreshCaptions();
 				LayoutMode.deselectRule();
