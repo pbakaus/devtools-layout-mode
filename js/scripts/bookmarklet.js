@@ -1,4 +1,4 @@
-(function() {
+javascript:(function() {
 
 	var link = document.createElement('link');
 	link.href = '//pbakaus.github.io/devtools-layout-mode/build/css/main.css';
@@ -10,4 +10,4 @@
 	script.type = 'text/javascript';
 	document.body.appendChild(script);
 
-})();
+})()
