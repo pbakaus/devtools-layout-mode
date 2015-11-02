@@ -106,7 +106,7 @@ LayoutMode.registerPlugin({
 				document.body.classList.remove('resize-width');
 				this.captionWidth.classList.remove('over');
 				this.refreshCaptions();
-				LayoutMode.deselectRule();
+				LayoutMode.deselectRule('width');
 			}
 
 		}
@@ -144,7 +144,7 @@ LayoutMode.registerPlugin({
 				document.body.classList.remove('resize-height');
 				this.captionHeight.classList.remove('over');
 				this.refreshCaptions();
-				LayoutMode.deselectRule();
+				LayoutMode.deselectRule('height');
 			}
 
 		}

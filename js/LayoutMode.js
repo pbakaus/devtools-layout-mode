@@ -404,6 +404,8 @@
 
 		selectRule: function(cssProperty) {
 
+			this.selectedProp = cssProperty;
+
 			for (var i = 0; i < this.matchedRules.length; i++) {
 				if(this.matchedRules[i].style[cssProperty]) {
 					this.enterRuleMode(this.matchedRules[i], i);
@@ -416,7 +418,13 @@
 
 		},
 
-		deselectRule: function() {
+		deselectRule: function(cssProperty) {
+
+			// don't do anything if in the meantime another rule was selected
+			if(this.selectedProp !== cssProperty) {
+				return;
+			}
+
 			this.exitRuleMode();
 		},
 

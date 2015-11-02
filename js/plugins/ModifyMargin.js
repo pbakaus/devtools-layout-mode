@@ -138,12 +138,14 @@ LayoutMode.registerPlugin({
 				this.overMarginTop = true;
 				this.captionMarginTop.classList.add('over');
 				document.body.classList.add('resize-margin-top');
+				LayoutMode.selectRule('marginTop');
 				cursorAdded = true;
 			}
 		} else {
 			if(this.overMarginTop) {
 				this.overMarginTop = false;
 				this.captionMarginTop.classList.remove('over');
+				LayoutMode.deselectRule('marginTop');
 				cursorRemoved = true;
 			}
 		}
@@ -153,12 +155,14 @@ LayoutMode.registerPlugin({
 				this.overMarginBottom = true;
 				this.captionMarginBottom.classList.add('over');
 				document.body.classList.add('resize-margin-bottom');
+				LayoutMode.selectRule('marginBottom');
 				cursorAdded = true;
 			}
 		} else {
 			if(this.overMarginBottom) {
 				this.overMarginBottom = false;
 				this.captionMarginBottom.classList.remove('over');
+				LayoutMode.deselectRule('marginBottom');
 				cursorRemoved = true;
 			}
 		}
@@ -168,12 +172,14 @@ LayoutMode.registerPlugin({
 				this.overMarginLeft = true;
 				this.captionMarginLeft.classList.add('over');
 				document.body.classList.add('resize-margin-left');
+				LayoutMode.selectRule('marginLeft');
 				cursorAdded = true;
 			}
 		} else {
 			if(this.overMarginLeft) {
 				this.overMarginLeft = false;
 				this.captionMarginLeft.classList.remove('over');
+				LayoutMode.deselectRule('marginLeft');
 				cursorRemoved = true;
 			}
 		}
@@ -183,12 +189,14 @@ LayoutMode.registerPlugin({
 				this.overMarginRight = true;
 				this.captionMarginRight.classList.add('over');
 				document.body.classList.add('resize-margin-right');
+				LayoutMode.selectRule('marginRight');
 				cursorAdded = true;
 			}
 		} else {
 			if(this.overMarginRight) {
 				this.overMarginRight = false;
 				this.captionMarginRight.classList.remove('over');
+				LayoutMode.deselectRule('marginRight');
 				cursorRemoved = true;
 			}
 		}
