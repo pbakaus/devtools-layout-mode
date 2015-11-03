@@ -176,12 +176,13 @@ LayoutMode.registerPlugin({
 			if(that.overWidth) {
 
 				var startWidth = LayoutMode.innerWidth;
+				LayoutMode.setLastActiveProperty('width');
 
 				new Dragger(event.originalEvent, {
 					vertical: false,
 					move: function(delta) {
 						delta = LayoutMode.shiftPressed ? delta : delta / 4;
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.width = Math.round(Math.max(0, startWidth - delta)) + 'px';
+						LayoutMode.changeValue('width', startWidth - delta);
 						LayoutMode.relayout();
 					}
 				});	
@@ -189,12 +190,13 @@ LayoutMode.registerPlugin({
 			} else if(that.overHeight) {
 
 				var startHeight = LayoutMode.innerHeight;
+				LayoutMode.setLastActiveProperty('height');
 
 				new Dragger(event.originalEvent, {
 					vertical: true,
 					move: function(delta) {
 						delta = LayoutMode.shiftPressed ? delta : delta / 4;
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.height = Math.round(Math.max(0, startHeight - delta)) + 'px';
+						LayoutMode.changeValue('height', startHeight - delta);
 						LayoutMode.relayout();
 					}
 				});

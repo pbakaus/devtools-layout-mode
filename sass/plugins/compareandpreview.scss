@@ -5,6 +5,12 @@
 	-webkit-filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.34));
 	position: absolute;
 	opacity: 1;
+	transition: opacity 0.2s;
+}
+
+.vline-x.hide,
+.vline-y.hide {
+	opacity: 0;
 }
 
 .vline-x div.caption,

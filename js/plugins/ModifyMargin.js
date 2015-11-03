@@ -280,13 +280,14 @@ LayoutMode.registerPlugin({
 
 				startMarginLeft = LayoutMode.marginLeft;
 				startMarginRight = LayoutMode.marginRight;
+				LayoutMode.setLastActiveProperty('marginLeft');
 
 				new Dragger(event.originalEvent, {
 					vertical: false,
 					move: function(delta) {
 						delta = LayoutMode.shiftPressed ? delta : delta / 4;
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.marginLeft = Math.round(Math.max(0, startMarginLeft + delta)) + 'px';
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.marginRight = LayoutMode.altPressed ? Math.round(Math.max(0, startMarginLeft + delta)) + 'px' : startMarginRight + 'px';
+						LayoutMode.changeValue('marginLeft', startMarginLeft + delta);
+						LayoutMode.changeValue('marginRight', LayoutMode.altPressed ? startMarginLeft + delta : startMarginRight, true);
 						LayoutMode.relayout();
 					}
 				});
@@ -297,13 +298,14 @@ LayoutMode.registerPlugin({
 
 				startMarginLeft = LayoutMode.marginLeft;
 				startMarginRight = LayoutMode.marginRight;
+				LayoutMode.setLastActiveProperty('marginRight');
 
 				new Dragger(event.originalEvent, {
 					vertical: false,
 					move: function(delta) {
 						delta = LayoutMode.shiftPressed ? delta : delta / 4;
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.marginRight = Math.round(Math.max(0, startMarginRight - delta)) + 'px';
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.marginLeft = LayoutMode.altPressed ? Math.round(Math.max(0, startMarginRight - delta)) + 'px' : startMarginLeft + 'px';
+						LayoutMode.changeValue('marginRight', startMarginRight - delta);
+						LayoutMode.changeValue('marginLeft', LayoutMode.altPressed ? startMarginRight - delta : startMarginLeft, true);
 						LayoutMode.relayout();
 					}
 				});
@@ -314,13 +316,14 @@ LayoutMode.registerPlugin({
 
 				startMarginTop = LayoutMode.marginTop;
 				startMarginBottom = LayoutMode.marginBottom;
+				LayoutMode.setLastActiveProperty('marginTop');
 
 				new Dragger(event.originalEvent, {
 					vertical: true,
 					move: function(delta) {
 						delta = LayoutMode.shiftPressed ? delta : delta / 4;
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.marginTop = Math.round(Math.max(0, startMarginTop + delta)) + 'px';
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.marginBottom = LayoutMode.altPressed ? Math.round(Math.max(0, startMarginTop + delta)) + 'px' : startMarginBottom + 'px';
+						LayoutMode.changeValue('marginTop', startMarginTop + delta);
+						LayoutMode.changeValue('marginBottom', LayoutMode.altPressed ? startMarginTop + delta : startMarginBottom, true);
 						LayoutMode.relayout();
 					}
 				});
@@ -331,13 +334,14 @@ LayoutMode.registerPlugin({
 
 				startMarginTop = LayoutMode.marginTop;
 				startMarginBottom = LayoutMode.marginBottom;
+				LayoutMode.setLastActiveProperty('marginBottom');
 
 				new Dragger(event.originalEvent, {
 					vertical: true,
 					move: function(delta) {
 						delta = LayoutMode.shiftPressed ? delta : delta / 4;
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.marginBottom = Math.round(Math.max(0, startMarginBottom - delta)) + 'px';
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.marginTop = LayoutMode.altPressed ? Math.round(Math.max(0, startMarginBottom - delta)) + 'px' : startMarginTop + 'px';
+						LayoutMode.changeValue('marginBottom', startMarginBottom - delta);
+						LayoutMode.changeValue('marginTop', LayoutMode.altPressed ? startMarginBottom - delta : startMarginTop, true);
 						LayoutMode.relayout();
 					}
 				});

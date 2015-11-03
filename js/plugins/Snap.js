@@ -6,9 +6,112 @@ LayoutMode.registerPlugin({
 
 	activate: function() {
 
+		this.calculateSnapAreas();
+
 	},
 
-	deactivate: function() {
+	changeValue: function(property, value, precision) {
+
+		// precision is set if we do keyboard, for instance.
+		// don't apply snap there.
+		if(precision) {
+			return;
+		}
+		
+		var axis = /(width|paddingLeft|paddingRight|marginLeft|marginRight)/.test(property) ? 'x' : 'y';
+		return parseInt(this.calculateSnap(property, value, axis));
+
+	},
+
+	/* member functions */
+	__previousTargets: [],
+
+	flash: function(target, edge) {
+
+		// don't flash a target twice in a row
+		if(this.__previousTargets.indexOf(target) > -1) {
+			return;
+		}
+
+		this.__previousTargets.push(target);
+
+		// delay execution of the flash, or the value isn't applied yet
+		// and the corrected offsets are wrong.
+
+		var that = this;
+		setTimeout(function() {
+
+			// refresh rect or the offsets might be wrong
+			target[1] = target[0].getBoundingClientRect();
+
+			if(edge === 'width') {
+
+				var vLineX = document.createElement('div');
+				vLineX.className = 'vline-x';
+				document.body.appendChild(vLineX);
+
+				var vLineXCaption = document.createElement('div');
+				vLineXCaption.className = 'caption';
+				vLineX.appendChild(vLineXCaption);
+
+				var vLineXCrossBar = document.createElement('div');
+				vLineXCrossBar.className = 'crossbar';
+				vLineX.appendChild(vLineXCrossBar);
+
+				vLineX.style.top = (target[1].top + (target[1].height / 2)) + 'px';
+				vLineX.style.left = target[1].left + 'px';
+				vLineX.style.width = target[1][edge] + 'px';
+				vLineXCaption.innerHTML = target[1][edge] + ' <span>px</span>';
+
+				// to a hide animation, then remove the DOM element and allow it
+				// to appear again.
+				setTimeout(function() {  vLineX.classList.add('hide'); }, 600);
+				setTimeout(function() {
+					document.body.removeChild(vLineX);
+					var index = that.__previousTargets.indexOf(target);
+					if (index > -1) {
+						that.__previousTargets.splice(index, 1);
+					}
+				}, 800);
+
+			}
+
+			if(edge === 'height') {
+
+				var vLineY = document.createElement('div');
+				vLineY.className = 'vline-y';
+				document.body.appendChild(vLineY);
+
+				var vLineYCaption = document.createElement('div');
+				vLineYCaption.className = 'caption';
+				vLineY.appendChild(vLineYCaption);
+
+				var vLineYCrossBar = document.createElement('div');
+				vLineYCrossBar.className = 'crossbar';
+				vLineY.appendChild(vLineYCrossBar);
+
+				vLineY.style.left = (target[1].left + (target[1].width / 2)) + 'px';
+				vLineY.style.top = target[1].top + 'px';
+				vLineY.style.height = target[1][edge] + 'px';
+				vLineYCaption.innerHTML = target[1][edge] + ' <span>px</span>';
+
+				// to a hide animation, then remove the DOM element and allow it
+				// to appear again.
+				setTimeout(function() {  vLineY.classList.add('hide'); }, 600);
+				setTimeout(function() {
+					document.body.removeChild(vLineY);
+					var index = that.__previousTargets.indexOf(target);
+					if (index > -1) {
+						that.__previousTargets.splice(index, 1);
+					}
+				}, 800);
+
+			}
+
+		}, 0);
+
+
+
 
 	},
 
@@ -45,7 +148,7 @@ LayoutMode.registerPlugin({
 
 			if(node.id === 'overlay' ||
 				node.className === 'overlay-title' ||
-				node === that.currentElement) {
+				node === LayoutMode.currentElement) {
 				return false;
 			}
 
@@ -81,10 +184,9 @@ LayoutMode.registerPlugin({
 
 	},
 
-	calculateSnap: function(currentValue, axis, add) {
+	calculateSnap: function(property, currentValue, axis) {
 
-		var offset = this.currentOffset;
-		offset.left = parseInt(offset.left);
+		var threshold = 5;
 		var targets = this.currentSnapTargets;
 		var target, i;
 
@@ -93,15 +195,27 @@ LayoutMode.registerPlugin({
 			for (i = 0; i < targets.length; i++) {
 				target = targets[i];
 
-				if(Math.abs(target[1].bottom - (offset.top + add + currentValue)) < 10) {
-					currentValue = parseInt(target[1].bottom) - offset.top - add - 3;
-					break;
+				if(property === 'height') {
+					if(Math.abs(target[1].height - (currentValue)) <= threshold) {
+						currentValue = target[1].height;
+						this.flash(target, 'height');
+					}
 				}
 
-				if(Math.abs(target[1].top - (offset.top + add + currentValue)) < 10) {
-					currentValue = parseInt(target[1].top) - offset.top - add - 3;
-					break;
+				if(property === 'paddingTop') {
+					if(Math.abs(target[1].height - (LayoutMode.paddingTop + LayoutMode.innerHeight + currentValue)) <= threshold) {
+						currentValue = target[1].height - (LayoutMode.paddingTop + LayoutMode.innerHeight);
+						this.flash(target, 'height');
+					}
 				}
+
+				if(property === 'paddingBottom') {
+					if(Math.abs(target[1].height - (LayoutMode.paddingBottom + LayoutMode.innerHeight + currentValue)) <= threshold) {
+						currentValue = target[1].height - (LayoutMode.paddingBottom + LayoutMode.innerHeight);
+						this.flash(target, 'height');
+					}
+				}
+
 			}
 
 		} else {
@@ -109,15 +223,27 @@ LayoutMode.registerPlugin({
 			for (i = 0; i < targets.length; i++) {
 				target = targets[i];
 
-				if(Math.abs(target[1].right - (offset.left + add + currentValue)) < 10) {
-					currentValue = parseInt(target[1].right) - offset.left - add - 3;
-					break;
+				if(property === 'width') {
+					if(Math.abs(target[1].width - (currentValue)) <= threshold) {
+						currentValue = target[1].width;
+						this.flash(target, 'width');
+					}
 				}
 
-				if(Math.abs(target[1].left - (offset.left + add + currentValue)) < 10) {
-					currentValue = parseInt(target[1].left) - offset.left - add - 3;
-					break;
+				if(property === 'paddingLeft') {
+					if(Math.abs(target[1].width - (LayoutMode.paddingRight + LayoutMode.innerWidth + currentValue)) <= threshold) {
+						currentValue = target[1].width - (LayoutMode.paddingRight + LayoutMode.innerWidth);
+						this.flash(target, 'width');
+					}
 				}
+
+				if(property === 'paddingRight') {
+					if(Math.abs(target[1].width - (LayoutMode.paddingLeft + LayoutMode.innerWidth + currentValue)) <= threshold) {
+						currentValue = target[1].width - (LayoutMode.paddingLeft + LayoutMode.innerWidth);
+						this.flash(target, 'width');
+					}
+				}
+
 			}
 
 		}

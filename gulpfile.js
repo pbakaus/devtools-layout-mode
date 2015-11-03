@@ -23,6 +23,8 @@ var scripts = [
 	'js/plugins/ModifySize.js',
 	'js/plugins/ModifyPadding.js',
 	'js/plugins/ModifyMargin.js',
+	'js/plugins/Keyboard.js',
+	'js/plugins/Snap.js',
 	// init
 	'js/scripts/init.js'];
 

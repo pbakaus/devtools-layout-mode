@@ -38,7 +38,7 @@
 				moveby = (this.eventDown.pageX - this.eventMove.pageX);
 			}
 
-			this.options.move(moveby);
+			this.options.move(moveby, event);
 
 		},
 		stop: function(event) {

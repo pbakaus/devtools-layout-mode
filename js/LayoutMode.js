@@ -26,11 +26,16 @@
 		},
 
 		callPlugin: function(eventName, a, b, c, d, e, f) {
+			var retVal, tmp;
 			for (var i = 0; i < this.plugins.length; i++) {
 				if(this.plugins[i][eventName]) {
-					this.plugins[i][eventName].call(this.plugins[i], a, b, c, d, e, f);
+					tmp = this.plugins[i][eventName].call(this.plugins[i], a, b, c, d, e, f);
+					if(tmp !== undefined) {
+						retVal = tmp;
+					}
 				}
 			}
+			return retVal;
 		},
 
 		sortPlugins: function() {
@@ -131,6 +136,10 @@
 					that.altPressed = false;
 				}
 
+				if(e.which === 17) {
+					that.ctrlPressed = false;
+				}
+
 				if(e.keyCode === 27) {
 					that.deactivate();
 				}		
@@ -143,6 +152,10 @@
 
 				if(e.which === 18) {
 					that.altPressed = true;
+				}
+
+				if(e.which === 17) {
+					that.ctrlPressed = true;
 				}
 
 			};
@@ -464,8 +477,29 @@
 
 			this.callPlugin('hide');
 
-		}
+		},
 
+		setLastActiveProperty: function(property) {
+			this.lastActiveProperty = property;
+		},
+
+		changeValue: function(property, value, precision) {
+
+			// if CTRL is pressed, force presision mode (disables snap)
+			if(this.ctrlPressed) {
+				precision = true;
+			}
+
+			value = Math.round(value);
+
+			var pluginValue = this.callPlugin('changeValue', property, value, precision);
+			if(pluginValue !== undefined) {
+				value = pluginValue;
+			}
+
+			(this.selectedRule || this.currentElement).style[property] = Math.max(0, value) + 'px';
+
+		}
 
 	});
 

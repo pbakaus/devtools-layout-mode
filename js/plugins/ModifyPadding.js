@@ -275,13 +275,14 @@ LayoutMode.registerPlugin({
 
 				startPaddingBottom = LayoutMode.paddingBottom;
 				startPaddingTop = LayoutMode.paddingTop;
+				LayoutMode.setLastActiveProperty('paddingBottom');
 
 				new Dragger(event.originalEvent, {
 					vertical: true,
 					move: function(delta) {
 						delta = LayoutMode.shiftPressed ? delta : delta / 4;
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.paddingBottom = Math.round(Math.max(0, startPaddingBottom - delta)) + 'px';
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.paddingTop = LayoutMode.altPressed ? Math.round(Math.max(0, startPaddingBottom - delta)) + 'px' : startPaddingTop + 'px';
+						LayoutMode.changeValue('paddingBottom', startPaddingBottom - delta);
+						LayoutMode.changeValue('paddingTop', LayoutMode.altPressed ? startPaddingBottom - delta : startPaddingTop, true);
 						LayoutMode.relayout();
 					}
 				});
@@ -292,13 +293,14 @@ LayoutMode.registerPlugin({
 
 				startPaddingTop = LayoutMode.paddingTop;
 				startPaddingBottom = LayoutMode.paddingBottom;
+				LayoutMode.setLastActiveProperty('paddingTop');
 
 				new Dragger(event.originalEvent, {
 					vertical: true,
 					move: function(delta) {
 						delta = LayoutMode.shiftPressed ? delta : delta / 4;
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.paddingTop = Math.round(Math.max(0, startPaddingTop + delta)) + 'px';
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.paddingBottom = LayoutMode.altPressed ? Math.round(Math.max(0, startPaddingTop + delta)) + 'px' : startPaddingBottom + 'px';
+						LayoutMode.changeValue('paddingTop', startPaddingTop + delta);
+						LayoutMode.changeValue('paddingBottom', LayoutMode.altPressed ? startPaddingTop + delta : startPaddingBottom, true);
 						LayoutMode.relayout();
 					}
 				});
@@ -309,13 +311,14 @@ LayoutMode.registerPlugin({
 
 				startPaddingRight = LayoutMode.paddingRight;
 				startPaddingLeft = LayoutMode.paddingLeft;
+				LayoutMode.setLastActiveProperty('paddingRight');
 
 				new Dragger(event.originalEvent, {
 					vertical: false,
 					move: function(delta) {
 						delta = LayoutMode.shiftPressed ? delta : delta / 4;
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.paddingRight = Math.round(Math.max(0, startPaddingRight - delta)) + 'px';
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.paddingLeft = LayoutMode.altPressed ? Math.round(Math.max(0, startPaddingRight - delta)) + 'px' : startPaddingLeft + 'px';
+						LayoutMode.changeValue('paddingRight', startPaddingRight - delta);
+						LayoutMode.changeValue('paddingLeft', LayoutMode.altPressed ? (startPaddingRight - delta) : startPaddingLeft, true);
 						LayoutMode.relayout();
 					}
 				});
@@ -326,13 +329,14 @@ LayoutMode.registerPlugin({
 
 				startPaddingLeft = LayoutMode.paddingLeft;
 				startPaddingRight = LayoutMode.paddingRight;
+				LayoutMode.setLastActiveProperty('paddingLeft');
 
 				new Dragger(event.originalEvent, {
 					vertical: false,
 					move: function(delta) {
 						delta = LayoutMode.shiftPressed ? delta : delta / 4;
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.paddingLeft = Math.round(Math.max(0, startPaddingLeft + delta)) + 'px';
-						(LayoutMode.selectedRule || LayoutMode.currentElement).style.paddingRight = LayoutMode.altPressed ? Math.round(Math.max(0, startPaddingLeft + delta)) + 'px' : startPaddingRight + 'px';
+						LayoutMode.changeValue('paddingLeft', startPaddingLeft + delta);
+						LayoutMode.changeValue('paddingRight', LayoutMode.altPressed ? (startPaddingLeft + delta) : startPaddingRight, true);
 						LayoutMode.relayout();
 					}
 				});
