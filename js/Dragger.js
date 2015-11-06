@@ -17,6 +17,7 @@
 
 			event.preventDefault();
 			LayoutMode.interacting = true;
+			LayoutMode.overlayElement.classList.add('interacting');
 
 			var self = this;
 			this.__move = function(e) { self.move(e); };
@@ -49,6 +50,7 @@
 			event.preventDefault();
 			LayoutMode.lastInteractionTime = Date.now();
 			LayoutMode.interacting = false;
+			LayoutMode.overlayElement.classList.remove('interacting');
 			if(this.options.stop) this.options.stop();
 
 		}

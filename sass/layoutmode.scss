@@ -45,6 +45,12 @@ $margin-color-light: #F6A723;
 		}
 	}
 
+	&.interacting {
+		.handle {
+			opacity: 0;
+		}
+	}
+
 	&.hover-inline {
 
 		.handle-size,
