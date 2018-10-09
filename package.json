@@ -16,14 +16,16 @@
     "url": "https://github.com/pbakaus/devtools-layout-mode/issues"
   },
   "dependencies": {
-    "gulp": "*",
-    "gulp-sass": "*",
-    "gulp-autoprefixer": "*",
-    "gulp-eslint": "*",
+    "@babel/core": "^7.1.2",
+    "babel": "*",
     "browser-sync": "*",
+    "gulp": "*",
+    "gulp-autoprefixer": "*",
+    "gulp-babel": "*",
     "gulp-concat": "*",
-    "gulp-uglify": "*",
+    "gulp-eslint": "*",
+    "gulp-sass": "*",
     "gulp-sourcemaps": "*",
-    "gulp-babel": "*"
+    "gulp-uglify": "*"
   }
 }

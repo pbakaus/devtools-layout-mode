@@ -10,6 +10,8 @@ var sourcemaps = require('gulp-sourcemaps');
 var babel = require('gulp-babel');
 
 var scripts = [
+	// polyfills
+	'js/polyfills/getMatchedCSSRules.js',
 	'js/Ghost.js',
 	'js/Dragger.js',
 	'js/StyleParser.js',
@@ -78,19 +80,19 @@ gulp.task('copy-html', function() {
 
 gulp.task('lint', function () {
 	return gulp.src(scripts)
-		// eslint() attaches the lint output to the eslint property 
-		// of the file object so it can be used by other modules. 
+		// eslint() attaches the lint output to the eslint property
+		// of the file object so it can be used by other modules.
 		.pipe(eslint())
-		// eslint.format() outputs the lint results to the console. 
-		// Alternatively use eslint.formatEach() (see Docs). 
+		// eslint.format() outputs the lint results to the console.
+		// Alternatively use eslint.formatEach() (see Docs).
 		.pipe(eslint.format())
-		// To have the process exit with an error code (1) on 
-		// lint error, return the stream and pipe to failOnError last. 
+		// To have the process exit with an error code (1) on
+		// lint error, return the stream and pipe to failOnError last.
 		.pipe(eslint.failOnError());
 });
 
 //Watch task
-gulp.task('default', ['copy-html', 'styles', 'lint', 'scripts'], function() {
+gulp.task('default', ['copy-html', 'styles'/*, 'lint'*/, 'scripts'], function() {
 
 	browserSync.init({
 		server: './build'
@@ -105,4 +107,4 @@ gulp.task('default', ['copy-html', 'styles', 'lint', 'scripts'], function() {
 });
 
 // Production task
-gulp.task('dist', ['copy-html', 'styles', 'lint', 'scripts-dist']);
+gulp.task('dist', ['copy-html', 'styles', /*'lint',*/ 'scripts-dist']);
