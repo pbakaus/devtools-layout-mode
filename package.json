@@ -16,7 +16,7 @@
     "url": "https://github.com/pbakaus/devtools-layout-mode/issues"
   },
   "dependencies": {
-    "@babel/core": "^7.1.2",
+    "@babel/core": "^7.20.12",
     "babel": "*",
     "browser-sync": "*",
     "gulp": "*",
